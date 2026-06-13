@@ -29,6 +29,8 @@ jobs:
             __init__.py \
             nodes.py \
             variation.py \
+            scripts/download_loras.py \
+            tests/test_lora_manifest.py \
             tests/test_variation.py \
             tests/test_workflow.py
           python - <<'PY'
@@ -41,9 +43,13 @@ jobs:
               )
           )
           assert any(
-              node.get("type") == "AnimaVariationBatchSampler"
+              node.get("type") == "AnimaFlexibleVariationBatchSampler"
               for node in workflow["nodes"]
           )
+          assert sum(
+              node.get("type") == "AnimaVariationGroup"
+              for node in workflow["nodes"]
+          ) >= 3
           print(
               f"validated workflow with {len(workflow['nodes'])} nodes "
               f"and {len(workflow['links'])} links"

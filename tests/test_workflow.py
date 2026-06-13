@@ -17,7 +17,25 @@ class WorkflowTests(unittest.TestCase):
 
     def test_custom_node_is_present(self):
         node_types = {node["type"] for node in self.workflow["nodes"]}
-        self.assertIn("AnimaVariationBatchSampler", node_types)
+        self.assertIn("AnimaFlexibleVariationBatchSampler", node_types)
+        self.assertIn("AnimaVariationGroup", node_types)
+
+    def test_node_orders_are_unique(self):
+        orders = [node["order"] for node in self.workflow["nodes"]]
+        self.assertEqual(len(orders), len(set(orders)))
+
+    def test_example_has_angle_expression_pose_and_composition_groups(self):
+        groups = [
+            node
+            for node in self.workflow["nodes"]
+            if node["type"] == "AnimaVariationGroup"
+        ]
+        self.assertGreaterEqual(len(groups), 4)
+        category_names = [node["widgets_values"][0] for node in groups]
+        self.assertEqual(
+            category_names[:4],
+            ["Angle", "Expression", "Pose", "Composition"],
+        )
 
     def test_links_reference_existing_nodes_and_sockets(self):
         nodes = {node["id"]: node for node in self.workflow["nodes"]}

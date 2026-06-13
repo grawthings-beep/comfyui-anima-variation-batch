@@ -2,12 +2,14 @@
 
 [![CI](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml/badge.svg)](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml)
 
-`Anima Variation Batch Sampler` creates several deliberately varied images
-from one base prompt in a single queued ComfyUI execution.
+`Anima Flexible Variation Batch Sampler` creates several deliberately varied
+images from one base prompt in a single queued ComfyUI execution.
 
 It:
 
-- selects unique `shot recipe x expression` combinations;
+- accepts any number of chained variation categories;
+- selects one comma-separated option from every category;
+- selects unique cross-category combinations;
 - encodes a separate positive prompt for every output;
 - assigns an independent sampling seed to every output;
 - samples and VAE-decodes sequentially to keep sampling VRAM close to a
@@ -46,19 +48,72 @@ one of:
 ## Inputs
 
 - `base_prompt`: character, clothes, scene, quality tags, and fixed details.
-- `shot_recipes`: one camera/composition/pose recipe per line.
-- `expressions`: one expression per line.
+- `variation_groups`: connect the final `Anima Variation Group` node.
 - `count`: outputs per queued execution; defaults to `4`.
 - `master_seed`: controls combination selection and every derived image seed.
 - `steps`, `cfg`, `sampler_name`, `scheduler`, `denoise`: KSampler settings.
 
+Each `Anima Variation Group` contains:
+
+- `category_name`: a report label such as `Angle`, `Expression`, or `Pose`.
+- `options`: short prompt tags separated by commas or new lines.
+- `previous_groups`: connect the preceding Group node here.
+
+Example:
+
+```text
+Angle:
+from above, from side, from below, eye level, dutch angle
+
+Expression:
+smile, serious, angry, surprised, embarrassed
+
+Pose:
+standing, sitting, lying, looking back, arms crossed
+```
+
+Connect `Angle -> Expression -> Pose -> Flexible Sampler`. Duplicate the Group
+node and connect it to the end to add `Composition`, `Lighting`, `Clothes`, or
+any other category. There is no fixed category count.
+
 Keep the connected `Empty Latent Image` batch size at `1`. Use `count` on the
 custom node to choose the number of outputs.
 
-There must be at least `count` unique combinations. Eight shot recipes and
-eight expressions provide 64 possible combinations.
+There must be at least `count` unique combinations. Three categories with
+eight options each provide 512 possible combinations.
 
-Lines beginning with `#` are ignored, so recipe lists can contain notes.
+Lines beginning with `#` are ignored. Duplicate options are removed
+case-insensitively.
+
+The original two-field `Anima Variation Batch Sampler` remains available for
+old workflows.
+
+## Optional character LoRA downloads
+
+`config/anima-loras.json` mirrors the private character LoRAs used by the
+RunPod image, including Label and Ark Ranger Black. The repository contains
+only download metadata, not model weights.
+
+List available IDs:
+
+```bash
+python scripts/download_loras.py --list
+```
+
+Download selected LoRAs:
+
+```bash
+hf auth login
+hf auth whoami
+python scripts/download_loras.py \
+  --root /workspace/comfyui \
+  --id label \
+  --id arkrangerblack
+```
+
+Omit `--id` to download every listed character LoRA. Files are installed under
+`models/loras/anima/`. A successful `hf auth login` is required because the
+LoRA repository is private.
 
 ## Anima Turbo example
 
@@ -76,8 +131,8 @@ environment.
 
 ## What this does not guarantee
 
-Prompt recipes increase diversity but do not provide exact pose or camera
-control. Closely related recipes can still produce visually similar images.
+Prompt tags increase diversity but do not provide exact pose or camera
+control. Closely related tags can still produce visually similar images.
 Control Adapter, ControlNet, pose, edge, or depth conditioning is a separate
 tool when specific 2D structure is required.
 

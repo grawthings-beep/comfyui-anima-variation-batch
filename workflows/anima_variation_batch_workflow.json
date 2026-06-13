@@ -1,8 +1,8 @@
 {
   "id": "f7a250a1-53fb-496b-8c39-c60d9e764028",
   "revision": 1,
-  "last_node_id": 52,
-  "last_link_id": 90,
+  "last_node_id": 56,
+  "last_link_id": 94,
   "nodes": [
     {
       "id": 15,
@@ -49,7 +49,7 @@
         82
       ],
       "flags": {},
-      "order": 6,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
@@ -234,7 +234,7 @@
         782.2011176206705
       ],
       "flags": {},
-      "order": 9,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -253,17 +253,17 @@
     },
     {
       "id": 51,
-      "type": "AnimaVariationBatchSampler",
+      "type": "AnimaFlexibleVariationBatchSampler",
       "pos": [
         330.0,
         310.0
       ],
       "size": [
-        850.0,
-        720.0
+        760.0,
+        560.0
       ],
       "flags": {},
-      "order": 8,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -290,6 +290,11 @@
           "name": "latent_image",
           "type": "LATENT",
           "link": 78
+        },
+        {
+          "name": "variation_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "link": 94
         }
       ],
       "outputs": [
@@ -310,12 +315,10 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "AnimaVariationBatchSampler"
+        "Node name for S&R": "AnimaFlexibleVariationBatchSampler"
       },
       "widgets_values": [
         "masterpiece, best quality, score_8, highres, safe, 1girl, original character, long dark hair, blue eyes, casual outfit, simple background",
-        "close-up portrait, eye-level, head tilted\nupper body shot, low angle, leaning forward\ncowboy shot, three-quarter view, hand on hip\nfull body shot, high angle, dynamic standing pose\nmedium shot, side view, looking over shoulder\nfull body shot, dutch angle, walking pose\nupper body shot, overhead angle, one hand near face\nknee-up shot, rear three-quarter view, turning pose",
-        "gentle smile, closed mouth\nlaughing, open mouth, closed eyes\nsurprised expression, wide eyes\nembarrassed expression, blush\nangry expression, furrowed brows\nserious expression, parted lips\nconfident grin, half-closed eyes\nsad expression, teary eyes",
         4,
         619037988729647,
         "randomize",
@@ -338,7 +341,7 @@
         58
       ],
       "flags": {},
-      "order": 10,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -355,6 +358,156 @@
       },
       "widgets_values": [
         "anima_variations"
+      ]
+    },
+    {
+      "id": 53,
+      "type": "AnimaVariationGroup",
+      "pos": [
+        330.0,
+        -260.0
+      ],
+      "size": [
+        320.0,
+        160.0
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "variation_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "slot_index": 0,
+          "links": [
+            91
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaVariationGroup"
+      },
+      "widgets_values": [
+        "Angle",
+        "from above, from side, from below, eye level, low angle, high angle, dutch angle, rear view"
+      ]
+    },
+    {
+      "id": 54,
+      "type": "AnimaVariationGroup",
+      "pos": [
+        680.0,
+        -260.0
+      ],
+      "size": [
+        320.0,
+        160.0
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "previous_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "link": 91
+        }
+      ],
+      "outputs": [
+        {
+          "name": "variation_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "slot_index": 0,
+          "links": [
+            92
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaVariationGroup"
+      },
+      "widgets_values": [
+        "Expression",
+        "smile, serious, angry, surprised, embarrassed, closed eyes, open mouth, pout"
+      ]
+    },
+    {
+      "id": 55,
+      "type": "AnimaVariationGroup",
+      "pos": [
+        1030.0,
+        -260.0
+      ],
+      "size": [
+        320.0,
+        160.0
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "previous_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "link": 92
+        }
+      ],
+      "outputs": [
+        {
+          "name": "variation_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "slot_index": 0,
+          "links": [
+            93
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaVariationGroup"
+      },
+      "widgets_values": [
+        "Pose",
+        "standing, sitting, lying, looking back, arms crossed, hand on hip, walking, kneeling"
+      ]
+    },
+    {
+      "id": 56,
+      "type": "AnimaVariationGroup",
+      "pos": [
+        1380.0,
+        -260.0
+      ],
+      "size": [
+        320.0,
+        160.0
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "previous_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "link": 93
+        }
+      ],
+      "outputs": [
+        {
+          "name": "variation_groups",
+          "type": "ANIMA_VARIATION_GROUPS",
+          "slot_index": 0,
+          "links": [
+            94
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaVariationGroup"
+      },
+      "widgets_values": [
+        "Composition",
+        "close-up, upper body, cowboy shot, full body, portrait, wide shot, profile, three-quarter view"
       ]
     }
   ],
@@ -430,6 +583,38 @@
       51,
       0,
       "MODEL"
+    ],
+    [
+      91,
+      53,
+      0,
+      54,
+      0,
+      "ANIMA_VARIATION_GROUPS"
+    ],
+    [
+      92,
+      54,
+      0,
+      55,
+      0,
+      "ANIMA_VARIATION_GROUPS"
+    ],
+    [
+      93,
+      55,
+      0,
+      56,
+      0,
+      "ANIMA_VARIATION_GROUPS"
+    ],
+    [
+      94,
+      56,
+      0,
+      51,
+      5,
+      "ANIMA_VARIATION_GROUPS"
     ]
   ],
   "groups": [],
