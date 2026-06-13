@@ -297,8 +297,8 @@ class AnimaFlexibleVariationBatchSampler:
     FUNCTION = "sample"
     CATEGORY = "Anima/batch"
     DESCRIPTION = (
-        "Randomly selects one comma-separated option from every connected "
-        "Variation Group. Chain any number of groups."
+        "Uses every option in each connected Variation Group once before "
+        "reshuffling that category. Chain any number of groups."
     )
 
     def sample(

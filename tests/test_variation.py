@@ -90,7 +90,6 @@ class VariationTests(unittest.TestCase):
 
         self.assertEqual(first, second)
         self.assertEqual(len(first), 8)
-        self.assertEqual(len({item.selections for item in first}), 8)
         self.assertEqual(len({item.seed for item in first}), 8)
         self.assertTrue(
             all(
@@ -104,6 +103,46 @@ class VariationTests(unittest.TestCase):
                 all(value in item.prompt for _name, value in item.selections)
                 for item in first
             )
+        )
+
+    def test_each_category_exhausts_its_options_before_repeating(self):
+        groups = add_variation_group(
+            None,
+            "Angle",
+            "from above, from side, from below",
+        )
+        groups = add_variation_group(
+            groups,
+            "Expression",
+            "smile, angry",
+        )
+
+        variations = build_group_variations("base", groups, 8, 44)
+        angles = [item.selections[0][1] for item in variations]
+        expressions = [item.selections[1][1] for item in variations]
+
+        self.assertEqual(
+            set(angles[:3]),
+            {"from above", "from side", "from below"},
+        )
+        self.assertEqual(
+            set(angles[3:6]),
+            {"from above", "from side", "from below"},
+        )
+        self.assertEqual(len(set(angles[6:])), 2)
+        self.assertNotEqual(angles[2], angles[3])
+        self.assertNotEqual(angles[5], angles[6])
+        for start in range(0, 8, 2):
+            self.assertEqual(set(expressions[start:start + 2]), {"smile", "angry"})
+        for boundary in (2, 4, 6):
+            self.assertNotEqual(expressions[boundary - 1], expressions[boundary])
+
+    def test_single_option_can_repeat_after_it_is_exhausted(self):
+        groups = add_variation_group(None, "Angle", "eye level")
+        variations = build_group_variations("base", groups, 4, 5)
+        self.assertEqual(
+            [item.selections[0][1] for item in variations],
+            ["eye level"] * 4,
         )
 
     def test_flexible_groups_can_be_extended_without_a_fixed_limit(self):
@@ -123,10 +162,12 @@ class VariationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate variation category"):
             add_variation_group(groups, "angle", "from below")
 
-    def test_flexible_count_cannot_exceed_combinations(self):
+    def test_flexible_count_can_exceed_total_combinations(self):
         groups = add_variation_group(None, "Angle", "from above, from below")
-        with self.assertRaisesRegex(ValueError, "only 2"):
-            build_group_variations("base", groups, 3, 0)
+        variations = build_group_variations("base", groups, 5, 0)
+        angles = [item.selections[0][1] for item in variations]
+        self.assertEqual(set(angles[:2]), {"from above", "from below"})
+        self.assertEqual(set(angles[2:4]), {"from above", "from below"})
 
 
 if __name__ == "__main__":

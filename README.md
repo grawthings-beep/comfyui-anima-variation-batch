@@ -9,7 +9,7 @@ It:
 
 - accepts any number of chained variation categories;
 - selects one comma-separated option from every category;
-- selects unique cross-category combinations;
+- uses every option in a category before reshuffling that category;
 - encodes a separate positive prompt for every output;
 - assigns an independent sampling seed to every output;
 - samples and VAE-decodes sequentially to keep sampling VRAM close to a
@@ -33,8 +33,10 @@ git clone https://github.com/grawthings-beep/comfyui-anima-variation-batch.git \
 Restart ComfyUI, then load:
 
 ```text
-workflows/anima_variation_batch_workflow.json
+example_workflows/anima_variation_batch_workflow.json
 ```
+
+It is also exposed through ComfyUI's workflow templates browser.
 
 For the existing RunPod image, the ComfyUI installation is commonly found at
 one of:
@@ -50,7 +52,7 @@ one of:
 - `base_prompt`: character, clothes, scene, quality tags, and fixed details.
 - `variation_groups`: connect the final `Anima Variation Group` node.
 - `count`: outputs per queued execution; defaults to `4`.
-- `master_seed`: controls combination selection and every derived image seed.
+- `master_seed`: controls category shuffle order and every derived image seed.
 - `steps`, `cfg`, `sampler_name`, `scheduler`, `denoise`: KSampler settings.
 
 Each `Anima Variation Group` contains:
@@ -79,8 +81,10 @@ any other category. There is no fixed category count.
 Keep the connected `Empty Latent Image` batch size at `1`. Use `count` on the
 custom node to choose the number of outputs.
 
-There must be at least `count` unique combinations. Three categories with
-eight options each provide 512 possible combinations.
+Each category acts as an independent shuffle bag. With three angle tags and
+eight outputs, all three angles are used once in random order, then reshuffled
+and used again. This works even when a category has fewer options than
+`count`.
 
 Lines beginning with `#` are ignored. Duplicate options are removed
 case-insensitively.

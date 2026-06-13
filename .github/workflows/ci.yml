@@ -38,7 +38,7 @@ jobs:
           from pathlib import Path
 
           workflow = json.loads(
-              Path("workflows/anima_variation_batch_workflow.json").read_text(
+              Path("example_workflows/anima_variation_batch_workflow.json").read_text(
                   encoding="utf-8"
               )
           )

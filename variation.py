@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import itertools
-import math
 import random
 from dataclasses import dataclass
 
@@ -81,24 +80,19 @@ def add_variation_group(previous_groups, category_name, options):
     return groups + (VariationGroup(name=name, options=parsed),)
 
 
-def _combination_at(groups, combination_index):
+def _shuffle_bag(options, count, rng):
     selected = []
-    remaining = combination_index
-    for group in reversed(groups):
-        remaining, option_index = divmod(remaining, len(group.options))
-        selected.append((group.name, group.options[option_index]))
-    selected.reverse()
-    return tuple(selected)
-
-
-def _sample_unique_indexes(rng, total, count):
-    selected = []
-    seen = set()
     while len(selected) < count:
-        value = rng.randrange(total)
-        if value not in seen:
-            seen.add(value)
-            selected.append(value)
+        cycle = list(options)
+        rng.shuffle(cycle)
+        if selected and len(cycle) > 1 and cycle[0] == selected[-1]:
+            swap_index = next(
+                index
+                for index, option in enumerate(cycle[1:], start=1)
+                if option != selected[-1]
+            )
+            cycle[0], cycle[swap_index] = cycle[swap_index], cycle[0]
+        selected.extend(cycle[: count - len(selected)])
     return selected
 
 
@@ -114,31 +108,26 @@ def build_group_variations(
             "variation_groups must contain at least one Variation Group node"
         )
 
-    total_combinations = math.prod(len(group.options) for group in groups)
-    if count > total_combinations:
-        raise ValueError(
-            f"count={count} requires at least {count} unique combinations, "
-            f"but only {total_combinations} are available"
-        )
-
     rng = random.Random(master_seed)
-    combination_indexes = _sample_unique_indexes(
-        rng,
-        total_combinations,
-        count,
-    )
+    group_selections = [
+        _shuffle_bag(group.options, count, rng)
+        for group in groups
+    ]
     used_seeds = set()
     variations = []
 
-    for index, combination_index in enumerate(combination_indexes, start=1):
-        selections = _combination_at(groups, combination_index)
+    for output_index in range(count):
+        selections = tuple(
+            (group.name, group_selections[group_index][output_index])
+            for group_index, group in enumerate(groups)
+        )
         seed = rng.getrandbits(64)
         while seed in used_seeds:
             seed = rng.getrandbits(64)
         used_seeds.add(seed)
         variations.append(
             FlexibleVariation(
-                index=index,
+                index=output_index + 1,
                 seed=seed,
                 selections=selections,
                 prompt=join_prompt(

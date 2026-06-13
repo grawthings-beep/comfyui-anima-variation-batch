@@ -5,7 +5,7 @@ from pathlib import Path
 
 WORKFLOW_PATH = (
     Path(__file__).parents[1]
-    / "workflows"
+    / "example_workflows"
     / "anima_variation_batch_workflow.json"
 )
 
