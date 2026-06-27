@@ -61,6 +61,16 @@ Qwen Image's reference latent conditioning, and
 `qwen_image_union_diffsynth_lora.safetensors` to keep composition closer to an
 input structure while still producing a reusable Anima batch.
 
+An img2img diff-making example is included for CG-set production:
+
+```text
+example_workflows/ANIMA_DiffMaker_img2img.json
+```
+
+That workflow starts from a finished source image, keeps the source composition
+with low-denoise img2img, and creates small reusable variations such as
+expression, detail, lighting, and finish changes.
+
 ## Batch ZIP saving
 
 The example workflow uses `Anima Save Batch ZIP` instead of the standard
@@ -196,6 +206,32 @@ models/loras/anima-turbo-lora-v0.2.safetensors
 Keep the variation groups focused on expression, lighting, clothing, finish,
 or other details. Avoid contradictory camera-angle tags when the control image
 is supposed to define the composition.
+
+## DiffMaker img2img batch
+
+`ANIMA_DiffMaker_img2img.json` is for turning one accepted base image into
+usable CG-set diffs. Upload the base image in the `Source image` node. The
+workflow scales it to about one megapixel, VAE-encodes it, and uses that latent
+as the sampler's `latent_image`.
+
+The default sampler settings are deliberately conservative:
+
+```text
+steps: 24
+cfg: 4
+denoise: 0.38
+sampler: euler
+scheduler: normal
+```
+
+Use `denoise` as the main control. Around `0.30` keeps the image close and is
+best for expression/detail changes. Around `0.45` allows stronger clothing,
+lighting, or small pose drift. Higher values can stop being a diff and become
+a new image.
+
+This example does not load the Turbo LoRA by default. It is intended for
+quality and prompt adherence after a good base image already exists, not for
+fast exploration.
 
 ## Optional character LoRA downloads
 

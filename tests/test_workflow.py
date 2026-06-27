@@ -23,6 +23,11 @@ ANIMA_CONTROL_CANNY_WORKFLOW_PATH = (
     / "example_workflows"
     / "ANIMA_Control_Canny.json"
 )
+ANIMA_DIFFMAKER_IMG2IMG_WORKFLOW_PATH = (
+    Path(__file__).parents[1]
+    / "example_workflows"
+    / "ANIMA_DiffMaker_img2img.json"
+)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -37,6 +42,9 @@ class WorkflowTests(unittest.TestCase):
         )
         cls.anima_control_canny_workflow = json.loads(
             ANIMA_CONTROL_CANNY_WORKFLOW_PATH.read_text(encoding="utf-8")
+        )
+        cls.anima_diffmaker_img2img_workflow = json.loads(
+            ANIMA_DIFFMAKER_IMG2IMG_WORKFLOW_PATH.read_text(encoding="utf-8")
         )
 
     def test_custom_node_is_present(self):
@@ -73,6 +81,11 @@ class WorkflowTests(unittest.TestCase):
     def test_control_canny_links_reference_existing_nodes_and_sockets(self):
         self.assert_links_reference_existing_nodes_and_sockets(
             self.anima_control_canny_workflow
+        )
+
+    def test_diffmaker_img2img_links_reference_existing_nodes_and_sockets(self):
+        self.assert_links_reference_existing_nodes_and_sockets(
+            self.anima_diffmaker_img2img_workflow
         )
 
     def test_easy_multiangle_example_uses_preset_group_node(self):
@@ -145,6 +158,40 @@ class WorkflowTests(unittest.TestCase):
         latent_link = links[sampler_input_links["latent_image"]]
         reference_link = links[sampler_input_links["reference_latent"]]
         self.assertEqual(latent_link[1:3], reference_link[1:3])
+
+    def test_diffmaker_img2img_workflow_uses_source_latent(self):
+        workflow = self.anima_diffmaker_img2img_workflow
+        node_types = {node["type"] for node in workflow["nodes"]}
+
+        self.assertIn("LoadImage", node_types)
+        self.assertIn("ImageScaleToTotalPixels", node_types)
+        self.assertIn("VAEEncode", node_types)
+        self.assertIn("ModelSamplingAuraFlow", node_types)
+        self.assertIn("AnimaFlexibleVariationBatchSampler", node_types)
+        self.assertNotIn("Canny", node_types)
+
+        self.assertFalse(
+            any(node["type"] == "LoraLoaderModelOnly" for node in workflow["nodes"])
+        )
+
+        sampler = next(
+            node
+            for node in workflow["nodes"]
+            if node["type"] == "AnimaFlexibleVariationBatchSampler"
+        )
+        self.assertEqual(sampler["widgets_values"][4], 24)
+        self.assertEqual(sampler["widgets_values"][5], 4)
+        self.assertEqual(sampler["widgets_values"][8], 0.38)
+
+        sampler_input_links = {
+            item["name"]: item["link"] for item in sampler["inputs"]
+        }
+        links = {item[0]: item for item in workflow["links"]}
+        latent_link = links[sampler_input_links["latent_image"]]
+        source_node = next(
+            node for node in workflow["nodes"] if node["type"] == "VAEEncode"
+        )
+        self.assertEqual(latent_link[1], source_node["id"])
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}
