@@ -42,7 +42,7 @@ It is also exposed through ComfyUI's workflow templates browser.
 An optional Easy MultiAngle example is also included:
 
 ```text
-example_workflows/anima_easy_multiangle_batch_workflow.json
+example_workflows/ANIMA_EasyMultiAngle.json
 ```
 
 That workflow requires

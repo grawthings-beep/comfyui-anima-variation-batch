@@ -13,6 +13,11 @@ EASY_MULTIANGLE_WORKFLOW_PATH = (
     / "example_workflows"
     / "anima_easy_multiangle_batch_workflow.json"
 )
+ANIMA_EASY_MULTIANGLE_WORKFLOW_PATH = (
+    Path(__file__).parents[1]
+    / "example_workflows"
+    / "ANIMA_EasyMultiAngle.json"
+)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -21,6 +26,9 @@ class WorkflowTests(unittest.TestCase):
         cls.workflow = json.loads(WORKFLOW_PATH.read_text(encoding="utf-8"))
         cls.easy_multiangle_workflow = json.loads(
             EASY_MULTIANGLE_WORKFLOW_PATH.read_text(encoding="utf-8")
+        )
+        cls.anima_easy_multiangle_workflow = json.loads(
+            ANIMA_EASY_MULTIANGLE_WORKFLOW_PATH.read_text(encoding="utf-8")
         )
 
     def test_custom_node_is_present(self):
@@ -66,6 +74,17 @@ class WorkflowTests(unittest.TestCase):
             if node["type"] == "AnimaEasyMultiAngleGroup"
         )
         self.assertEqual(adapter["widgets_values"], ["Angle", "", True, True])
+
+    def test_named_anima_easy_multiangle_workflow_is_self_contained(self):
+        node_types = {
+            node["type"] for node in self.anima_easy_multiangle_workflow["nodes"]
+        }
+        self.assertIn("AnimaMultiAngle", node_types)
+        self.assertIn("AnimaEasyMultiAngleGroup", node_types)
+        self.assertNotIn("easy multiAngle", node_types)
+        self.assertNotIn("easy positive", node_types)
+        self.assertNotIn("easy negative", node_types)
+        self.assertNotIn("Power Lora Loader (rgthree)", node_types)
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}
