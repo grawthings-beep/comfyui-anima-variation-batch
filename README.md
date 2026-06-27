@@ -46,8 +46,8 @@ example_workflows/anima_easy_multiangle_batch_workflow.json
 ```
 
 That workflow requires
-[ComfyUI-Easy-Use](https://github.com/yolain/ComfyUI-Easy-Use) v1.3.6 or
-newer for its `easy multiAngle` node.
+only this custom node repository. It uses the built-in `Anima MultiAngle`
+node, which mirrors the angle prompt mapping from ComfyUI-Easy-Use.
 
 ## Batch ZIP saving
 
@@ -122,14 +122,15 @@ old workflows.
 
 ## Easy MultiAngle adapter
 
-`Anima Easy MultiAngle Group` adapts the `easy multiAngle` node from
-ComfyUI-Easy-Use into the same `ANIMA_VARIATION_GROUPS` chain used by the
-flexible sampler.
+`Anima MultiAngle` creates Easy-Use-compatible multi-angle params from JSON,
+without requiring ComfyUI-Easy-Use. `Anima Easy MultiAngle Group` adapts those
+params into the same `ANIMA_VARIATION_GROUPS` chain used by the flexible
+sampler.
 
 Connect:
 
 ```text
-easy multiAngle params -> Anima Easy MultiAngle Group multi_angle
+Anima MultiAngle params -> Anima Easy MultiAngle Group multi_angle
 Anima Easy MultiAngle Group -> Expression Group -> Pose Group -> Flexible Sampler
 ```
 
@@ -154,6 +155,9 @@ into three separate choices.
 If you do not use ComfyUI-Easy-Use, you can paste one camera prompt per line
 into `angle_prompts` instead. `<sks>` prefixes from Qwen multi-angle prompt
 generators are stripped by default.
+
+If ComfyUI-Easy-Use v1.3.6 or newer is installed, its `easy multiAngle` node's
+`params` output can also be connected to `Anima Easy MultiAngle Group`.
 
 ## Optional character LoRA downloads
 

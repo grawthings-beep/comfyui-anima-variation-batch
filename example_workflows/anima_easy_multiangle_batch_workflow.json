@@ -485,7 +485,7 @@
     },
     {
       "id": 57,
-      "type": "easy multiAngle",
+      "type": "AnimaMultiAngle",
       "pos": [
         330,
         -470
@@ -500,29 +500,27 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "prompt",
-          "shape": 6,
+          "name": "angle_prompts",
           "type": "STRING",
+          "slot_index": 0,
           "links": []
         },
         {
           "name": "params",
           "type": "EASY_MULTI_ANGLE",
+          "slot_index": 1,
           "links": [
             96
           ]
         }
       ],
       "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "1.3.6",
-        "Node name for S&R": "easy multiAngle"
+        "Node name for S&R": "AnimaMultiAngle"
       },
       "widgets_values": [
-        "[{\"rotate\":0,\"vertical\":0,\"zoom\":5,\"add_angle_prompt\":true},{\"rotate\":45,\"vertical\":25,\"zoom\":4,\"add_angle_prompt\":true},{\"rotate\":145,\"vertical\":36,\"zoom\":0,\"add_angle_prompt\":true},{\"rotate\":270,\"vertical\":-20,\"zoom\":6,\"add_angle_prompt\":true}]"
+        "[\n  {\n    \"rotate\": 0,\n    \"vertical\": 0,\n    \"zoom\": 5,\n    \"add_angle_prompt\": true\n  },\n  {\n    \"rotate\": 45,\n    \"vertical\": 25,\n    \"zoom\": 4,\n    \"add_angle_prompt\": true\n  },\n  {\n    \"rotate\": 145,\n    \"vertical\": 36,\n    \"zoom\": 0,\n    \"add_angle_prompt\": true\n  },\n  {\n    \"rotate\": 270,\n    \"vertical\": -20,\n    \"zoom\": 6,\n    \"add_angle_prompt\": true\n  }\n]"
       ],
-      "color": "#323",
-      "bgcolor": "#535"
+      "title": "Anima MultiAngle"
     },
     {
       "id": 58,

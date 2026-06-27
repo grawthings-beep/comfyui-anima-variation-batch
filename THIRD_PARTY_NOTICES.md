@@ -10,7 +10,7 @@ The source code in this repository is distributed under GPL-3.0-only.
 
 ## ComfyUI-Easy-Use
 
-The optional Easy MultiAngle example interoperates with
+The optional Easy MultiAngle adapter can interoperate with
 [yolain/ComfyUI-Easy-Use](https://github.com/yolain/ComfyUI-Easy-Use), which is
 licensed under GPL-3.0. ComfyUI-Easy-Use is not bundled with this repository.
 

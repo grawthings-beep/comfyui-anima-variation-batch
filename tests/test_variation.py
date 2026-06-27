@@ -11,6 +11,7 @@ from variation import (
     join_prompt,
     parse_lines,
     parse_options,
+    parse_easy_multi_angle_params,
 )
 
 
@@ -90,6 +91,22 @@ class VariationTests(unittest.TestCase):
         self.assertEqual(
             prompts,
             ["back-right view, high angle, extreme wide shot"],
+        )
+
+    def test_easy_multi_angle_params_are_clamped(self):
+        self.assertEqual(
+            parse_easy_multi_angle_params(
+                '[{"rotate":999,"vertical":-999,"zoom":99,'
+                '"add_angle_prompt":false}]'
+            ),
+            [
+                {
+                    "rotate": 360,
+                    "vertical": -90,
+                    "zoom": 10.0,
+                    "add_angle_prompt": False,
+                }
+            ],
         )
 
     def test_four_variations_are_deterministic_and_unique(self):

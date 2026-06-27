@@ -56,8 +56,9 @@ class WorkflowTests(unittest.TestCase):
 
     def test_easy_multiangle_example_uses_adapter_node(self):
         node_types = {node["type"] for node in self.easy_multiangle_workflow["nodes"]}
-        self.assertIn("easy multiAngle", node_types)
+        self.assertIn("AnimaMultiAngle", node_types)
         self.assertIn("AnimaEasyMultiAngleGroup", node_types)
+        self.assertNotIn("easy multiAngle", node_types)
 
         adapter = next(
             node

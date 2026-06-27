@@ -21,6 +21,7 @@ from .variation import (
     build_variations,
     clean_angle_prompts,
     easy_multi_angle_prompts,
+    parse_easy_multi_angle_params,
 )
 
 
@@ -122,6 +123,66 @@ class AnimaVariationGroup:
         return (
             add_variation_group(previous_groups, category_name, options),
         )
+
+
+class AnimaMultiAngle:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "multi_angle_json": (
+                    "STRING",
+                    {
+                        "multiline": True,
+                        "dynamicPrompts": False,
+                        "default": json.dumps(
+                            [
+                                {
+                                    "rotate": 0,
+                                    "vertical": 0,
+                                    "zoom": 5,
+                                    "add_angle_prompt": True,
+                                },
+                                {
+                                    "rotate": 45,
+                                    "vertical": 25,
+                                    "zoom": 4,
+                                    "add_angle_prompt": True,
+                                },
+                                {
+                                    "rotate": 145,
+                                    "vertical": 36,
+                                    "zoom": 0,
+                                    "add_angle_prompt": True,
+                                },
+                                {
+                                    "rotate": 270,
+                                    "vertical": -20,
+                                    "zoom": 6,
+                                    "add_angle_prompt": True,
+                                },
+                            ],
+                            indent=2,
+                        ),
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "EASY_MULTI_ANGLE")
+    RETURN_NAMES = ("angle_prompts", "params")
+    FUNCTION = "build"
+    CATEGORY = "Anima/batch"
+    DESCRIPTION = (
+        "Creates Easy-Use-compatible multi-angle params from JSON without "
+        "requiring ComfyUI-Easy-Use. Use the params output with "
+        "Anima Easy MultiAngle Group."
+    )
+
+    def build(self, multi_angle_json):
+        params = parse_easy_multi_angle_params(multi_angle_json)
+        prompts = easy_multi_angle_prompts(params)
+        return ("\n".join(prompts), params)
 
 
 class AnimaEasyMultiAngleGroup:
@@ -564,6 +625,7 @@ class AnimaSaveBatchZip:
 
 NODE_CLASS_MAPPINGS = {
     "AnimaVariationGroup": AnimaVariationGroup,
+    "AnimaMultiAngle": AnimaMultiAngle,
     "AnimaEasyMultiAngleGroup": AnimaEasyMultiAngleGroup,
     "AnimaVariationBatchSampler": AnimaVariationBatchSampler,
     "AnimaFlexibleVariationBatchSampler": AnimaFlexibleVariationBatchSampler,
@@ -572,6 +634,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AnimaVariationGroup": "Anima Variation Group",
+    "AnimaMultiAngle": "Anima MultiAngle",
     "AnimaEasyMultiAngleGroup": "Anima Easy MultiAngle Group",
     "AnimaVariationBatchSampler": "Anima Variation Batch Sampler",
     "AnimaFlexibleVariationBatchSampler": "Anima Flexible Variation Batch Sampler",

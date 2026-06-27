@@ -177,11 +177,48 @@ def _clamp_number(value, minimum, maximum, default, number_type):
     return max(minimum, min(maximum, number))
 
 
+def parse_easy_multi_angle_params(multi_angle):
+    params = []
+    for item in _as_multi_angle_items(multi_angle):
+        params.append(
+            {
+                "rotate": _clamp_number(
+                    item.get("rotate", 0),
+                    0,
+                    360,
+                    0,
+                    int,
+                ),
+                "vertical": _clamp_number(
+                    item.get("vertical", 0),
+                    -90,
+                    90,
+                    0,
+                    int,
+                ),
+                "zoom": _clamp_number(
+                    item.get("zoom", 5),
+                    0.0,
+                    10.0,
+                    5.0,
+                    float,
+                ),
+                "add_angle_prompt": bool(
+                    item.get("add_angle_prompt", True)
+                ),
+            }
+        )
+    if not params:
+        raise ValueError("multi_angle must contain at least one angle")
+    return params
+
+
 def easy_multi_angle_prompt(angle_data):
-    rotate = _clamp_number(angle_data.get("rotate", 0), 0, 360, 0, int)
-    vertical = _clamp_number(angle_data.get("vertical", 0), -90, 90, 0, int)
-    zoom = _clamp_number(angle_data.get("zoom", 5), 0.0, 10.0, 5.0, float)
-    add_angle_prompt = angle_data.get("add_angle_prompt", True)
+    angle_data = parse_easy_multi_angle_params(angle_data)[0]
+    rotate = angle_data["rotate"]
+    vertical = angle_data["vertical"]
+    zoom = angle_data["zoom"]
+    add_angle_prompt = angle_data["add_angle_prompt"]
 
     h_angle = rotate % 360
     h_suffix = "" if add_angle_prompt else " quarter"
@@ -270,7 +307,7 @@ def easy_multi_angle_prompts(
 ):
     prompts = [
         easy_multi_angle_prompt(item)
-        for item in _as_multi_angle_items(multi_angle)
+        for item in parse_easy_multi_angle_params(multi_angle)
     ]
     return clean_angle_prompts(prompts, strip_metadata, remove_sks_trigger)
 
