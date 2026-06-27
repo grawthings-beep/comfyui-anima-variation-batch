@@ -49,7 +49,7 @@
         82
       ],
       "flags": {},
-      "order": 10,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
@@ -234,7 +234,7 @@
         782.2011176206705
       ],
       "flags": {},
-      "order": 12,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -263,7 +263,7 @@
         560
       ],
       "flags": {},
-      "order": 11,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -343,7 +343,7 @@
         110
       ],
       "flags": {},
-      "order": 13,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -370,7 +370,7 @@
       "id": 54,
       "type": "AnimaVariationGroup",
       "pos": [
-        740,
+        800,
         -20
       ],
       "size": [
@@ -378,7 +378,7 @@
         160
       ],
       "flags": {},
-      "order": 7,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
@@ -409,7 +409,7 @@
       "id": 55,
       "type": "AnimaVariationGroup",
       "pos": [
-        1090,
+        1150,
         -20
       ],
       "size": [
@@ -417,7 +417,7 @@
         160
       ],
       "flags": {},
-      "order": 8,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -448,7 +448,7 @@
       "id": 56,
       "type": "AnimaVariationGroup",
       "pos": [
-        1440,
+        1500,
         -20
       ],
       "size": [
@@ -456,7 +456,7 @@
         160
       ],
       "flags": {},
-      "order": 9,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -485,64 +485,19 @@
     },
     {
       "id": 57,
-      "type": "AnimaMultiAngle",
+      "type": "AnimaMultiAnglePresetGroup",
       "pos": [
         330,
-        -470
+        -620
       ],
       "size": [
-        390,
-        420
+        420,
+        620
       ],
       "flags": {},
       "order": 5,
       "mode": 0,
       "inputs": [],
-      "outputs": [
-        {
-          "name": "angle_prompts",
-          "type": "STRING",
-          "slot_index": 0,
-          "links": []
-        },
-        {
-          "name": "params",
-          "type": "EASY_MULTI_ANGLE",
-          "slot_index": 1,
-          "links": [
-            96
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaMultiAngle"
-      },
-      "widgets_values": [
-        "[\n  {\n    \"rotate\": 0,\n    \"vertical\": 0,\n    \"zoom\": 5,\n    \"add_angle_prompt\": true\n  },\n  {\n    \"rotate\": 45,\n    \"vertical\": 25,\n    \"zoom\": 4,\n    \"add_angle_prompt\": true\n  },\n  {\n    \"rotate\": 145,\n    \"vertical\": 36,\n    \"zoom\": 0,\n    \"add_angle_prompt\": true\n  },\n  {\n    \"rotate\": 270,\n    \"vertical\": -20,\n    \"zoom\": 6,\n    \"add_angle_prompt\": true\n  }\n]"
-      ],
-      "title": "Anima MultiAngle"
-    },
-    {
-      "id": 58,
-      "type": "AnimaEasyMultiAngleGroup",
-      "pos": [
-        330,
-        -20
-      ],
-      "size": [
-        360,
-        220
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "multi_angle",
-          "type": "EASY_MULTI_ANGLE",
-          "link": 96
-        }
-      ],
       "outputs": [
         {
           "name": "variation_groups",
@@ -560,14 +515,32 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "AnimaEasyMultiAngleGroup"
+        "Node name for S&R": "AnimaMultiAnglePresetGroup"
       },
       "widgets_values": [
         "Angle",
-        "",
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         true,
         true
-      ]
+      ],
+      "title": "Angle presets"
     }
   ],
   "links": [
@@ -677,19 +650,11 @@
     ],
     [
       91,
-      58,
+      57,
       0,
       54,
       0,
       "ANIMA_VARIATION_GROUPS"
-    ],
-    [
-      96,
-      57,
-      1,
-      58,
-      0,
-      "EASY_MULTI_ANGLE"
     ]
   ],
   "groups": [],

@@ -15,6 +15,7 @@ import nodes
 
 from .batch_archive import create_batch_zip
 from .variation import (
+    MULTI_ANGLE_PRESETS,
     add_variation_group,
     add_variation_group_options,
     build_group_variations,
@@ -22,6 +23,7 @@ from .variation import (
     clean_angle_prompts,
     easy_multi_angle_prompts,
     parse_easy_multi_angle_params,
+    selected_multi_angle_presets,
 )
 
 
@@ -183,6 +185,56 @@ class AnimaMultiAngle:
         params = parse_easy_multi_angle_params(multi_angle_json)
         prompts = easy_multi_angle_prompts(params)
         return ("\n".join(prompts), params)
+
+
+class AnimaMultiAnglePresetGroup:
+    @classmethod
+    def INPUT_TYPES(cls):
+        required = {
+            "category_name": (
+                "STRING",
+                {
+                    "default": "Angle",
+                    "dynamicPrompts": False,
+                },
+            ),
+        }
+        required.update(
+            {
+                preset["key"]: (
+                    "BOOLEAN",
+                    {
+                        "default": preset["default"],
+                    },
+                )
+                for preset in MULTI_ANGLE_PRESETS
+            }
+        )
+        return {
+            "required": required,
+            "optional": {
+                "previous_groups": ("ANIMA_VARIATION_GROUPS",),
+            },
+        }
+
+    RETURN_TYPES = ("ANIMA_VARIATION_GROUPS", "STRING")
+    RETURN_NAMES = ("variation_groups", "angle_prompts")
+    FUNCTION = "build"
+    CATEGORY = "Anima/batch"
+    DESCRIPTION = (
+        "Builds an Angle variation group from preset camera toggles. Use this "
+        "instead of editing multi-angle JSON by hand."
+    )
+
+    def build(self, category_name, previous_groups=None, **enabled):
+        params = selected_multi_angle_presets(enabled)
+        options = easy_multi_angle_prompts(params)
+        groups = add_variation_group_options(
+            previous_groups,
+            category_name,
+            options,
+        )
+        return (groups, "\n".join(options))
 
 
 class AnimaEasyMultiAngleGroup:
@@ -626,6 +678,7 @@ class AnimaSaveBatchZip:
 NODE_CLASS_MAPPINGS = {
     "AnimaVariationGroup": AnimaVariationGroup,
     "AnimaMultiAngle": AnimaMultiAngle,
+    "AnimaMultiAnglePresetGroup": AnimaMultiAnglePresetGroup,
     "AnimaEasyMultiAngleGroup": AnimaEasyMultiAngleGroup,
     "AnimaVariationBatchSampler": AnimaVariationBatchSampler,
     "AnimaFlexibleVariationBatchSampler": AnimaFlexibleVariationBatchSampler,
@@ -635,6 +688,7 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AnimaVariationGroup": "Anima Variation Group",
     "AnimaMultiAngle": "Anima MultiAngle",
+    "AnimaMultiAnglePresetGroup": "Anima MultiAngle Preset Group",
     "AnimaEasyMultiAngleGroup": "Anima Easy MultiAngle Group",
     "AnimaVariationBatchSampler": "Anima Variation Batch Sampler",
     "AnimaFlexibleVariationBatchSampler": "Anima Flexible Variation Batch Sampler",

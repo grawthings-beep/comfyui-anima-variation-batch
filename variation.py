@@ -7,6 +7,30 @@ import re
 from dataclasses import dataclass
 
 
+MULTI_ANGLE_PRESETS = (
+    {"key": "front", "rotate": 0, "vertical": 0, "zoom": 5, "default": True},
+    {"key": "front_high", "rotate": 0, "vertical": 30, "zoom": 5, "default": True},
+    {"key": "front_low", "rotate": 0, "vertical": -25, "zoom": 5, "default": False},
+    {"key": "front_close", "rotate": 0, "vertical": 0, "zoom": 7, "default": False},
+    {"key": "front_right", "rotate": 45, "vertical": 0, "zoom": 5, "default": True},
+    {"key": "front_right_high", "rotate": 45, "vertical": 30, "zoom": 5, "default": True},
+    {"key": "front_right_low", "rotate": 45, "vertical": -25, "zoom": 5, "default": False},
+    {"key": "right", "rotate": 90, "vertical": 0, "zoom": 5, "default": False},
+    {"key": "right_high", "rotate": 90, "vertical": 30, "zoom": 5, "default": False},
+    {"key": "right_low", "rotate": 90, "vertical": -25, "zoom": 5, "default": False},
+    {"key": "back_right", "rotate": 135, "vertical": 0, "zoom": 5, "default": False},
+    {"key": "back_right_high", "rotate": 135, "vertical": 30, "zoom": 5, "default": False},
+    {"key": "back", "rotate": 180, "vertical": 0, "zoom": 5, "default": False},
+    {"key": "back_high", "rotate": 180, "vertical": 30, "zoom": 5, "default": False},
+    {"key": "back_left", "rotate": 225, "vertical": 0, "zoom": 5, "default": False},
+    {"key": "back_left_high", "rotate": 225, "vertical": 30, "zoom": 5, "default": False},
+    {"key": "left", "rotate": 270, "vertical": 0, "zoom": 5, "default": False},
+    {"key": "left_high", "rotate": 270, "vertical": 30, "zoom": 5, "default": False},
+    {"key": "front_left", "rotate": 315, "vertical": 0, "zoom": 5, "default": True},
+    {"key": "front_left_high", "rotate": 315, "vertical": 30, "zoom": 5, "default": True},
+)
+
+
 def parse_lines(value):
     return list(
         dict.fromkeys(
@@ -211,6 +235,23 @@ def parse_easy_multi_angle_params(multi_angle):
     if not params:
         raise ValueError("multi_angle must contain at least one angle")
     return params
+
+
+def selected_multi_angle_presets(enabled):
+    presets = []
+    for preset in MULTI_ANGLE_PRESETS:
+        if enabled.get(preset["key"], False):
+            presets.append(
+                {
+                    "rotate": preset["rotate"],
+                    "vertical": preset["vertical"],
+                    "zoom": preset["zoom"],
+                    "add_angle_prompt": True,
+                }
+            )
+    if not presets:
+        raise ValueError("select at least one multi-angle preset")
+    return presets
 
 
 def easy_multi_angle_prompt(angle_data):

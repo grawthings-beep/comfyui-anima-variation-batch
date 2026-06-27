@@ -1,6 +1,7 @@
 import unittest
 
 from variation import (
+    MULTI_ANGLE_PRESETS,
     add_variation_group,
     add_variation_group_options,
     build_group_variations,
@@ -12,6 +13,7 @@ from variation import (
     parse_lines,
     parse_options,
     parse_easy_multi_angle_params,
+    selected_multi_angle_presets,
 )
 
 
@@ -108,6 +110,44 @@ class VariationTests(unittest.TestCase):
                 }
             ],
         )
+
+    def test_multi_angle_presets_expose_twenty_toggle_options(self):
+        keys = [preset["key"] for preset in MULTI_ANGLE_PRESETS]
+        self.assertEqual(len(keys), 20)
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertIn("front", keys)
+        self.assertIn("front_left_high", keys)
+
+    def test_selected_multi_angle_presets_use_enabled_toggles_only(self):
+        params = selected_multi_angle_presets(
+            {
+                "front": True,
+                "front_high": False,
+                "right_low": True,
+            }
+        )
+
+        self.assertEqual(
+            params,
+            [
+                {
+                    "rotate": 0,
+                    "vertical": 0,
+                    "zoom": 5,
+                    "add_angle_prompt": True,
+                },
+                {
+                    "rotate": 90,
+                    "vertical": -25,
+                    "zoom": 5,
+                    "add_angle_prompt": True,
+                },
+            ],
+        )
+
+    def test_selected_multi_angle_presets_require_one_toggle(self):
+        with self.assertRaisesRegex(ValueError, "select at least one"):
+            selected_multi_angle_presets({})
 
     def test_four_variations_are_deterministic_and_unique(self):
         first = build_variations(

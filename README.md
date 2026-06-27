@@ -46,8 +46,9 @@ example_workflows/ANIMA_EasyMultiAngle.json
 ```
 
 That workflow requires
-only this custom node repository. It uses the built-in `Anima MultiAngle`
-node, which mirrors the angle prompt mapping from ComfyUI-Easy-Use.
+only this custom node repository. It uses the built-in
+`Anima MultiAngle Preset Group` node, so camera angles can be selected with
+toggles instead of editing JSON numbers.
 
 ## Batch ZIP saving
 
@@ -120,22 +121,25 @@ case-insensitively.
 The original two-field `Anima Variation Batch Sampler` remains available for
 old workflows.
 
-## Easy MultiAngle adapter
+## Easy MultiAngle presets
 
-`Anima MultiAngle` creates Easy-Use-compatible multi-angle params from JSON,
-without requiring ComfyUI-Easy-Use. `Anima Easy MultiAngle Group` adapts those
-params into the same `ANIMA_VARIATION_GROUPS` chain used by the flexible
-sampler.
+`Anima MultiAngle Preset Group` creates an `Angle` variation category from
+twenty camera preset toggles. It is the recommended node for normal use.
 
 Connect:
 
 ```text
-Anima MultiAngle params -> Anima Easy MultiAngle Group multi_angle
-Anima Easy MultiAngle Group -> Expression Group -> Pose Group -> Flexible Sampler
+Anima MultiAngle Preset Group -> Expression Group -> Pose Group -> Flexible Sampler
 ```
 
-The adapter mirrors Easy-Use's camera prompt mapping, then removes the
-parenthetical coordinate suffix by default. For example:
+The presets cover front, front-left, front-right, side, and rear angles with
+eye-level, high-angle, low-angle, and close-up variants. Toggle the presets you
+want included in the shuffle bag; at least one preset must be enabled.
+
+The legacy `Anima MultiAngle` node is still available for JSON-based workflows.
+It mirrors Easy-Use's camera prompt mapping. `Anima Easy MultiAngle Group` can
+adapt those params into the same `ANIMA_VARIATION_GROUPS` chain. The adapter
+removes the parenthetical coordinate suffix by default. For example:
 
 ```text
 back-right view, high angle, extreme wide shot (horizontal: 145, vertical: 36, zoom: 0.0)
@@ -151,10 +155,6 @@ This follows the common Anima workflow pattern of keeping only the camera tags
 and dropping the coordinate metadata. Comma-containing camera prompts are kept
 as one variation option, so `front view, eye level, medium shot` is not split
 into three separate choices.
-
-If you do not use ComfyUI-Easy-Use, you can paste one camera prompt per line
-into `angle_prompts` instead. `<sks>` prefixes from Qwen multi-angle prompt
-generators are stripped by default.
 
 If ComfyUI-Easy-Use v1.3.6 or newer is installed, its `easy multiAngle` node's
 `params` output can also be connected to `Anima Easy MultiAngle Group`.

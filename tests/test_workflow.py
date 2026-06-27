@@ -62,25 +62,29 @@ class WorkflowTests(unittest.TestCase):
             self.easy_multiangle_workflow
         )
 
-    def test_easy_multiangle_example_uses_adapter_node(self):
+    def test_easy_multiangle_example_uses_preset_group_node(self):
         node_types = {node["type"] for node in self.easy_multiangle_workflow["nodes"]}
-        self.assertIn("AnimaMultiAngle", node_types)
-        self.assertIn("AnimaEasyMultiAngleGroup", node_types)
+        self.assertIn("AnimaMultiAnglePresetGroup", node_types)
+        self.assertNotIn("AnimaMultiAngle", node_types)
+        self.assertNotIn("AnimaEasyMultiAngleGroup", node_types)
         self.assertNotIn("easy multiAngle", node_types)
 
-        adapter = next(
+        preset_group = next(
             node
             for node in self.easy_multiangle_workflow["nodes"]
-            if node["type"] == "AnimaEasyMultiAngleGroup"
+            if node["type"] == "AnimaMultiAnglePresetGroup"
         )
-        self.assertEqual(adapter["widgets_values"], ["Angle", "", True, True])
+        self.assertEqual(preset_group["widgets_values"][0], "Angle")
+        self.assertEqual(len(preset_group["widgets_values"]), 21)
+        self.assertGreaterEqual(sum(preset_group["widgets_values"][1:]), 4)
 
     def test_named_anima_easy_multiangle_workflow_is_self_contained(self):
         node_types = {
             node["type"] for node in self.anima_easy_multiangle_workflow["nodes"]
         }
-        self.assertIn("AnimaMultiAngle", node_types)
-        self.assertIn("AnimaEasyMultiAngleGroup", node_types)
+        self.assertIn("AnimaMultiAnglePresetGroup", node_types)
+        self.assertNotIn("AnimaMultiAngle", node_types)
+        self.assertNotIn("AnimaEasyMultiAngleGroup", node_types)
         self.assertNotIn("easy multiAngle", node_types)
         self.assertNotIn("easy positive", node_types)
         self.assertNotIn("easy negative", node_types)
