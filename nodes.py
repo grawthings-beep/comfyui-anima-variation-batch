@@ -16,8 +16,11 @@ import nodes
 from .batch_archive import create_batch_zip
 from .variation import (
     add_variation_group,
+    add_variation_group_options,
     build_group_variations,
     build_variations,
+    clean_angle_prompts,
+    easy_multi_angle_prompts,
 )
 
 
@@ -119,6 +122,84 @@ class AnimaVariationGroup:
         return (
             add_variation_group(previous_groups, category_name, options),
         )
+
+
+class AnimaEasyMultiAngleGroup:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "category_name": (
+                    "STRING",
+                    {
+                        "default": "Angle",
+                        "dynamicPrompts": False,
+                    },
+                ),
+                "angle_prompts": (
+                    "STRING",
+                    {
+                        "multiline": True,
+                        "dynamicPrompts": False,
+                        "default": "",
+                    },
+                ),
+                "strip_metadata": (
+                    "BOOLEAN",
+                    {
+                        "default": True,
+                    },
+                ),
+                "remove_sks_trigger": (
+                    "BOOLEAN",
+                    {
+                        "default": True,
+                    },
+                ),
+            },
+            "optional": {
+                "previous_groups": ("ANIMA_VARIATION_GROUPS",),
+                "multi_angle": ("EASY_MULTI_ANGLE",),
+            },
+        }
+
+    RETURN_TYPES = ("ANIMA_VARIATION_GROUPS", "STRING")
+    RETURN_NAMES = ("variation_groups", "angle_prompts")
+    FUNCTION = "build"
+    CATEGORY = "Anima/batch"
+    DESCRIPTION = (
+        "Adapts ComfyUI-Easy-Use easy multiAngle params or prompt text into "
+        "one ANIMA variation category. Parenthetical coordinate metadata is "
+        "stripped by default for Anima-friendly camera tags."
+    )
+
+    def build(
+        self,
+        category_name,
+        angle_prompts,
+        strip_metadata,
+        remove_sks_trigger,
+        previous_groups=None,
+        multi_angle=None,
+    ):
+        if multi_angle is not None:
+            options = easy_multi_angle_prompts(
+                multi_angle,
+                strip_metadata,
+                remove_sks_trigger,
+            )
+        else:
+            options = clean_angle_prompts(
+                angle_prompts,
+                strip_metadata,
+                remove_sks_trigger,
+            )
+        groups = add_variation_group_options(
+            previous_groups,
+            category_name,
+            options,
+        )
+        return (groups, "\n".join(options))
 
 
 class AnimaVariationBatchSampler:
@@ -483,6 +564,7 @@ class AnimaSaveBatchZip:
 
 NODE_CLASS_MAPPINGS = {
     "AnimaVariationGroup": AnimaVariationGroup,
+    "AnimaEasyMultiAngleGroup": AnimaEasyMultiAngleGroup,
     "AnimaVariationBatchSampler": AnimaVariationBatchSampler,
     "AnimaFlexibleVariationBatchSampler": AnimaFlexibleVariationBatchSampler,
     "AnimaSaveBatchZip": AnimaSaveBatchZip,
@@ -490,6 +572,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AnimaVariationGroup": "Anima Variation Group",
+    "AnimaEasyMultiAngleGroup": "Anima Easy MultiAngle Group",
     "AnimaVariationBatchSampler": "Anima Variation Batch Sampler",
     "AnimaFlexibleVariationBatchSampler": "Anima Flexible Variation Batch Sampler",
     "AnimaSaveBatchZip": "Anima Save Batch ZIP",

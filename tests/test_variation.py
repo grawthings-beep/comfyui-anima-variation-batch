@@ -2,8 +2,12 @@ import unittest
 
 from variation import (
     add_variation_group,
+    add_variation_group_options,
     build_group_variations,
     build_variations,
+    clean_angle_prompt,
+    clean_angle_prompts,
+    easy_multi_angle_prompts,
     join_prompt,
     parse_lines,
     parse_options,
@@ -41,6 +45,51 @@ class VariationTests(unittest.TestCase):
         self.assertEqual(
             parse_options(value),
             ["from above", "from side", "from below"],
+        )
+
+    def test_preparsed_options_preserve_commas_inside_angle_prompt(self):
+        groups = add_variation_group_options(
+            None,
+            "Angle",
+            [
+                "front view, eye level, medium shot",
+                "right side view, high angle, close-up",
+            ],
+        )
+
+        self.assertEqual(len(groups[0].options), 2)
+        self.assertEqual(
+            groups[0].options[0],
+            "front view, eye level, medium shot",
+        )
+
+    def test_clean_angle_prompt_strips_metadata_and_qwen_trigger(self):
+        self.assertEqual(
+            clean_angle_prompt(
+                "<sks> front view, eye level, medium shot "
+                "(horizontal: 0, vertical: 0, zoom: 5.0)"
+            ),
+            "front view, eye level, medium shot",
+        )
+
+    def test_clean_angle_prompts_accepts_json_string_list(self):
+        self.assertEqual(
+            clean_angle_prompts(
+                '["front view (horizontal: 0)", "front view (horizontal: 0)", '
+                '"left side view (horizontal: 270)"]'
+            ),
+            ["front view", "left side view"],
+        )
+
+    def test_easy_multi_angle_params_create_anima_friendly_prompts(self):
+        prompts = easy_multi_angle_prompts(
+            '[{"rotate":145,"vertical":36,"zoom":0,'
+            '"add_angle_prompt":true}]'
+        )
+
+        self.assertEqual(
+            prompts,
+            ["back-right view, high angle, extreme wide shot"],
         )
 
     def test_four_variations_are_deterministic_and_unique(self):

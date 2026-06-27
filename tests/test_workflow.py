@@ -8,12 +8,20 @@ WORKFLOW_PATH = (
     / "example_workflows"
     / "anima_variation_batch_workflow.json"
 )
+EASY_MULTIANGLE_WORKFLOW_PATH = (
+    Path(__file__).parents[1]
+    / "example_workflows"
+    / "anima_easy_multiangle_batch_workflow.json"
+)
 
 
 class WorkflowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.workflow = json.loads(WORKFLOW_PATH.read_text(encoding="utf-8"))
+        cls.easy_multiangle_workflow = json.loads(
+            EASY_MULTIANGLE_WORKFLOW_PATH.read_text(encoding="utf-8")
+        )
 
     def test_custom_node_is_present(self):
         node_types = {node["type"] for node in self.workflow["nodes"]}
@@ -39,11 +47,31 @@ class WorkflowTests(unittest.TestCase):
         )
 
     def test_links_reference_existing_nodes_and_sockets(self):
-        nodes = {node["id"]: node for node in self.workflow["nodes"]}
+        self.assert_links_reference_existing_nodes_and_sockets(self.workflow)
+
+    def test_easy_multiangle_links_reference_existing_nodes_and_sockets(self):
+        self.assert_links_reference_existing_nodes_and_sockets(
+            self.easy_multiangle_workflow
+        )
+
+    def test_easy_multiangle_example_uses_adapter_node(self):
+        node_types = {node["type"] for node in self.easy_multiangle_workflow["nodes"]}
+        self.assertIn("easy multiAngle", node_types)
+        self.assertIn("AnimaEasyMultiAngleGroup", node_types)
+
+        adapter = next(
+            node
+            for node in self.easy_multiangle_workflow["nodes"]
+            if node["type"] == "AnimaEasyMultiAngleGroup"
+        )
+        self.assertEqual(adapter["widgets_values"], ["Angle", "", True, True])
+
+    def assert_links_reference_existing_nodes_and_sockets(self, workflow):
+        nodes = {node["id"]: node for node in workflow["nodes"]}
         link_ids = set()
 
         for link_id, source_id, source_slot, target_id, target_slot, _type in (
-            self.workflow["links"]
+            workflow["links"]
         ):
             self.assertNotIn(link_id, link_ids)
             link_ids.add(link_id)

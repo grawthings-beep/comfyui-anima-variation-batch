@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import itertools
+import json
 import random
+import re
 from dataclasses import dataclass
 
 
@@ -28,6 +30,18 @@ def parse_options(value):
                 seen.add(key)
                 options.append(option)
     return options
+
+
+def dedupe_options(options):
+    parsed = []
+    seen = set()
+    for option in options:
+        option = str(option).strip(" \t\r\n,")
+        key = option.casefold()
+        if option and key not in seen:
+            seen.add(key)
+            parsed.append(option)
+    return parsed
 
 
 def join_prompt(*parts):
@@ -63,21 +77,202 @@ class FlexibleVariation:
         return " | ".join(f"{name}={value}" for name, value in self.selections)
 
 
-def add_variation_group(previous_groups, category_name, options):
+def add_variation_group_options(previous_groups, category_name, options):
     name = category_name.strip()
     if not name:
         raise ValueError("category_name must not be empty")
 
-    parsed = tuple(parse_options(options))
+    parsed = tuple(dedupe_options(options))
     if not parsed:
-        raise ValueError(
-            f"{name} must contain at least one comma-separated option"
-        )
+        raise ValueError(f"{name} must contain at least one option")
 
     groups = tuple(previous_groups or ())
     if any(group.name.casefold() == name.casefold() for group in groups):
         raise ValueError(f"duplicate variation category: {name}")
     return groups + (VariationGroup(name=name, options=parsed),)
+
+
+def add_variation_group(previous_groups, category_name, options):
+    return add_variation_group_options(
+        previous_groups,
+        category_name,
+        parse_options(options),
+    )
+
+
+def clean_angle_prompt(prompt, strip_metadata=True, remove_sks_trigger=True):
+    text = str(prompt).strip()
+    if remove_sks_trigger:
+        text = re.sub(r"^\s*<sks>\s*", "", text, flags=re.IGNORECASE)
+    if strip_metadata:
+        text = text.split("(", 1)[0].strip()
+    return text.strip(" \t\r\n,")
+
+
+def _prompt_items(value):
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        items = []
+        for item in value:
+            items.extend(_prompt_items(item))
+        return items
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        if text.startswith("["):
+            try:
+                parsed = json.loads(text)
+            except json.JSONDecodeError:
+                parsed = None
+            if parsed is not None:
+                return _prompt_items(parsed)
+        return parse_lines(text)
+    return [str(value)]
+
+
+def clean_angle_prompts(
+    value,
+    strip_metadata=True,
+    remove_sks_trigger=True,
+):
+    return dedupe_options(
+        clean_angle_prompt(item, strip_metadata, remove_sks_trigger)
+        for item in _prompt_items(value)
+    )
+
+
+def _as_multi_angle_items(value):
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        try:
+            value = json.loads(text)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid easy multiAngle params: {value}") from exc
+    if isinstance(value, dict):
+        return [value]
+    if isinstance(value, (list, tuple)):
+        items = []
+        for item in value:
+            if isinstance(item, dict):
+                items.append(item)
+            elif isinstance(item, str):
+                items.extend(_as_multi_angle_items(item))
+            else:
+                raise ValueError(f"Invalid easy multiAngle item: {item!r}")
+        return items
+    raise ValueError(f"Invalid easy multiAngle params: {value!r}")
+
+
+def _clamp_number(value, minimum, maximum, default, number_type):
+    try:
+        number = number_type(value)
+    except (TypeError, ValueError):
+        number = default
+    return max(minimum, min(maximum, number))
+
+
+def easy_multi_angle_prompt(angle_data):
+    rotate = _clamp_number(angle_data.get("rotate", 0), 0, 360, 0, int)
+    vertical = _clamp_number(angle_data.get("vertical", 0), -90, 90, 0, int)
+    zoom = _clamp_number(angle_data.get("zoom", 5), 0.0, 10.0, 5.0, float)
+    add_angle_prompt = angle_data.get("add_angle_prompt", True)
+
+    h_angle = rotate % 360
+    h_suffix = "" if add_angle_prompt else " quarter"
+    if h_angle < 22.5 or h_angle >= 337.5:
+        h_direction = "front view"
+    elif h_angle < 67.5:
+        h_direction = f"front-right{h_suffix} view"
+    elif h_angle < 112.5:
+        h_direction = "right side view"
+    elif h_angle < 157.5:
+        h_direction = f"back-right{h_suffix} view"
+    elif h_angle < 202.5:
+        h_direction = "back view"
+    elif h_angle < 247.5:
+        h_direction = f"back-left{h_suffix} view"
+    elif h_angle < 292.5:
+        h_direction = "left side view"
+    else:
+        h_direction = f"front-left{h_suffix} view"
+
+    if add_angle_prompt:
+        if vertical == -90:
+            v_direction = (
+                "bottom-looking-up perspective, extreme worm's eye view, "
+                "focus subject bottom"
+            )
+        elif vertical < -75:
+            v_direction = "bottom-looking-up perspective, extreme worm's eye view"
+        elif vertical < -45:
+            v_direction = "ultra-low angle"
+        elif vertical < -15:
+            v_direction = "low angle"
+        elif vertical < 15:
+            v_direction = "eye level"
+        elif vertical < 45:
+            v_direction = "high angle"
+        elif vertical < 75:
+            v_direction = "bird's eye view"
+        elif vertical < 90:
+            v_direction = "top-down perspective, looking straight down at the top of the subject"
+        else:
+            v_direction = (
+                "top-down perspective, looking straight down at the top of the subject, "
+                "face not visible, focus on subject head"
+            )
+    else:
+        if vertical < -15:
+            v_direction = "low-angle shot"
+        elif vertical < 15:
+            v_direction = "eye-level shot"
+        elif vertical < 45:
+            v_direction = "elevated shot"
+        elif vertical < 75:
+            v_direction = "high-angle shot"
+        elif vertical < 90:
+            v_direction = "top-down perspective, looking straight down at the top of the subject"
+        else:
+            v_direction = (
+                "top-down perspective, looking straight down at the top of the subject, "
+                "face not visible, focus on subject head"
+            )
+
+    if zoom < 2:
+        distance = "extreme wide shot"
+    elif zoom < 4:
+        distance = "wide shot"
+    elif zoom < 6:
+        distance = "medium shot"
+    elif zoom < 8:
+        distance = "close-up"
+    else:
+        distance = "extreme close-up"
+
+    if add_angle_prompt:
+        return (
+            f"{h_direction}, {v_direction}, {distance} "
+            f"(horizontal: {rotate}, vertical: {vertical}, zoom: {zoom:.1f})"
+        )
+    return f"{h_direction} {v_direction} {distance}"
+
+
+def easy_multi_angle_prompts(
+    multi_angle,
+    strip_metadata=True,
+    remove_sks_trigger=True,
+):
+    prompts = [
+        easy_multi_angle_prompt(item)
+        for item in _as_multi_angle_items(multi_angle)
+    ]
+    return clean_angle_prompts(prompts, strip_metadata, remove_sks_trigger)
 
 
 def _shuffle_bag(options, count, rng):

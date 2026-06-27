@@ -39,6 +39,16 @@ example_workflows/anima_variation_batch_workflow.json
 
 It is also exposed through ComfyUI's workflow templates browser.
 
+An optional Easy MultiAngle example is also included:
+
+```text
+example_workflows/anima_easy_multiangle_batch_workflow.json
+```
+
+That workflow requires
+[ComfyUI-Easy-Use](https://github.com/yolain/ComfyUI-Easy-Use) v1.3.6 or
+newer for its `easy multiAngle` node.
+
 ## Batch ZIP saving
 
 The example workflow uses `Anima Save Batch ZIP` instead of the standard
@@ -109,6 +119,41 @@ case-insensitively.
 
 The original two-field `Anima Variation Batch Sampler` remains available for
 old workflows.
+
+## Easy MultiAngle adapter
+
+`Anima Easy MultiAngle Group` adapts the `easy multiAngle` node from
+ComfyUI-Easy-Use into the same `ANIMA_VARIATION_GROUPS` chain used by the
+flexible sampler.
+
+Connect:
+
+```text
+easy multiAngle params -> Anima Easy MultiAngle Group multi_angle
+Anima Easy MultiAngle Group -> Expression Group -> Pose Group -> Flexible Sampler
+```
+
+The adapter mirrors Easy-Use's camera prompt mapping, then removes the
+parenthetical coordinate suffix by default. For example:
+
+```text
+back-right view, high angle, extreme wide shot (horizontal: 145, vertical: 36, zoom: 0.0)
+```
+
+becomes:
+
+```text
+back-right view, high angle, extreme wide shot
+```
+
+This follows the common Anima workflow pattern of keeping only the camera tags
+and dropping the coordinate metadata. Comma-containing camera prompts are kept
+as one variation option, so `front view, eye level, medium shot` is not split
+into three separate choices.
+
+If you do not use ComfyUI-Easy-Use, you can paste one camera prompt per line
+into `angle_prompts` instead. `<sks>` prefixes from Qwen multi-angle prompt
+generators are stripped by default.
 
 ## Optional character LoRA downloads
 
