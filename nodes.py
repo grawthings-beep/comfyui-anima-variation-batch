@@ -11,6 +11,7 @@ from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
 import comfy.samplers
+import node_helpers
 import nodes
 
 from .batch_archive import create_batch_zip
@@ -39,6 +40,7 @@ def sample_variations(
     sampler_name,
     scheduler,
     denoise,
+    reference_latent=None,
 ):
     latent_samples = latent_image.get("samples")
     if latent_samples is None:
@@ -49,11 +51,28 @@ def sample_variations(
             "Use count to control the number of output images."
         )
 
+    reference_samples = None
+    if reference_latent is not None:
+        reference_samples = reference_latent.get("samples")
+        if reference_samples is None:
+            raise ValueError("reference_latent does not contain samples")
+        negative = node_helpers.conditioning_set_values(
+            negative,
+            {"reference_latents": [reference_samples]},
+            append=True,
+        )
+
     images = []
     report_lines = []
     for variation in variations:
         tokens = clip.tokenize(variation.prompt)
         positive = clip.encode_from_tokens_scheduled(tokens)
+        if reference_samples is not None:
+            positive = node_helpers.conditioning_set_values(
+                positive,
+                {"reference_latents": [reference_samples]},
+                append=True,
+            )
 
         sampled = nodes.common_ksampler(
             model,
@@ -386,7 +405,19 @@ class AnimaVariationBatchSampler:
                     "FLOAT",
                     {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01},
                 ),
-            }
+            },
+            "optional": {
+                "reference_latent": (
+                    "LATENT",
+                    {
+                        "tooltip": (
+                            "Optional VAE-encoded control/reference image. "
+                            "For Qwen Image control LoRAs, connect the "
+                            "Canny/depth/pose latent here."
+                        )
+                    },
+                ),
+            },
         }
 
     RETURN_TYPES = ("IMAGE", "STRING")
@@ -419,6 +450,7 @@ class AnimaVariationBatchSampler:
         sampler_name,
         scheduler,
         denoise,
+        reference_latent=None,
     ):
         variations = build_variations(
             base_prompt,
@@ -439,6 +471,7 @@ class AnimaVariationBatchSampler:
             sampler_name,
             scheduler,
             denoise,
+            reference_latent=reference_latent,
         )
 
 
@@ -488,7 +521,19 @@ class AnimaFlexibleVariationBatchSampler:
                     "FLOAT",
                     {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01},
                 ),
-            }
+            },
+            "optional": {
+                "reference_latent": (
+                    "LATENT",
+                    {
+                        "tooltip": (
+                            "Optional VAE-encoded control/reference image. "
+                            "For Qwen Image control LoRAs, connect the "
+                            "Canny/depth/pose latent here."
+                        )
+                    },
+                ),
+            },
         }
 
     RETURN_TYPES = ("IMAGE", "STRING")
@@ -520,6 +565,7 @@ class AnimaFlexibleVariationBatchSampler:
         sampler_name,
         scheduler,
         denoise,
+        reference_latent=None,
     ):
         variations = build_group_variations(
             base_prompt,
@@ -539,6 +585,7 @@ class AnimaFlexibleVariationBatchSampler:
             sampler_name,
             scheduler,
             denoise,
+            reference_latent=reference_latent,
         )
 
 

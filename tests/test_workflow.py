@@ -18,6 +18,11 @@ ANIMA_EASY_MULTIANGLE_WORKFLOW_PATH = (
     / "example_workflows"
     / "ANIMA_EasyMultiAngle.json"
 )
+ANIMA_CONTROL_CANNY_WORKFLOW_PATH = (
+    Path(__file__).parents[1]
+    / "example_workflows"
+    / "ANIMA_Control_Canny.json"
+)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -29,6 +34,9 @@ class WorkflowTests(unittest.TestCase):
         )
         cls.anima_easy_multiangle_workflow = json.loads(
             ANIMA_EASY_MULTIANGLE_WORKFLOW_PATH.read_text(encoding="utf-8")
+        )
+        cls.anima_control_canny_workflow = json.loads(
+            ANIMA_CONTROL_CANNY_WORKFLOW_PATH.read_text(encoding="utf-8")
         )
 
     def test_custom_node_is_present(self):
@@ -62,6 +70,11 @@ class WorkflowTests(unittest.TestCase):
             self.easy_multiangle_workflow
         )
 
+    def test_control_canny_links_reference_existing_nodes_and_sockets(self):
+        self.assert_links_reference_existing_nodes_and_sockets(
+            self.anima_control_canny_workflow
+        )
+
     def test_easy_multiangle_example_uses_preset_group_node(self):
         node_types = {node["type"] for node in self.easy_multiangle_workflow["nodes"]}
         self.assertIn("AnimaMultiAnglePresetGroup", node_types)
@@ -89,6 +102,49 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("easy positive", node_types)
         self.assertNotIn("easy negative", node_types)
         self.assertNotIn("Power Lora Loader (rgthree)", node_types)
+
+    def test_control_canny_workflow_uses_reference_latent_control(self):
+        workflow = self.anima_control_canny_workflow
+        node_types = {node["type"] for node in workflow["nodes"]}
+
+        self.assertIn("LoadImage", node_types)
+        self.assertIn("ImageScaleToTotalPixels", node_types)
+        self.assertIn("Canny", node_types)
+        self.assertIn("VAEEncode", node_types)
+        self.assertIn("ModelSamplingAuraFlow", node_types)
+        self.assertIn("AnimaFlexibleVariationBatchSampler", node_types)
+
+        lora_names = [
+            node["widgets_values"][0]
+            for node in workflow["nodes"]
+            if node["type"] == "LoraLoaderModelOnly"
+        ]
+        self.assertIn("qwen_image_union_diffsynth_lora.safetensors", lora_names)
+        self.assertIn("anima-turbo-lora-v0.2.safetensors", lora_names)
+
+        unet_loader = next(
+            node for node in workflow["nodes"] if node["type"] == "UNETLoader"
+        )
+        self.assertEqual(
+            unet_loader["widgets_values"][0],
+            "waiANIMA_v10Base10.safetensors",
+        )
+
+        sampler = next(
+            node
+            for node in workflow["nodes"]
+            if node["type"] == "AnimaFlexibleVariationBatchSampler"
+        )
+        sampler_input_links = {
+            item["name"]: item["link"] for item in sampler["inputs"]
+        }
+        self.assertIsNotNone(sampler_input_links["latent_image"])
+        self.assertIsNotNone(sampler_input_links["reference_latent"])
+
+        links = {item[0]: item for item in workflow["links"]}
+        latent_link = links[sampler_input_links["latent_image"]]
+        reference_link = links[sampler_input_links["reference_latent"]]
+        self.assertEqual(latent_link[1:3], reference_link[1:3])
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}

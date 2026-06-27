@@ -50,6 +50,17 @@ only this custom node repository. It uses the built-in
 `Anima MultiAngle Preset Group` node, so camera angles can be selected with
 toggles instead of editing JSON numbers.
 
+A control-guided batch example is also included:
+
+```text
+example_workflows/ANIMA_Control_Canny.json
+```
+
+That workflow uses a loaded control image, the built-in ComfyUI Canny node,
+Qwen Image's reference latent conditioning, and
+`qwen_image_union_diffsynth_lora.safetensors` to keep composition closer to an
+input structure while still producing a reusable Anima batch.
+
 ## Batch ZIP saving
 
 The example workflow uses `Anima Save Batch ZIP` instead of the standard
@@ -159,6 +170,33 @@ into three separate choices.
 If ComfyUI-Easy-Use v1.3.6 or newer is installed, its `easy multiAngle` node's
 `params` output can also be connected to `Anima Easy MultiAngle Group`.
 
+## Control Canny batch
+
+`ANIMA_Control_Canny.json` is the recommended starting point when prompt-only
+angle tags are not strong enough. Upload or select a control image in the
+`Load Image` node; the workflow scales it to about one megapixel, extracts
+Canny edges, VAE-encodes those edges, and connects the latent to the sampler's
+`reference_latent` input.
+
+The sampler applies that reference latent to every generated positive and
+negative conditioning entry, matching ComfyUI's built-in `ReferenceLatent`
+node behavior. The same encoded latent is also used as the sampling latent, so
+the output resolution follows the control image after scaling.
+
+The example expects these model filenames:
+
+```text
+models/diffusion_models/waiANIMA_v10Base10.safetensors
+models/text_encoders/qwen_3_06b_base.safetensors
+models/vae/qwen_image_vae.safetensors
+models/loras/qwen_image_union_diffsynth_lora.safetensors
+models/loras/anima-turbo-lora-v0.2.safetensors
+```
+
+Keep the variation groups focused on expression, lighting, clothing, finish,
+or other details. Avoid contradictory camera-angle tags when the control image
+is supposed to define the composition.
+
 ## Optional character LoRA downloads
 
 `config/anima-loras.json` mirrors the private character LoRAs used by the
@@ -203,9 +241,9 @@ environment.
 ## What this does not guarantee
 
 Prompt tags increase diversity but do not provide exact pose or camera
-control. Closely related tags can still produce visually similar images.
-Control Adapter, ControlNet, pose, edge, or depth conditioning is a separate
-tool when specific 2D structure is required.
+control. Closely related tags can still produce visually similar images. Use
+`ANIMA_Control_Canny.json` or another reference/depth/pose workflow when
+specific 2D structure is required.
 
 ## License
 

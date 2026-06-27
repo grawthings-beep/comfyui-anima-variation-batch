@@ -178,7 +178,7 @@
         "Node name for S&R": "UNETLoader"
       },
       "widgets_values": [
-        "anima-base-v1.0.safetensors",
+        "waiANIMA_v10Base10.safetensors",
         "default"
       ]
     },
