@@ -81,6 +81,17 @@ example_workflows/ANIMA_RePose_img2img.json
 That workflow uses a source image for img2img identity/style carryover and a
 separate target pose/control image through Qwen Image Union Control LoRA.
 
+Two pose-authoring variants are also included:
+
+```text
+example_workflows/ANIMA_RePose_OpenPoseEditor_img2img.json
+example_workflows/ANIMA_RePose_DWPose_img2img.json
+```
+
+Use the OpenPose Editor workflow when you want to manually move the skeleton.
+Use the DWPose workflow when you want to extract a skeleton from a reference
+photo first.
+
 ## Batch ZIP saving
 
 The example workflow uses `Anima Save Batch ZIP` instead of the standard
@@ -270,6 +281,63 @@ source image. If the target image is a full render, edge/pose/depth-like
 images usually work better than a busy finished image. Lower `denoise` toward
 `0.50` to preserve the source more; raise it toward `0.65` when the pose is
 not changing enough.
+
+This workflow expects you to already have a target control image. It does not
+provide a skeleton editor by itself.
+
+## OpenPose Editor RePose batch
+
+`ANIMA_RePose_OpenPoseEditor_img2img.json` is the workflow to use when you
+want to freely edit the pose. It needs the lightweight OpenPose Editor custom
+node:
+
+```bash
+cd /path/to/ComfyUI/custom_nodes
+git clone https://github.com/space-nuko/ComfyUI-OpenPose-Editor.git
+```
+
+The workflow has a normal `Source image` node and an `OpenPose Editor target
+pose` node. Open the editor node, make or edit a skeleton, then queue the
+workflow. The edited pose image is VAE-encoded as `reference_latent`, while
+the source image is used as the img2img latent.
+
+Defaults:
+
+```text
+steps: 30
+cfg: 4
+denoise: 0.60
+sampler: euler
+scheduler: normal
+```
+
+If the pose is ignored, raise `denoise` toward `0.65`. If the character or
+outfit drifts too much, lower it toward `0.52` and keep the prompt focused on
+identity, clothing, and finish rather than camera angle.
+
+## DWPose RePose batch
+
+`ANIMA_RePose_DWPose_img2img.json` is for taking a pose from a reference
+photo. It needs ComfyUI ControlNet Auxiliary Preprocessors:
+
+```bash
+cd /path/to/ComfyUI/custom_nodes
+git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
+cd comfyui_controlnet_aux
+python -m pip install -r requirements.txt
+```
+
+The workflow has two image inputs:
+
+```text
+Source image: character/style source, encoded as the img2img latent
+Target pose reference photo: photo/render to extract DWPose skeleton from
+```
+
+`DWPose target skeleton` outputs a pose map, the workflow previews that map,
+then encodes it as `reference_latent`. If DWPose misses hands or the body,
+use a clearer full-body reference, increase the target image size, or switch
+to the OpenPose Editor workflow and fix the skeleton manually.
 
 ## Optional character LoRA downloads
 

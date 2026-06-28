@@ -33,6 +33,16 @@ ANIMA_REPOSE_IMG2IMG_WORKFLOW_PATH = (
     / "example_workflows"
     / "ANIMA_RePose_img2img.json"
 )
+ANIMA_REPOSE_OPENPOSE_IMG2IMG_WORKFLOW_PATH = (
+    Path(__file__).parents[1]
+    / "example_workflows"
+    / "ANIMA_RePose_OpenPoseEditor_img2img.json"
+)
+ANIMA_REPOSE_DWPOSE_IMG2IMG_WORKFLOW_PATH = (
+    Path(__file__).parents[1]
+    / "example_workflows"
+    / "ANIMA_RePose_DWPose_img2img.json"
+)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -53,6 +63,12 @@ class WorkflowTests(unittest.TestCase):
         )
         cls.anima_repose_img2img_workflow = json.loads(
             ANIMA_REPOSE_IMG2IMG_WORKFLOW_PATH.read_text(encoding="utf-8")
+        )
+        cls.anima_repose_openpose_img2img_workflow = json.loads(
+            ANIMA_REPOSE_OPENPOSE_IMG2IMG_WORKFLOW_PATH.read_text(encoding="utf-8")
+        )
+        cls.anima_repose_dwpose_img2img_workflow = json.loads(
+            ANIMA_REPOSE_DWPOSE_IMG2IMG_WORKFLOW_PATH.read_text(encoding="utf-8")
         )
 
     def test_custom_node_is_present(self):
@@ -99,6 +115,16 @@ class WorkflowTests(unittest.TestCase):
     def test_repose_img2img_links_reference_existing_nodes_and_sockets(self):
         self.assert_links_reference_existing_nodes_and_sockets(
             self.anima_repose_img2img_workflow
+        )
+
+    def test_repose_openpose_img2img_links_reference_existing_nodes_and_sockets(self):
+        self.assert_links_reference_existing_nodes_and_sockets(
+            self.anima_repose_openpose_img2img_workflow
+        )
+
+    def test_repose_dwpose_img2img_links_reference_existing_nodes_and_sockets(self):
+        self.assert_links_reference_existing_nodes_and_sockets(
+            self.anima_repose_dwpose_img2img_workflow
         )
 
     def test_easy_multiangle_example_uses_preset_group_node(self):
@@ -237,6 +263,94 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(sampler["widgets_values"][4], 30)
         self.assertEqual(sampler["widgets_values"][5], 4)
         self.assertEqual(sampler["widgets_values"][8], 0.58)
+
+        sampler_input_links = {
+            item["name"]: item["link"] for item in sampler["inputs"]
+        }
+        self.assertIsNotNone(sampler_input_links["latent_image"])
+        self.assertIsNotNone(sampler_input_links["reference_latent"])
+
+        links = {item[0]: item for item in workflow["links"]}
+        source_link = links[sampler_input_links["latent_image"]]
+        reference_link = links[sampler_input_links["reference_latent"]]
+        self.assertNotEqual(source_link[1], reference_link[1])
+        self.assertIn(source_link[1], {node["id"] for node in vae_encodes})
+        self.assertIn(reference_link[1], {node["id"] for node in vae_encodes})
+
+    def test_repose_openpose_workflow_uses_editor_pose_latent(self):
+        workflow = self.anima_repose_openpose_img2img_workflow
+        node_types = {node["type"] for node in workflow["nodes"]}
+
+        self.assertIn("LoadImage", node_types)
+        self.assertIn("Nui.OpenPoseEditor", node_types)
+        self.assertIn("ImageScaleToTotalPixels", node_types)
+        self.assertIn("VAEEncode", node_types)
+        self.assertIn("LoraLoaderModelOnly", node_types)
+        self.assertIn("AnimaFlexibleVariationBatchSampler", node_types)
+
+        self.assertEqual(
+            self.lora_names(workflow),
+            ["qwen_image_union_diffsynth_lora.safetensors"],
+        )
+        self.assert_repose_sampler_defaults(workflow, denoise=0.6)
+        self.assert_sampler_uses_distinct_source_and_reference_latents(workflow)
+
+    def test_repose_dwpose_workflow_extracts_pose_reference(self):
+        workflow = self.anima_repose_dwpose_img2img_workflow
+        node_types = {node["type"] for node in workflow["nodes"]}
+
+        self.assertIn("LoadImage", node_types)
+        self.assertIn("DWPreprocessor", node_types)
+        self.assertIn("ImageScaleToTotalPixels", node_types)
+        self.assertIn("VAEEncode", node_types)
+        self.assertIn("LoraLoaderModelOnly", node_types)
+        self.assertIn("AnimaFlexibleVariationBatchSampler", node_types)
+
+        dwpose = next(node for node in workflow["nodes"] if node["type"] == "DWPreprocessor")
+        self.assertEqual(
+            dwpose["widgets_values"],
+            [
+                "enable",
+                "enable",
+                "enable",
+                1024,
+                "yolox_l.onnx",
+                "dw-ll_ucoco_384_bs5.torchscript.pt",
+                "disable",
+            ],
+        )
+        self.assertEqual(
+            self.lora_names(workflow),
+            ["qwen_image_union_diffsynth_lora.safetensors"],
+        )
+        self.assert_repose_sampler_defaults(workflow, denoise=0.6)
+        self.assert_sampler_uses_distinct_source_and_reference_latents(workflow)
+
+    def lora_names(self, workflow):
+        return [
+            node["widgets_values"][0]
+            for node in workflow["nodes"]
+            if node["type"] == "LoraLoaderModelOnly"
+        ]
+
+    def assert_repose_sampler_defaults(self, workflow, denoise):
+        sampler = next(
+            node
+            for node in workflow["nodes"]
+            if node["type"] == "AnimaFlexibleVariationBatchSampler"
+        )
+        self.assertEqual(sampler["widgets_values"][4], 30)
+        self.assertEqual(sampler["widgets_values"][5], 4)
+        self.assertEqual(sampler["widgets_values"][8], denoise)
+
+    def assert_sampler_uses_distinct_source_and_reference_latents(self, workflow):
+        sampler = next(
+            node
+            for node in workflow["nodes"]
+            if node["type"] == "AnimaFlexibleVariationBatchSampler"
+        )
+        vae_encodes = [node for node in workflow["nodes"] if node["type"] == "VAEEncode"]
+        self.assertEqual(len(vae_encodes), 2)
 
         sampler_input_links = {
             item["name"]: item["link"] for item in sampler["inputs"]
