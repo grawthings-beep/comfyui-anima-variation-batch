@@ -102,6 +102,11 @@ class WorkflowTests(unittest.TestCase):
             self.easy_multiangle_workflow
         )
 
+    def test_named_anima_easy_multiangle_links_reference_existing_nodes_and_sockets(self):
+        self.assert_links_reference_existing_nodes_and_sockets(
+            self.anima_easy_multiangle_workflow
+        )
+
     def test_control_canny_links_reference_existing_nodes_and_sockets(self):
         self.assert_links_reference_existing_nodes_and_sockets(
             self.anima_control_canny_workflow
@@ -143,17 +148,35 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(len(preset_group["widgets_values"]), 21)
         self.assertGreaterEqual(sum(preset_group["widgets_values"][1:]), 4)
 
-    def test_named_anima_easy_multiangle_workflow_is_self_contained(self):
+    def test_named_anima_easy_multiangle_workflow_matches_note_style(self):
         node_types = {
             node["type"] for node in self.anima_easy_multiangle_workflow["nodes"]
         }
-        self.assertIn("AnimaMultiAnglePresetGroup", node_types)
-        self.assertNotIn("AnimaMultiAngle", node_types)
-        self.assertNotIn("AnimaEasyMultiAngleGroup", node_types)
-        self.assertNotIn("easy multiAngle", node_types)
-        self.assertNotIn("easy positive", node_types)
-        self.assertNotIn("easy negative", node_types)
-        self.assertNotIn("Power Lora Loader (rgthree)", node_types)
+        self.assertIn("easy multiAngle", node_types)
+        self.assertIn("RegexExtract", node_types)
+        self.assertIn("StringConcatenate", node_types)
+        self.assertIn("easy positive", node_types)
+        self.assertIn("easy negative", node_types)
+        self.assertIn("Power Lora Loader (rgthree)", node_types)
+        self.assertIn("KSampler", node_types)
+        self.assertNotIn("AnimaMultiAnglePresetGroup", node_types)
+
+        regex_node = next(
+            node
+            for node in self.anima_easy_multiangle_workflow["nodes"]
+            if node["type"] == "RegexExtract"
+        )
+        self.assertEqual(regex_node["widgets_values"][1], "^([^\\(]*).*")
+
+        angle_node = next(
+            node
+            for node in self.anima_easy_multiangle_workflow["nodes"]
+            if node["type"] == "easy multiAngle"
+        )
+        self.assertEqual(
+            angle_node["widgets_values"][0],
+            '[{"rotate":145,"vertical":36,"zoom":0,"add_angle_prompt":true}]',
+        )
 
     def test_control_canny_workflow_uses_reference_latent_control(self):
         workflow = self.anima_control_canny_workflow

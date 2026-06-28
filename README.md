@@ -39,16 +39,25 @@ example_workflows/anima_variation_batch_workflow.json
 
 It is also exposed through ComfyUI's workflow templates browser.
 
-An optional Easy MultiAngle example is also included:
+An Easy-Use style Easy MultiAngle example is also included:
 
 ```text
 example_workflows/ANIMA_EasyMultiAngle.json
 ```
 
-That workflow requires
-only this custom node repository. It uses the built-in
-`Anima MultiAngle Preset Group` node, so camera angles can be selected with
-toggles instead of editing JSON numbers.
+That workflow mirrors the note.com Easy MultiAngle setup: `easy multiAngle`
+outputs a prompt, `RegexExtract` keeps only the text before the coordinate
+suffix, and `StringConcatenate` joins it with the character prompt. It requires
+ComfyUI-Easy-Use and rgthree-comfy.
+
+A no-extra-dependency preset-batch variant is also included:
+
+```text
+example_workflows/anima_easy_multiangle_batch_workflow.json
+```
+
+It uses the built-in `Anima MultiAngle Preset Group` node so camera angles can
+be selected with toggles instead of editing JSON numbers.
 
 A control-guided batch example is also included:
 
@@ -164,6 +173,24 @@ The original two-field `Anima Variation Batch Sampler` remains available for
 old workflows.
 
 ## Easy MultiAngle presets
+
+`ANIMA_EasyMultiAngle.json` is the Easy-Use/rgthree version matching the public
+note workflow. It depends on these custom nodes:
+
+```text
+ComfyUI-Easy-Use: easy multiAngle, easy positive, easy negative
+rgthree-comfy: Power Lora Loader (rgthree)
+ComfyUI core: RegexExtract, StringConcatenate, PreviewAny
+```
+
+The important extraction pattern is:
+
+```text
+^([^\(]*).*
+```
+
+It removes Easy MultiAngle's coordinate suffix and keeps the angle prompt text
+for ANIMA.
 
 `Anima MultiAngle Preset Group` creates an `Angle` variation category from
 twenty camera preset toggles. It is the recommended node for normal use.

@@ -1,19 +1,19 @@
 {
-  "id": "bd4c5a1a-3d65-4f4f-bcf5-a03f4f8b9001",
+  "id": "7a9fb126-9bbf-4499-9a85-d3cb838075e8",
   "revision": 0,
-  "last_node_id": 58,
-  "last_link_id": 96,
+  "last_node_id": 31,
+  "last_link_id": 21,
   "nodes": [
     {
-      "id": 15,
-      "type": "VAELoader",
+      "id": 7,
+      "type": "CLIPLoader",
       "pos": [
-        18.665004536305837,
-        326.73950278742507
+        -450,
+        280
       ],
       "size": [
-        270,
-        58
+        307.578125,
+        125.20833333333334
       ],
       "flags": {},
       "order": 0,
@@ -21,71 +21,47 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "VAE",
-          "type": "VAE",
+          "name": "CLIP",
+          "type": "CLIP",
           "links": [
-            11
+            10
           ]
         }
       ],
       "properties": {
         "cnr_id": "comfy-core",
-        "ver": "0.3.40",
-        "Node name for S&R": "VAELoader"
+        "ver": "0.11.0",
+        "Node name for S&R": "CLIPLoader",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "models": [
+          {
+            "name": "qwen_3_06b_base.safetensors",
+            "url": "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/text_encoders/qwen_3_06b_base.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
       },
       "widgets_values": [
-        "qwen_image_vae.safetensors"
+        "qwen_3_06b_base.safetensors",
+        "stable_diffusion",
+        "default"
       ]
     },
     {
-      "id": 47,
-      "type": "LoraLoaderModelOnly",
-      "pos": [
-        472.68022636109595,
-        71.58955164220009
-      ],
-      "size": [
-        270,
-        82
-      ],
-      "flags": {},
-      "order": 9,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 82
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            86
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.18.2",
-        "Node name for S&R": "LoraLoaderModelOnly"
-      },
-      "widgets_values": [
-        "anima-turbo-lora-v0.2.safetensors",
-        1
-      ]
-    },
-    {
-      "id": 28,
+      "id": 29,
       "type": "EmptyLatentImage",
       "pos": [
-        963.7605740449753,
-        760
+        -460,
+        990
       ],
       "size": [
-        270,
+        315,
         106
       ],
       "flags": {},
@@ -96,31 +72,33 @@
         {
           "name": "LATENT",
           "type": "LATENT",
-          "links": [
-            78
-          ]
+          "slot_index": 0,
+          "links": []
         }
       ],
+      "title": "縦長",
       "properties": {
         "cnr_id": "comfy-core",
-        "ver": "0.3.40",
+        "ver": "0.3.65",
         "Node name for S&R": "EmptyLatentImage"
       },
       "widgets_values": [
-        792,
-        1408,
+        896,
+        1152,
         1
-      ]
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
     },
     {
-      "id": 45,
-      "type": "CLIPLoader",
+      "id": 30,
+      "type": "EmptyLatentImage",
       "pos": [
-        21.660091952095566,
-        545.5175428342981
+        -460,
+        1150
       ],
       "size": [
-        270,
+        315,
         106
       ],
       "flags": {},
@@ -129,35 +107,36 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            80,
-            81
-          ]
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": []
         }
       ],
+      "title": "横長",
       "properties": {
         "cnr_id": "comfy-core",
-        "ver": "0.11.0",
-        "Node name for S&R": "CLIPLoader"
+        "ver": "0.3.65",
+        "Node name for S&R": "EmptyLatentImage"
       },
       "widgets_values": [
-        "qwen_3_06b_base.safetensors",
-        "stable_diffusion",
-        "default"
-      ]
+        1152,
+        896,
+        1
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
     },
     {
-      "id": 44,
-      "type": "UNETLoader",
+      "id": 23,
+      "type": "easy positive",
       "pos": [
-        -6.297700538271247,
-        428.74385315405027
+        -100,
+        170
       ],
       "size": [
-        307.5999755859375,
-        82
+        390,
+        420
       ],
       "flags": {},
       "order": 3,
@@ -165,17 +144,66 @@
       "inputs": [],
       "outputs": [
         {
+          "name": "positive",
+          "type": "STRING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.6",
+        "Node name for S&R": "easy positive"
+      },
+      "widgets_values": [
+        "anime coloring, \n\n1girl, solo, black hair, long hair.straight hair, \n\n(white background:1.3), \n\nstanding, "
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 6,
+      "type": "UNETLoader",
+      "pos": [
+        -450,
+        130
+      ],
+      "size": [
+        307.578125,
+        98.5546875
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            82
+            9
           ]
         }
       ],
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.11.0",
-        "Node name for S&R": "UNETLoader"
+        "Node name for S&R": "UNETLoader",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "models": [
+          {
+            "name": "anima-preview.safetensors",
+            "url": "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/diffusion_models/anima-preview.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
       },
       "widgets_values": [
         "waiANIMA_v10Base10.safetensors",
@@ -183,316 +211,15 @@
       ]
     },
     {
-      "id": 12,
-      "type": "CLIPTextEncode",
+      "id": 28,
+      "type": "EmptyLatentImage",
       "pos": [
-        343.68868937752615,
-        810
+        -460,
+        830
       ],
       "size": [
-        563.8246516827604,
-        115.2275727733695
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 81
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            40
-          ]
-        }
-      ],
-      "title": "CLIP Text Encode (Negative Prompt)",
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.3.65",
-        "Node name for S&R": "CLIPTextEncode"
-      },
-      "widgets_values": [
-        "low quality, worst quality, bad anatomy, bad hands, extra fingers, missing fingers, fused fingers, deformed hands, long neck, bad face, asymmetrical eyes, cross-eyed, ugly, old, child, loli, flat chest, different character, wrong hair color, wrong eye color, short hair, logo, text, watermark, signature, jpeg artifacts, blurry, messy background, extra arms, extra legs, multiple girls, collage, comic panel, speech bubble, too long arms"
-      ]
-    },
-    {
-      "id": 50,
-      "type": "PreviewImage",
-      "pos": [
-        1510,
-        150
-      ],
-      "size": [
-        709.7646762274667,
-        782.2011176206705
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 89
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.3.40",
-        "Node name for S&R": "PreviewImage"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 51,
-      "type": "AnimaFlexibleVariationBatchSampler",
-      "pos": [
-        330,
-        310
-      ],
-      "size": [
-        760,
-        560
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 86
-        },
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 80
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 11
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "link": 40
-        },
-        {
-          "name": "latent_image",
-          "type": "LATENT",
-          "link": 78
-        },
-        {
-          "name": "variation_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "link": 94
-        }
-      ],
-      "outputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            89,
-            90
-          ]
-        },
-        {
-          "name": "prompt_report",
-          "type": "STRING",
-          "slot_index": 1,
-          "links": [
-            95
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaFlexibleVariationBatchSampler"
-      },
-      "widgets_values": [
-        "masterpiece, best quality, score_8, highres, safe, 1girl, original character, long dark hair, blue eyes, casual outfit, simple background",
-        4,
-        619037988729647,
-        "randomize",
-        8,
-        1,
-        "euler",
-        "normal",
-        1
-      ]
-    },
-    {
-      "id": 52,
-      "type": "AnimaSaveBatchZip",
-      "pos": [
-        1270,
-        260
-      ],
-      "size": [
-        320,
-        110
-      ],
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 90
-        },
-        {
-          "name": "prompt_report",
-          "type": "STRING",
-          "link": 95
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "AnimaSaveBatchZip"
-      },
-      "widgets_values": [
-        "anima_batches/%year%-%month%-%day%/anima_batch",
-        true
-      ]
-    },
-    {
-      "id": 54,
-      "type": "AnimaVariationGroup",
-      "pos": [
-        800,
-        -20
-      ],
-      "size": [
-        320,
-        160
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "previous_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "link": 91
-        }
-      ],
-      "outputs": [
-        {
-          "name": "variation_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "slot_index": 0,
-          "links": [
-            92
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaVariationGroup"
-      },
-      "widgets_values": [
-        "Expression",
-        "smile, serious, angry, surprised, embarrassed, closed eyes, open mouth, pout"
-      ]
-    },
-    {
-      "id": 55,
-      "type": "AnimaVariationGroup",
-      "pos": [
-        1150,
-        -20
-      ],
-      "size": [
-        320,
-        160
-      ],
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "previous_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "link": 92
-        }
-      ],
-      "outputs": [
-        {
-          "name": "variation_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "slot_index": 0,
-          "links": [
-            93
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaVariationGroup"
-      },
-      "widgets_values": [
-        "Pose",
-        "standing, sitting, lying, looking back, arms crossed, hand on hip, walking, kneeling"
-      ]
-    },
-    {
-      "id": 56,
-      "type": "AnimaVariationGroup",
-      "pos": [
-        1500,
-        -20
-      ],
-      "size": [
-        320,
-        160
-      ],
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "previous_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "link": 93
-        }
-      ],
-      "outputs": [
-        {
-          "name": "variation_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
-          "slot_index": 0,
-          "links": [
-            94
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaVariationGroup"
-      },
-      "widgets_values": [
-        "Composition",
-        "close-up, upper body, cowboy shot, full body, portrait, wide shot, profile, three-quarter view"
-      ]
-    },
-    {
-      "id": 57,
-      "type": "AnimaMultiAnglePresetGroup",
-      "pos": [
-        330,
-        -620
-      ],
-      "size": [
-        420,
-        620
+        315,
+        106
       ],
       "flags": {},
       "order": 5,
@@ -500,175 +227,783 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "variation_groups",
-          "type": "ANIMA_VARIATION_GROUPS",
+          "name": "LATENT",
+          "type": "LATENT",
           "slot_index": 0,
           "links": [
-            91
+            19
+          ]
+        }
+      ],
+      "title": "正方形",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 12,
+      "type": "StringConcatenate",
+      "pos": [
+        330,
+        860
+      ],
+      "size": [
+        210,
+        166
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string_a",
+          "type": "STRING",
+          "widget": {
+            "name": "string_a"
+          },
+          "link": 12
+        },
+        {
+          "name": "string_b",
+          "type": "STRING",
+          "widget": {
+            "name": "string_b"
+          },
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.2",
+        "Node name for S&R": "StringConcatenate"
+      },
+      "widgets_values": [
+        "",
+        "\n",
+        ","
+      ]
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [
+        330,
+        900
+      ],
+      "size": [
+        770,
+        88
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "color": "#223",
+      "bgcolor": "#335",
+      "shape": "card"
+    },
+    {
+      "id": 11,
+      "type": "CLIPTextEncode",
+      "pos": [
+        330,
+        940
+      ],
+      "size": [
+        770,
+        88
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 6
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            17
+          ]
+        }
+      ],
+      "title": "CLIPテキストエンコード（ネガティブプロンプト）",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "color": "#223",
+      "bgcolor": "#335",
+      "shape": "card"
+    },
+    {
+      "id": 26,
+      "type": "VAEDecode",
+      "pos": [
+        330,
+        1010
+      ],
+      "size": [
+        209.98697916666669,
+        59.6875
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 14
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.40",
+        "Node name for S&R": "VAEDecode",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 5,
+      "type": "VAELoader",
+      "pos": [
+        -450,
+        450
+      ],
+      "size": [
+        310,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            18
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.1",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ]
+    },
+    {
+      "id": 31,
+      "type": "PreviewAny",
+      "pos": [
+        330,
+        600
+      ],
+      "size": [
+        210,
+        166
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 21
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.2",
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "id": 24,
+      "type": "easy negative",
+      "pos": [
+        -100,
+        640
+      ],
+      "size": [
+        390,
+        240
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "negative",
+          "type": "STRING",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.6",
+        "Node name for S&R": "easy negative"
+      },
+      "widgets_values": [
+        "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, bad anatomy, bad hands, fewer digits, extra digits, lineart, sketch, "
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 13,
+      "type": "Power Lora Loader (rgthree)",
+      "pos": [
+        -450,
+        570
+      ],
+      "size": [
+        310,
+        200
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "dir": 3,
+          "name": "model",
+          "type": "MODEL",
+          "link": 9
+        },
+        {
+          "dir": 3,
+          "name": "clip",
+          "type": "CLIP",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "dir": 4,
+          "name": "MODEL",
+          "shape": 3,
+          "type": "MODEL",
+          "links": [
+            20
           ]
         },
         {
-          "name": "angle_prompts",
+          "dir": 4,
+          "name": "CLIP",
+          "shape": 3,
+          "type": "CLIP",
+          "links": [
+            4,
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "rgthree-comfy",
+        "ver": "1.0.2512112053",
+        "Show Strengths": "Single Strength"
+      },
+      "widgets_values": [
+        {},
+        {
+          "type": "PowerLoraLoaderHeaderWidget"
+        },
+        {
+          "on": true,
+          "lora": "anima\\anima-turbo-lora-v0.2.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        {},
+        ""
+      ]
+    },
+    {
+      "id": 4,
+      "type": "RegexExtract",
+      "pos": [
+        330,
+        820
+      ],
+      "size": [
+        400,
+        262
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
           "type": "STRING",
-          "slot_index": 1,
+          "widget": {
+            "name": "string"
+          },
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            12,
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.2",
+        "Node name for S&R": "RegexExtract"
+      },
+      "widgets_values": [
+        "",
+        "^([^\\(]*).*",
+        "First Group",
+        true,
+        true,
+        false,
+        1
+      ]
+    },
+    {
+      "id": 27,
+      "type": "SaveImage",
+      "pos": [
+        740,
+        130
+      ],
+      "size": [
+        530,
+        520
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        },
+        {
+          "label": "ファイル名_プレフィックス",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.11.1",
+        "Node name for S&R": "SaveImage",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "%date:yyyyMMdd%/ANIMA%date:hhmmss%_%KSampler.seed%"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "KSampler",
+      "pos": [
+        -100,
+        970
+      ],
+      "size": [
+        290,
+        270
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 20
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 16
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 17
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.40",
+        "Node name for S&R": "KSampler",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        570108013542736,
+        "randomize",
+        12,
+        1,
+        "er_sde",
+        "simple",
+        1
+      ]
+    },
+    {
+      "id": 3,
+      "type": "easy multiAngle",
+      "pos": [
+        330,
+        130
+      ],
+      "size": [
+        390,
+        420
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "shape": 6,
+          "type": "STRING",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "params",
+          "type": "EASY_MULTI_ANGLE",
           "links": []
         }
       ],
       "properties": {
-        "Node name for S&R": "AnimaMultiAnglePresetGroup"
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.6",
+        "Node name for S&R": "easy multiAngle"
       },
       "widgets_values": [
-        "Angle",
-        true,
-        true,
-        false,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true
+        "[{\"rotate\":145,\"vertical\":36,\"zoom\":0,\"add_angle_prompt\":true}]"
       ],
-      "title": "Angle presets"
+      "color": "#323",
+      "bgcolor": "#535"
     }
   ],
   "links": [
     [
-      11,
-      15,
-      0,
-      51,
       2,
-      "VAE"
-    ],
-    [
-      40,
-      12,
-      0,
-      51,
       3,
-      "CONDITIONING"
-    ],
-    [
-      78,
-      28,
       0,
-      51,
       4,
-      "LATENT"
+      0,
+      "STRING"
     ],
     [
-      80,
-      45,
-      0,
-      51,
+      4,
+      13,
       1,
+      10,
+      0,
       "CLIP"
     ],
     [
-      81,
-      45,
-      0,
+      5,
       12,
       0,
-      "CLIP"
-    ],
-    [
-      89,
-      51,
-      0,
-      50,
-      0,
-      "IMAGE"
-    ],
-    [
-      90,
-      51,
-      0,
-      52,
-      0,
-      "IMAGE"
-    ],
-    [
-      82,
-      44,
-      0,
-      47,
-      0,
-      "MODEL"
-    ],
-    [
-      86,
-      47,
-      0,
-      51,
-      0,
-      "MODEL"
-    ],
-    [
-      92,
-      54,
-      0,
-      55,
-      0,
-      "ANIMA_VARIATION_GROUPS"
-    ],
-    [
-      93,
-      55,
-      0,
-      56,
-      0,
-      "ANIMA_VARIATION_GROUPS"
-    ],
-    [
-      94,
-      56,
-      0,
-      51,
-      5,
-      "ANIMA_VARIATION_GROUPS"
-    ],
-    [
-      95,
-      51,
-      1,
-      52,
+      10,
       1,
       "STRING"
     ],
     [
-      91,
-      57,
+      6,
+      13,
+      1,
+      11,
       0,
-      54,
+      "CLIP"
+    ],
+    [
+      9,
+      6,
       0,
-      "ANIMA_VARIATION_GROUPS"
+      13,
+      0,
+      "MODEL"
+    ],
+    [
+      10,
+      7,
+      0,
+      13,
+      1,
+      "CLIP"
+    ],
+    [
+      11,
+      24,
+      0,
+      11,
+      1,
+      "STRING"
+    ],
+    [
+      12,
+      4,
+      0,
+      12,
+      0,
+      "STRING"
+    ],
+    [
+      13,
+      23,
+      0,
+      12,
+      1,
+      "STRING"
+    ],
+    [
+      14,
+      25,
+      0,
+      26,
+      0,
+      "LATENT"
+    ],
+    [
+      15,
+      26,
+      0,
+      27,
+      0,
+      "IMAGE"
+    ],
+    [
+      16,
+      10,
+      0,
+      25,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      17,
+      11,
+      0,
+      25,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      18,
+      5,
+      0,
+      26,
+      1,
+      "VAE"
+    ],
+    [
+      19,
+      28,
+      0,
+      25,
+      3,
+      "LATENT"
+    ],
+    [
+      20,
+      13,
+      0,
+      25,
+      0,
+      "MODEL"
+    ],
+    [
+      21,
+      4,
+      0,
+      31,
+      0,
+      "STRING"
     ]
   ],
-  "groups": [],
+  "groups": [
+    {
+      "id": 1,
+      "title": "プロント",
+      "bounding": [
+        -110,
+        100,
+        410,
+        793.6
+      ],
+      "color": "#444",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
   "config": {},
   "extra": {
+    "workflowRendererVersion": "LG",
     "ds": {
-      "scale": 0.5849705596436467,
+      "scale": 0.5730855330119166,
       "offset": [
-        -104.39543230771778,
-        -143.47355415218433
+        1680.4793069177533,
+        535.7435711513876
       ]
     },
-    "workflowRendererVersion": "LG",
-    "frontendVersion": "1.41.21",
+    "frontendVersion": "1.39.19",
     "VHS_latentpreview": false,
     "VHS_latentpreviewrate": 0,
     "VHS_MetadataImage": true,
