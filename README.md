@@ -71,6 +71,16 @@ That workflow starts from a finished source image, keeps the source composition
 with low-denoise img2img, and creates small reusable variations such as
 expression, detail, lighting, and finish changes.
 
+A stronger img2img re-posing example is included for larger pose/composition
+changes:
+
+```text
+example_workflows/ANIMA_RePose_img2img.json
+```
+
+That workflow uses a source image for img2img identity/style carryover and a
+separate target pose/control image through Qwen Image Union Control LoRA.
+
 ## Batch ZIP saving
 
 The example workflow uses `Anima Save Batch ZIP` instead of the standard
@@ -232,6 +242,34 @@ a new image.
 This example does not load the Turbo LoRA by default. It is intended for
 quality and prompt adherence after a good base image already exists, not for
 fast exploration.
+
+## RePose img2img batch
+
+`ANIMA_RePose_img2img.json` is for changing pose or composition more strongly
+than DiffMaker. It has two image inputs:
+
+```text
+Source image: character/style source, encoded as the img2img latent
+Target pose/control image: desired pose or composition, encoded as reference_latent
+```
+
+The workflow loads `qwen_image_union_diffsynth_lora.safetensors` and connects
+the target control latent to the sampler's `reference_latent` input. The
+defaults are stronger than DiffMaker:
+
+```text
+steps: 30
+cfg: 4
+denoise: 0.58
+sampler: euler
+scheduler: normal
+```
+
+Use a target pose/control image with roughly the same aspect ratio as the
+source image. If the target image is a full render, edge/pose/depth-like
+images usually work better than a busy finished image. Lower `denoise` toward
+`0.50` to preserve the source more; raise it toward `0.65` when the pose is
+not changing enough.
 
 ## Optional character LoRA downloads
 
