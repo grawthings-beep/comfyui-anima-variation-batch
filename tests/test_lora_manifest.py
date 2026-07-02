@@ -43,7 +43,7 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(
             by_id["marciana"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
-            "anima_marciana.safetensors",
+            "anima_marciana%20(1).safetensors",
         )
         self.assertEqual(
             by_id["anisstar3"]["url"],

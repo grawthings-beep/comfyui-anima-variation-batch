@@ -103,7 +103,7 @@
       "id": "marciana",
       "name": "Marciana Anima LoRA (trigger: m4rciana)",
       "trigger": "m4rciana",
-      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_marciana.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_marciana%20(1).safetensors",
       "path": "models/loras/anima/anima_marciana.safetensors",
       "min_bytes": 1048576
     },
