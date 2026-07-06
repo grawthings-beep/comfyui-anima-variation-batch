@@ -101,6 +101,35 @@ Use the OpenPose Editor workflow when you want to manually move the skeleton.
 Use the DWPose workflow when you want to extract a skeleton from a reference
 photo first.
 
+## Hires-fix upscale workflows
+
+Two 2-pass Hires-fix upscale examples are included:
+
+```text
+example_workflows/anima_hiresfix_esrgan_2pass.json
+example_workflows/anima_hiresfix_latent_2pass.json
+```
+
+Both workflows expect the Anima base stack:
+
+```text
+anima-base-v1.0
+qwen_3_06b_base
+qwen_image_vae
+```
+
+`anima_hiresfix_esrgan_2pass.json` starts at 832x1216, upscales the first
+pass with a 4x ESRGAN model, resizes to an effective 1.5x with Lanczos,
+VAE-re-encodes, then runs a second pass. It additionally needs an anime
+ESRGAN upscaler such as `models/upscale_models/4x-AnimeSharp.pth`. The
+default second-pass denoise is `0.45`; tune around `0.35` to `0.55`, lowering
+it to preserve the first pass or raising it for stronger detail redraw.
+
+`anima_hiresfix_latent_2pass.json` uses only ComfyUI core nodes: it upscales
+the latent by 1.5x with bislerp, then runs a second pass. The default
+second-pass denoise is `0.55`; tune around `0.50` to `0.60` depending on how
+much structure you want the second pass to revise.
+
 ## Batch ZIP saving
 
 The example workflow uses `Anima Save Batch ZIP` instead of the standard
