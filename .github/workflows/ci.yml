@@ -27,39 +27,37 @@ jobs:
         run: |
           python -m py_compile \
             __init__.py \
-            batch_archive.py \
+            angle_control.py \
             nodes.py \
-            variation.py \
-            scripts/download_loras.py \
-            tests/test_batch_archive.py \
-            tests/test_lora_manifest.py \
-            tests/test_variation.py \
+            tests/test_angle_control.py \
             tests/test_workflow.py
+          node --check web/anima_360_preview.js
           python - <<'PY'
           import json
           from pathlib import Path
 
-          workflow = json.loads(
-              Path("example_workflows/anima_variation_batch_workflow.json").read_text(
-                  encoding="utf-8"
+          workflow_dir = Path("example_workflows")
+          workflow_names = sorted(path.name for path in workflow_dir.glob("*.json"))
+          assert workflow_names == [
+              "ANIMA_360_Angle_Control.json",
+              "anima_hiresfix_esrgan_2pass.json",
+              "anima_hiresfix_latent_2pass.json",
+          ]
+
+          for path in workflow_dir.glob("*.json"):
+              workflow = json.loads(path.read_text(encoding="utf-8"))
+              nodes = {node["id"]: node for node in workflow["nodes"]}
+              for link_id, source_id, source_slot, target_id, target_slot, _type in (
+                  workflow["links"]
+              ):
+                  assert source_id in nodes, (path, link_id, source_id)
+                  assert target_id in nodes, (path, link_id, target_id)
+                  assert source_slot < len(nodes[source_id]["outputs"]), (path, link_id)
+                  assert target_slot < len(nodes[target_id]["inputs"]), (path, link_id)
+              print(
+                  f"validated {path.name} with {len(workflow['nodes'])} nodes "
+                  f"and {len(workflow['links'])} links"
               )
-          )
-          assert any(
-              node.get("type") == "AnimaFlexibleVariationBatchSampler"
-              for node in workflow["nodes"]
-          )
-          assert sum(
-              node.get("type") == "AnimaVariationGroup"
-              for node in workflow["nodes"]
-          ) >= 3
-          assert any(
-              node.get("type") == "AnimaSaveBatchZip"
-              for node in workflow["nodes"]
-          )
-          print(
-              f"validated workflow with {len(workflow['nodes'])} nodes "
-              f"and {len(workflow['links'])} links"
-          )
           PY
 
       - name: Run unit tests
