@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW_DIR = ROOT / "example_workflows"
+WEB_PREVIEW_PATH = ROOT / "web" / "anima_360_preview.js"
 HIRES_ESRGAN_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_esrgan_2pass.json"
 HIRES_LATENT_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_latent_2pass.json"
 ANGLE_360_WORKFLOW_PATH = WORKFLOW_DIR / "ANIMA_360_Angle_Control.json"
@@ -55,6 +56,7 @@ class WorkflowTests(unittest.TestCase):
             node for node in self.angle_360["nodes"] if node["type"] == "Anima360AngleControl"
         )
         self.assertEqual(angle_node["widgets_values"][1:5], [832, 1216, 45, 0])
+        self.assertGreaterEqual(angle_node["size"][1], 590)
 
         apply_node = next(
             node for node in self.angle_360["nodes"] if node["type"] == "AnimaApplyReferenceLatent"
@@ -68,6 +70,12 @@ class WorkflowTests(unittest.TestCase):
             node for node in self.angle_360["nodes"] if node["type"] == "VAEEncode"
         )
         self.assertEqual(reference_source, vae_encode["id"])
+
+    def test_live_preview_extension_is_present(self):
+        source = WEB_PREVIEW_PATH.read_text(encoding="utf-8")
+        self.assertIn("app.registerExtension", source)
+        self.assertIn("Anima360AngleControl", source)
+        self.assertIn("live OpenPose preview", source)
 
     def test_hires_workflows_do_not_use_removed_custom_nodes(self):
         removed_nodes = {

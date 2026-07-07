@@ -65,7 +65,7 @@
       "id": 4,
       "type": "Anima360AngleControl",
       "pos": [-240, -40],
-      "size": [560, 430],
+      "size": [620, 590],
       "flags": {},
       "order": 3,
       "mode": 0,
@@ -91,7 +91,7 @@
         6,
         true
       ],
-      "title": "360 angle guide and positive prompt"
+      "title": "Live OpenPose 360 guide and positive prompt"
     },
     {
       "id": 5,
@@ -298,7 +298,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima 360 Angle Control\n\nUse the yaw slider for the horizontal angle: 0 front, 90 right profile, 180 back, 270 left profile. Pitch controls low/high angle, roll tilts the camera, and zoom controls framing.\n\nThe generated lineart is both previewed and VAE-encoded. `Anima Apply Reference Latent` attaches that latent to the positive and negative conditioning as `reference_latents`, then the Qwen Union Control LoRA uses it as structural guidance.\n\nRequired models:\n- diffusion_models/anima-base-v1.0.safetensors\n- text_encoders/qwen_3_06b_base.safetensors\n- vae/qwen_image_vae.safetensors\n- loras/qwen_image_union_diffsynth_lora.safetensors\n\nIf the angle is weak, keep the prompt simple, leave denoise at 1.0, raise LoRA strength slightly, or make the guide lines thicker."
+        "# Anima 360 Angle Control\n\nUse the yaw slider for the horizontal angle: 0 front, 90 right profile, 180 back, 270 left profile. Pitch controls low/high angle, roll tilts the camera, and zoom controls framing.\n\nThe custom JS extension draws a live OpenPose preview inside the angle node before queueing. The generated OpenPose-style guide is also VAE-encoded. `Anima Apply Reference Latent` attaches that latent to the positive and negative conditioning as `reference_latents`, then the Qwen Union Control LoRA uses it as structural guidance.\n\nRequired models:\n- diffusion_models/anima-base-v1.0.safetensors\n- text_encoders/qwen_3_06b_base.safetensors\n- vae/qwen_image_vae.safetensors\n- loras/qwen_image_union_diffsynth_lora.safetensors\n\nIf the angle is weak, keep the prompt simple, leave denoise at 1.0, raise LoRA strength slightly, or make the guide lines thicker."
       ],
       "color": "#222",
       "bgcolor": "#000"

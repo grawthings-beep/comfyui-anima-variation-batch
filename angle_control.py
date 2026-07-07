@@ -5,6 +5,50 @@ import math
 from PIL import Image, ImageDraw
 
 
+OPENPOSE_SEGMENTS = (
+    ("neck", "right_shoulder", (255, 0, 0)),
+    ("right_shoulder", "right_elbow", (255, 85, 0)),
+    ("right_elbow", "right_wrist", (255, 170, 0)),
+    ("neck", "left_shoulder", (255, 255, 0)),
+    ("left_shoulder", "left_elbow", (170, 255, 0)),
+    ("left_elbow", "left_wrist", (85, 255, 0)),
+    ("neck", "pelvis", (0, 255, 0)),
+    ("pelvis", "right_hip", (0, 255, 85)),
+    ("right_hip", "right_knee", (0, 255, 170)),
+    ("right_knee", "right_ankle", (0, 255, 255)),
+    ("pelvis", "left_hip", (0, 170, 255)),
+    ("left_hip", "left_knee", (0, 85, 255)),
+    ("left_knee", "left_ankle", (0, 0, 255)),
+    ("neck", "head", (85, 0, 255)),
+    ("head", "nose", (170, 0, 255)),
+    ("head", "left_eye", (255, 0, 255)),
+    ("head", "right_eye", (255, 0, 170)),
+    ("chest_front", "pelvis_front", (255, 255, 255)),
+    ("chest_back", "pelvis_back", (160, 160, 255)),
+    ("chest_front", "chest_back", (255, 255, 255)),
+    ("pelvis_front", "pelvis_back", (160, 160, 255)),
+)
+
+OPENPOSE_JOINTS = (
+    "head",
+    "neck",
+    "pelvis",
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist",
+    "left_hip",
+    "right_hip",
+    "left_knee",
+    "right_knee",
+    "left_ankle",
+    "right_ankle",
+    "nose",
+)
+
+
 def clamp(value, minimum, maximum):
     return max(minimum, min(maximum, value))
 
@@ -63,7 +107,7 @@ def build_angle_prompt(yaw_degrees, pitch_degrees, zoom):
     return (
         f"{describe_yaw(yaw)}, {describe_pitch(pitch_degrees)}, "
         f"{describe_zoom(zoom)}, camera yaw {yaw:.0f} degrees, "
-        "match the control reference perspective"
+        "match the OpenPose control reference perspective"
     )
 
 
@@ -124,7 +168,7 @@ def _point2(projected):
     return projected[0], projected[1]
 
 
-def _draw_depth_line(draw, start, end, width, fill):
+def _draw_line(draw, start, end, width, fill):
     draw.line([_point2(start), _point2(end)], fill=fill, width=width, joint="curve")
 
 
@@ -194,42 +238,18 @@ def render_angle_guide(
     }
     projected = {name: project(point) for name, point in joints.items()}
 
-    segments = (
-        ("left_ankle", "left_knee"),
-        ("right_ankle", "right_knee"),
-        ("left_knee", "left_hip"),
-        ("right_knee", "right_hip"),
-        ("left_hip", "pelvis"),
-        ("right_hip", "pelvis"),
-        ("pelvis", "chest"),
-        ("chest", "neck"),
-        ("left_shoulder", "right_shoulder"),
-        ("left_shoulder", "left_elbow"),
-        ("left_elbow", "left_wrist"),
-        ("right_shoulder", "right_elbow"),
-        ("right_elbow", "right_wrist"),
-        ("left_shoulder", "left_hip"),
-        ("right_shoulder", "right_hip"),
-        ("chest_front", "pelvis_front"),
-        ("chest_back", "pelvis_back"),
-        ("chest_front", "chest_back"),
-        ("pelvis_front", "pelvis_back"),
-    )
-
     def segment_depth(segment):
-        first, second = segment
+        first, second, _color = segment
         return (projected[first][2] + projected[second][2]) * 0.5
 
-    for segment in sorted(segments, key=segment_depth, reverse=True):
-        first, second = segment
-        depth = segment_depth(segment)
-        brightness = int(clamp(220 - depth * 85, 120, 255))
-        _draw_depth_line(
+    for segment in sorted(OPENPOSE_SEGMENTS, key=segment_depth, reverse=True):
+        first, second, color = segment
+        _draw_line(
             draw,
             projected[first],
             projected[second],
             line_width,
-            (brightness, brightness, brightness),
+            color,
         )
 
     head = projected["head"]
@@ -240,73 +260,49 @@ def render_angle_guide(
         head[0] + head_radius,
         head[1] + head_radius * 1.12,
     ]
-    draw.ellipse(head_box, outline=(255, 255, 255), width=max(1, line_width // 2))
-    _draw_depth_line(draw, projected["neck"], projected["head"], line_width, (235, 235, 235))
+    draw.ellipse(head_box, outline=(85, 0, 255), width=max(1, line_width // 2))
 
     yaw_rad = math.radians(yaw)
     front_visibility = math.cos(yaw_rad)
     side_visibility = abs(math.sin(yaw_rad))
 
     if front_visibility > 0.18:
-        eye_radius = max(2, line_width // 3)
         for eye_name in ("left_eye", "right_eye"):
             eye = projected[eye_name]
+            radius = max(2, line_width // 3)
             draw.ellipse(
-                [
-                    eye[0] - eye_radius,
-                    eye[1] - eye_radius,
-                    eye[0] + eye_radius,
-                    eye[1] + eye_radius,
-                ],
+                [eye[0] - radius, eye[1] - radius, eye[0] + radius, eye[1] + radius],
                 fill=(255, 255, 255),
             )
-        _draw_depth_line(
+        _draw_line(
             draw,
             projected["mouth_left"],
             projected["mouth_right"],
             max(1, line_width // 2),
-            (230, 230, 230),
-        )
-        _draw_depth_line(
-            draw,
-            projected["head"],
-            projected["nose"],
-            max(1, line_width // 2),
-            (245, 245, 245),
+            (255, 255, 255),
         )
     elif side_visibility > 0.35 and front_visibility > -0.25:
-        _draw_depth_line(
+        _draw_line(
             draw,
             projected["head"],
             projected["nose"],
-            max(1, line_width // 2),
-            (250, 250, 250),
+            line_width,
+            (170, 0, 255),
         )
     elif front_visibility < -0.18:
         back_top = project((0.0, 1.48, 0.12))
         back_low = project((0.0, 1.16, 0.14))
-        _draw_depth_line(
+        _draw_line(
             draw,
             back_top,
             back_low,
             max(1, line_width // 2),
-            (210, 210, 210),
+            (160, 160, 255),
         )
 
-    for name in (
-        "left_shoulder",
-        "right_shoulder",
-        "left_elbow",
-        "right_elbow",
-        "left_wrist",
-        "right_wrist",
-        "left_knee",
-        "right_knee",
-        "left_ankle",
-        "right_ankle",
-    ):
+    for name in OPENPOSE_JOINTS:
         point = projected[name]
-        radius = max(2, line_width // 3)
+        radius = max(3, line_width // 2)
         draw.ellipse(
             [point[0] - radius, point[1] - radius, point[0] + radius, point[1] + radius],
             fill=(255, 255, 255),

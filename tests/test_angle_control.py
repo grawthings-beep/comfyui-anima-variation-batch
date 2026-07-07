@@ -22,6 +22,7 @@ class AngleControlTests(unittest.TestCase):
         self.assertIn("back-right three-quarter view", prompt)
         self.assertIn("high-angle view", prompt)
         self.assertIn("camera yaw 137 degrees", prompt)
+        self.assertIn("OpenPose control reference", prompt)
 
     def test_full_prompt_can_skip_angle_terms(self):
         self.assertEqual(
@@ -34,6 +35,9 @@ class AngleControlTests(unittest.TestCase):
         self.assertEqual(image.size, (320, 512))
         self.assertEqual(image.mode, "RGB")
         self.assertGreater(sum(image.tobytes()), 0)
+        colors = image.getcolors(maxcolors=1000000)
+        self.assertIsNotNone(colors)
+        self.assertTrue(any(color[0] != color[1] for _count, color in colors))
 
     def test_yaw_changes_rendered_control_image(self):
         front = render_angle_guide(320, 512, 0, 0, 0, 5, line_thickness=4)

@@ -86,15 +86,15 @@ class Anima360AngleControl:
     RETURN_TYPES = ("IMAGE", "CONDITIONING", "STRING")
     RETURN_NAMES = ("control_image", "positive", "full_prompt")
     OUTPUT_TOOLTIPS = (
-        "Generated lineart reference image for Qwen Union Control LoRA.",
+        "Generated OpenPose-style reference image for Qwen Union Control LoRA.",
         "CLIP conditioning for the base prompt plus the selected camera angle.",
         "The exact prompt text encoded into the positive conditioning.",
     )
     FUNCTION = "build"
     CATEGORY = "Anima/360 control"
     DESCRIPTION = (
-        "Generates a custom 360-degree camera guide image and matching prompt "
-        "conditioning from yaw, pitch, roll, and zoom controls."
+        "Generates a custom 360-degree OpenPose-style camera guide image and "
+        "matching prompt conditioning from yaw, pitch, roll, and zoom controls."
     )
 
     def build(

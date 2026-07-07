@@ -6,7 +6,8 @@ This repository contains a small Anima-focused ComfyUI helper set:
 
 - two 2-pass Hires-fix upscale example workflows;
 - one custom 360-degree angle-control workflow that generates its own
-  structural guide image and feeds it to Qwen Image Union Control LoRA.
+  OpenPose-style structural guide image and feeds it to Qwen Image Union
+  Control LoRA.
 
 Old variation-batch, preset multi-angle, re-pose, diff-maker, ZIP saver, and
 LoRA manifest helper workflows have been removed.
@@ -87,8 +88,8 @@ Anima 360 Angle Control
 Anima Apply Reference Latent
 ```
 
-`Anima 360 Angle Control` creates a synthetic lineart control image from
-numeric camera controls:
+`Anima 360 Angle Control` creates a synthetic OpenPose-style control image
+from numeric camera controls:
 
 - `yaw_degrees`: `0` front, `90` right profile, `180` back, `270` left profile;
 - `pitch_degrees`: low-angle to high-angle camera tilt;
@@ -96,12 +97,16 @@ numeric camera controls:
 - `zoom`: wide shot through close-up framing;
 - `line_thickness`: guide strength before VAE encoding.
 
+The browser extension also draws a live OpenPose preview directly inside the
+node, so yaw/pitch/roll/zoom changes are visible before queueing generation.
+
 The node also encodes a positive prompt that includes the selected camera
-angle. The workflow VAE-encodes the generated guide and `Anima Apply Reference
-Latent` attaches that latent to the positive and negative conditioning as
-`reference_latents`. With `qwen_image_union_diffsynth_lora.safetensors`
-loaded, Qwen Image receives both a structural reference and a matching camera
-prompt, so the angle is much more enforceable than prompt-only view tags.
+angle. The workflow VAE-encodes the generated OpenPose-style guide and
+`Anima Apply Reference Latent` attaches that latent to the positive and
+negative conditioning as `reference_latents`. With
+`qwen_image_union_diffsynth_lora.safetensors` loaded, Qwen Image receives both
+a structural reference and a matching camera prompt, so the angle is much more
+enforceable than prompt-only view tags.
 
 Required models:
 
@@ -125,8 +130,8 @@ Qwen union control LoRA strength: 1.0
 
 If the camera angle is too weak, keep the base prompt simple, avoid
 contradictory view words, raise `line_thickness`, or raise the Union Control
-LoRA strength slightly. If the guide shape is too visible in the final image,
-lower `line_thickness` or the LoRA strength.
+LoRA strength slightly. If the skeleton shape is too visible in the final
+image, lower `line_thickness` or the LoRA strength.
 
 ## Model downloads
 
