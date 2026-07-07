@@ -2,7 +2,7 @@
 
 ## ComfyUI
 
-This custom node calls APIs provided by
+The workflow examples in this repository are intended for
 [Comfy-Org/ComfyUI](https://github.com/Comfy-Org/ComfyUI), which is licensed
 under GPL-3.0.
 

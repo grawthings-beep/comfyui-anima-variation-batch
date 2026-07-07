@@ -5,10 +5,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW_DIR = ROOT / "example_workflows"
-WEB_PREVIEW_PATH = ROOT / "web" / "anima_360_preview.js"
 HIRES_ESRGAN_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_esrgan_2pass.json"
 HIRES_LATENT_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_latent_2pass.json"
-ANGLE_360_WORKFLOW_PATH = WORKFLOW_DIR / "ANIMA_360_Angle_Control.json"
 
 
 class WorkflowTests(unittest.TestCase):
@@ -16,7 +14,6 @@ class WorkflowTests(unittest.TestCase):
     def setUpClass(cls):
         cls.hires_esrgan = cls.load(HIRES_ESRGAN_WORKFLOW_PATH)
         cls.hires_latent = cls.load(HIRES_LATENT_WORKFLOW_PATH)
-        cls.angle_360 = cls.load(ANGLE_360_WORKFLOW_PATH)
 
     @staticmethod
     def load(path):
@@ -27,59 +24,15 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(
             workflow_names,
             [
-                "ANIMA_360_Angle_Control.json",
                 "anima_hiresfix_esrgan_2pass.json",
                 "anima_hiresfix_latent_2pass.json",
             ],
         )
 
     def test_all_workflow_links_reference_existing_nodes_and_sockets(self):
-        for workflow in (self.hires_esrgan, self.hires_latent, self.angle_360):
+        for workflow in (self.hires_esrgan, self.hires_latent):
             with self.subTest(workflow=workflow.get("id")):
                 self.assert_links_reference_existing_nodes_and_sockets(workflow)
-
-    def test_360_workflow_uses_custom_angle_control_and_reference_latent(self):
-        node_types = {node["type"] for node in self.angle_360["nodes"]}
-        self.assertIn("Anima360AngleControl", node_types)
-        self.assertIn("AnimaApplyReferenceLatent", node_types)
-        self.assertIn("LoraLoaderModelOnly", node_types)
-        self.assertIn("KSampler", node_types)
-
-        lora_names = [
-            node["widgets_values"][0]
-            for node in self.angle_360["nodes"]
-            if node["type"] == "LoraLoaderModelOnly"
-        ]
-        self.assertEqual(lora_names, ["qwen_image_union_diffsynth_lora.safetensors"])
-
-        angle_node = next(
-            node for node in self.angle_360["nodes"] if node["type"] == "Anima360AngleControl"
-        )
-        self.assertEqual(angle_node["widgets_values"][1:5], [832, 1216, 45, 0])
-        self.assertEqual(angle_node["widgets_values"][7:15], [15, 15, 25, 25, 0, 0, 0, 0])
-        self.assertEqual(len(angle_node["widgets_values"]), 17)
-        self.assertGreaterEqual(angle_node["size"][1], 900)
-
-        apply_node = next(
-            node for node in self.angle_360["nodes"] if node["type"] == "AnimaApplyReferenceLatent"
-        )
-        apply_inputs = {item["name"]: item["link"] for item in apply_node["inputs"]}
-        self.assertIsNotNone(apply_inputs["reference_latent"])
-
-        links = {item[0]: item for item in self.angle_360["links"]}
-        reference_source = links[apply_inputs["reference_latent"]][1]
-        vae_encode = next(
-            node for node in self.angle_360["nodes"] if node["type"] == "VAEEncode"
-        )
-        self.assertEqual(reference_source, vae_encode["id"])
-
-    def test_live_preview_extension_is_present(self):
-        source = WEB_PREVIEW_PATH.read_text(encoding="utf-8")
-        self.assertIn("app.registerExtension", source)
-        self.assertIn("Anima360AngleControl", source)
-        self.assertIn("live OpenPose preview", source)
-        self.assertIn("pose_preview", source)
-        self.assertNotIn("onDrawForeground", source)
 
     def test_hires_workflows_do_not_use_removed_custom_nodes(self):
         removed_nodes = {

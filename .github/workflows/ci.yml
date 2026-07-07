@@ -23,18 +23,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install test dependencies
-        run: python -m pip install pillow
-
       - name: Check Python and workflow JSON
         run: |
           python -m py_compile \
             __init__.py \
-            angle_control.py \
-            nodes.py \
-            tests/test_angle_control.py \
             tests/test_workflow.py
-          node --check web/anima_360_preview.js
           python - <<'PY'
           import json
           from pathlib import Path
@@ -42,7 +35,6 @@ jobs:
           workflow_dir = Path("example_workflows")
           workflow_names = sorted(path.name for path in workflow_dir.glob("*.json"))
           assert workflow_names == [
-              "ANIMA_360_Angle_Control.json",
               "anima_hiresfix_esrgan_2pass.json",
               "anima_hiresfix_latent_2pass.json",
           ]
