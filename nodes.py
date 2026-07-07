@@ -1,743 +1,175 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-import json
-import os
-
-import folder_paths
-import numpy as np
 import torch
-from comfy.cli_args import args
-from PIL import Image
-from PIL.PngImagePlugin import PngInfo
 
-import comfy.samplers
 import node_helpers
-import nodes
 
-from .batch_archive import create_batch_zip
-from .variation import (
-    MULTI_ANGLE_PRESETS,
-    add_variation_group,
-    add_variation_group_options,
-    build_group_variations,
-    build_variations,
-    clean_angle_prompts,
-    easy_multi_angle_prompts,
-    parse_easy_multi_angle_params,
-    selected_multi_angle_presets,
-)
+try:
+    from .angle_control import build_full_prompt, render_angle_guide
+except ImportError:
+    from angle_control import build_full_prompt, render_angle_guide
 
 
-def sample_variations(
-    variations,
-    model,
-    clip,
-    vae,
-    negative,
-    latent_image,
-    steps,
-    cfg,
-    sampler_name,
-    scheduler,
-    denoise,
-    reference_latent=None,
-):
-    latent_samples = latent_image.get("samples")
-    if latent_samples is None:
-        raise ValueError("latent_image does not contain samples")
-    if latent_samples.shape[0] != 1:
-        raise ValueError(
-            "Anima Variation Batch Sampler requires latent batch_size=1. "
-            "Use count to control the number of output images."
-        )
-
-    reference_samples = None
-    if reference_latent is not None:
-        reference_samples = reference_latent.get("samples")
-        if reference_samples is None:
-            raise ValueError("reference_latent does not contain samples")
-        negative = node_helpers.conditioning_set_values(
-            negative,
-            {"reference_latents": [reference_samples]},
-            append=True,
-        )
-
-    images = []
-    report_lines = []
-    for variation in variations:
-        tokens = clip.tokenize(variation.prompt)
-        positive = clip.encode_from_tokens_scheduled(tokens)
-        if reference_samples is not None:
-            positive = node_helpers.conditioning_set_values(
-                positive,
-                {"reference_latents": [reference_samples]},
-                append=True,
-            )
-
-        sampled = nodes.common_ksampler(
-            model,
-            variation.seed,
-            steps,
-            cfg,
-            sampler_name,
-            scheduler,
-            positive,
-            negative,
-            latent_image,
-            denoise=denoise,
-        )[0]
-        decoded = vae.decode(sampled["samples"])
-        if len(decoded.shape) == 5:
-            decoded = decoded.reshape(
-                -1,
-                decoded.shape[-3],
-                decoded.shape[-2],
-                decoded.shape[-1],
-            )
-        images.append(decoded)
-        details = getattr(variation, "selection_report", "")
-        details = f" | {details}" if details else ""
-        report_lines.append(
-            f"{variation.index:02d} | seed={variation.seed}{details} | "
-            f"{variation.prompt}"
-        )
-
-    return (torch.cat(images, dim=0), "\n".join(report_lines))
+def pil_to_image_tensor(image):
+    pixels = torch.ByteTensor(torch.ByteStorage.from_buffer(image.tobytes()))
+    return pixels.reshape((image.height, image.width, 3)).float() / 255.0
 
 
-class AnimaVariationGroup:
+class Anima360AngleControl:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "category_name": (
-                    "STRING",
-                    {
-                        "default": "Angle",
-                        "dynamicPrompts": False,
-                    },
-                ),
-                "options": (
+                "clip": ("CLIP",),
+                "base_prompt": (
                     "STRING",
                     {
                         "multiline": True,
                         "dynamicPrompts": False,
-                        "default": "from above, from side, from below",
-                    },
-                ),
-            },
-            "optional": {
-                "previous_groups": ("ANIMA_VARIATION_GROUPS",),
-            },
-        }
-
-    RETURN_TYPES = ("ANIMA_VARIATION_GROUPS",)
-    RETURN_NAMES = ("variation_groups",)
-    FUNCTION = "build"
-    CATEGORY = "Anima/batch"
-    DESCRIPTION = (
-        "Adds one unlimited variation category. Enter short prompt tags "
-        "separated by commas or new lines, then chain more Group nodes."
-    )
-
-    def build(self, category_name, options, previous_groups=None):
-        return (
-            add_variation_group(previous_groups, category_name, options),
-        )
-
-
-class AnimaMultiAngle:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "multi_angle_json": (
-                    "STRING",
-                    {
-                        "multiline": True,
-                        "dynamicPrompts": False,
-                        "default": json.dumps(
-                            [
-                                {
-                                    "rotate": 0,
-                                    "vertical": 0,
-                                    "zoom": 5,
-                                    "add_angle_prompt": True,
-                                },
-                                {
-                                    "rotate": 45,
-                                    "vertical": 25,
-                                    "zoom": 4,
-                                    "add_angle_prompt": True,
-                                },
-                                {
-                                    "rotate": 145,
-                                    "vertical": 36,
-                                    "zoom": 0,
-                                    "add_angle_prompt": True,
-                                },
-                                {
-                                    "rotate": 270,
-                                    "vertical": -20,
-                                    "zoom": 6,
-                                    "add_angle_prompt": True,
-                                },
-                            ],
-                            indent=2,
+                        "default": (
+                            "masterpiece, best quality, score_8, highres, safe, "
+                            "1girl, original character, detailed outfit"
                         ),
                     },
                 ),
-            },
-        }
-
-    RETURN_TYPES = ("STRING", "EASY_MULTI_ANGLE")
-    RETURN_NAMES = ("angle_prompts", "params")
-    FUNCTION = "build"
-    CATEGORY = "Anima/batch"
-    DESCRIPTION = (
-        "Creates Easy-Use-compatible multi-angle params from JSON without "
-        "requiring ComfyUI-Easy-Use. Use the params output with "
-        "Anima Easy MultiAngle Group."
-    )
-
-    def build(self, multi_angle_json):
-        params = parse_easy_multi_angle_params(multi_angle_json)
-        prompts = easy_multi_angle_prompts(params)
-        return ("\n".join(prompts), params)
-
-
-class AnimaMultiAnglePresetGroup:
-    @classmethod
-    def INPUT_TYPES(cls):
-        required = {
-            "category_name": (
-                "STRING",
-                {
-                    "default": "Angle",
-                    "dynamicPrompts": False,
-                },
-            ),
-        }
-        required.update(
-            {
-                preset["key"]: (
-                    "BOOLEAN",
+                "width": ("INT", {"default": 832, "min": 256, "max": 4096, "step": 64}),
+                "height": ("INT", {"default": 1216, "min": 256, "max": 4096, "step": 64}),
+                "yaw_degrees": (
+                    "INT",
                     {
-                        "default": preset["default"],
+                        "default": 45,
+                        "min": 0,
+                        "max": 359,
+                        "step": 1,
+                        "display": "slider",
                     },
-                )
-                for preset in MULTI_ANGLE_PRESETS
+                ),
+                "pitch_degrees": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": -75,
+                        "max": 75,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "roll_degrees": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": -45,
+                        "max": 45,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "zoom": (
+                    "FLOAT",
+                    {
+                        "default": 5.0,
+                        "min": 0.0,
+                        "max": 10.0,
+                        "step": 0.1,
+                        "round": 0.01,
+                        "display": "slider",
+                    },
+                ),
+                "line_thickness": (
+                    "INT",
+                    {"default": 6, "min": 1, "max": 24, "step": 1},
+                ),
+                "add_angle_prompt": ("BOOLEAN", {"default": True}),
             }
-        )
-        return {
-            "required": required,
-            "optional": {
-                "previous_groups": ("ANIMA_VARIATION_GROUPS",),
-            },
         }
 
-    RETURN_TYPES = ("ANIMA_VARIATION_GROUPS", "STRING")
-    RETURN_NAMES = ("variation_groups", "angle_prompts")
-    FUNCTION = "build"
-    CATEGORY = "Anima/batch"
-    DESCRIPTION = (
-        "Builds an Angle variation group from preset camera toggles. Use this "
-        "instead of editing multi-angle JSON by hand."
+    RETURN_TYPES = ("IMAGE", "CONDITIONING", "STRING")
+    RETURN_NAMES = ("control_image", "positive", "full_prompt")
+    OUTPUT_TOOLTIPS = (
+        "Generated lineart reference image for Qwen Union Control LoRA.",
+        "CLIP conditioning for the base prompt plus the selected camera angle.",
+        "The exact prompt text encoded into the positive conditioning.",
     )
-
-    def build(self, category_name, previous_groups=None, **enabled):
-        params = selected_multi_angle_presets(enabled)
-        options = easy_multi_angle_prompts(params)
-        groups = add_variation_group_options(
-            previous_groups,
-            category_name,
-            options,
-        )
-        return (groups, "\n".join(options))
-
-
-class AnimaEasyMultiAngleGroup:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "category_name": (
-                    "STRING",
-                    {
-                        "default": "Angle",
-                        "dynamicPrompts": False,
-                    },
-                ),
-                "angle_prompts": (
-                    "STRING",
-                    {
-                        "multiline": True,
-                        "dynamicPrompts": False,
-                        "default": "",
-                    },
-                ),
-                "strip_metadata": (
-                    "BOOLEAN",
-                    {
-                        "default": True,
-                    },
-                ),
-                "remove_sks_trigger": (
-                    "BOOLEAN",
-                    {
-                        "default": True,
-                    },
-                ),
-            },
-            "optional": {
-                "previous_groups": ("ANIMA_VARIATION_GROUPS",),
-                "multi_angle": ("EASY_MULTI_ANGLE",),
-            },
-        }
-
-    RETURN_TYPES = ("ANIMA_VARIATION_GROUPS", "STRING")
-    RETURN_NAMES = ("variation_groups", "angle_prompts")
     FUNCTION = "build"
-    CATEGORY = "Anima/batch"
+    CATEGORY = "Anima/360 control"
     DESCRIPTION = (
-        "Adapts ComfyUI-Easy-Use easy multiAngle params or prompt text into "
-        "one ANIMA variation category. Parenthetical coordinate metadata is "
-        "stripped by default for Anima-friendly camera tags."
+        "Generates a custom 360-degree camera guide image and matching prompt "
+        "conditioning from yaw, pitch, roll, and zoom controls."
     )
 
     def build(
         self,
-        category_name,
-        angle_prompts,
-        strip_metadata,
-        remove_sks_trigger,
-        previous_groups=None,
-        multi_angle=None,
-    ):
-        if multi_angle is not None:
-            options = easy_multi_angle_prompts(
-                multi_angle,
-                strip_metadata,
-                remove_sks_trigger,
-            )
-        else:
-            options = clean_angle_prompts(
-                angle_prompts,
-                strip_metadata,
-                remove_sks_trigger,
-            )
-        groups = add_variation_group_options(
-            previous_groups,
-            category_name,
-            options,
-        )
-        return (groups, "\n".join(options))
-
-
-class AnimaVariationBatchSampler:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "model": ("MODEL",),
-                "clip": ("CLIP",),
-                "vae": ("VAE",),
-                "negative": ("CONDITIONING",),
-                "latent_image": ("LATENT",),
-                "base_prompt": (
-                    "STRING",
-                    {
-                        "multiline": True,
-                        "dynamicPrompts": False,
-                        "default": "masterpiece, best quality, 1girl",
-                    },
-                ),
-                "shot_recipes": (
-                    "STRING",
-                    {
-                        "multiline": True,
-                        "dynamicPrompts": False,
-                        "default": (
-                            "close-up portrait, eye-level, head tilted\n"
-                            "upper body shot, low angle, leaning forward\n"
-                            "cowboy shot, three-quarter view, hand on hip\n"
-                            "full body shot, high angle, dynamic standing pose"
-                        ),
-                    },
-                ),
-                "expressions": (
-                    "STRING",
-                    {
-                        "multiline": True,
-                        "dynamicPrompts": False,
-                        "default": (
-                            "gentle smile, closed mouth\n"
-                            "laughing, open mouth, closed eyes\n"
-                            "surprised expression, wide eyes\n"
-                            "embarrassed expression, blush"
-                        ),
-                    },
-                ),
-                "count": ("INT", {"default": 4, "min": 1, "max": 32, "step": 1}),
-                "master_seed": (
-                    "INT",
-                    {
-                        "default": 0,
-                        "min": 0,
-                        "max": 0xFFFFFFFFFFFFFFFF,
-                        "control_after_generate": True,
-                    },
-                ),
-                "steps": ("INT", {"default": 8, "min": 1, "max": 10000}),
-                "cfg": (
-                    "FLOAT",
-                    {
-                        "default": 1.0,
-                        "min": 0.0,
-                        "max": 100.0,
-                        "step": 0.1,
-                        "round": 0.01,
-                    },
-                ),
-                "sampler_name": (comfy.samplers.KSampler.SAMPLERS,),
-                "scheduler": (comfy.samplers.KSampler.SCHEDULERS,),
-                "denoise": (
-                    "FLOAT",
-                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01},
-                ),
-            },
-            "optional": {
-                "reference_latent": (
-                    "LATENT",
-                    {
-                        "tooltip": (
-                            "Optional VAE-encoded control/reference image. "
-                            "For Qwen Image control LoRAs, connect the "
-                            "Canny/depth/pose latent here."
-                        )
-                    },
-                ),
-            },
-        }
-
-    RETURN_TYPES = ("IMAGE", "STRING")
-    RETURN_NAMES = ("images", "prompt_report")
-    OUTPUT_TOOLTIPS = (
-        "A batch containing one independently sampled and decoded image per prompt.",
-        "The expanded prompts and seeds used for the batch.",
-    )
-    FUNCTION = "sample"
-    CATEGORY = "Anima/batch"
-    DESCRIPTION = (
-        "Creates unique shot/expression prompt combinations and samples each one "
-        "with an independent seed in a single queued execution."
-    )
-
-    def sample(
-        self,
-        model,
         clip,
-        vae,
-        negative,
-        latent_image,
         base_prompt,
-        shot_recipes,
-        expressions,
-        count,
-        master_seed,
-        steps,
-        cfg,
-        sampler_name,
-        scheduler,
-        denoise,
-        reference_latent=None,
+        width,
+        height,
+        yaw_degrees,
+        pitch_degrees,
+        roll_degrees,
+        zoom,
+        line_thickness,
+        add_angle_prompt,
     ):
-        variations = build_variations(
+        image = render_angle_guide(
+            width,
+            height,
+            yaw_degrees,
+            pitch_degrees,
+            roll_degrees,
+            zoom,
+            line_thickness=line_thickness,
+        )
+        prompt = build_full_prompt(
             base_prompt,
-            shot_recipes,
-            expressions,
-            count,
-            master_seed,
+            yaw_degrees,
+            pitch_degrees,
+            zoom,
+            add_angle_prompt,
         )
-        return sample_variations(
-            variations,
-            model,
-            clip,
-            vae,
-            negative,
-            latent_image,
-            steps,
-            cfg,
-            sampler_name,
-            scheduler,
-            denoise,
-            reference_latent=reference_latent,
-        )
+        tokens = clip.tokenize(prompt)
+        positive = clip.encode_from_tokens_scheduled(tokens)
+        return (pil_to_image_tensor(image)[None,], positive, prompt)
 
 
-class AnimaFlexibleVariationBatchSampler:
+class AnimaApplyReferenceLatent:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model": ("MODEL",),
-                "clip": ("CLIP",),
-                "vae": ("VAE",),
+                "positive": ("CONDITIONING",),
                 "negative": ("CONDITIONING",),
-                "latent_image": ("LATENT",),
-                "variation_groups": ("ANIMA_VARIATION_GROUPS",),
-                "base_prompt": (
-                    "STRING",
-                    {
-                        "multiline": True,
-                        "dynamicPrompts": False,
-                        "default": "masterpiece, best quality, 1girl",
-                    },
-                ),
-                "count": ("INT", {"default": 4, "min": 1, "max": 32, "step": 1}),
-                "master_seed": (
-                    "INT",
-                    {
-                        "default": 0,
-                        "min": 0,
-                        "max": 0xFFFFFFFFFFFFFFFF,
-                        "control_after_generate": True,
-                    },
-                ),
-                "steps": ("INT", {"default": 8, "min": 1, "max": 10000}),
-                "cfg": (
-                    "FLOAT",
-                    {
-                        "default": 1.0,
-                        "min": 0.0,
-                        "max": 100.0,
-                        "step": 0.1,
-                        "round": 0.01,
-                    },
-                ),
-                "sampler_name": (comfy.samplers.KSampler.SAMPLERS,),
-                "scheduler": (comfy.samplers.KSampler.SCHEDULERS,),
-                "denoise": (
-                    "FLOAT",
-                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01},
-                ),
-            },
-            "optional": {
-                "reference_latent": (
-                    "LATENT",
-                    {
-                        "tooltip": (
-                            "Optional VAE-encoded control/reference image. "
-                            "For Qwen Image control LoRAs, connect the "
-                            "Canny/depth/pose latent here."
-                        )
-                    },
-                ),
-            },
-        }
-
-    RETURN_TYPES = ("IMAGE", "STRING")
-    RETURN_NAMES = ("images", "prompt_report")
-    OUTPUT_TOOLTIPS = (
-        "A batch containing one independently sampled and decoded image per prompt.",
-        "The selected category values, expanded prompts, and seeds.",
-    )
-    FUNCTION = "sample"
-    CATEGORY = "Anima/batch"
-    DESCRIPTION = (
-        "Uses every option in each connected Variation Group once before "
-        "reshuffling that category. Chain any number of groups."
-    )
-
-    def sample(
-        self,
-        model,
-        clip,
-        vae,
-        negative,
-        latent_image,
-        variation_groups,
-        base_prompt,
-        count,
-        master_seed,
-        steps,
-        cfg,
-        sampler_name,
-        scheduler,
-        denoise,
-        reference_latent=None,
-    ):
-        variations = build_group_variations(
-            base_prompt,
-            variation_groups,
-            count,
-            master_seed,
-        )
-        return sample_variations(
-            variations,
-            model,
-            clip,
-            vae,
-            negative,
-            latent_image,
-            steps,
-            cfg,
-            sampler_name,
-            scheduler,
-            denoise,
-            reference_latent=reference_latent,
-        )
-
-
-class AnimaSaveBatchZip:
-    def __init__(self):
-        self.output_dir = folder_paths.get_output_directory()
-        self.type = "output"
-        self.compress_level = 4
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "images": ("IMAGE",),
-                "filename_prefix": (
-                    "STRING",
-                    {
-                        "default": (
-                            "anima_batches/"
-                            "%year%-%month%-%day%/"
-                            "anima_batch"
-                        ),
-                    },
-                ),
-                "auto_download": (
-                    "BOOLEAN",
-                    {
-                        "default": True,
-                    },
-                ),
-            },
-            "optional": {
-                "prompt_report": (
-                    "STRING",
-                    {
-                        "forceInput": True,
-                    },
-                ),
-            },
-            "hidden": {
-                "prompt": "PROMPT",
-                "extra_pnginfo": "EXTRA_PNGINFO",
-            },
-        }
-
-    RETURN_TYPES = ()
-    FUNCTION = "save"
-    OUTPUT_NODE = True
-    CATEGORY = "Anima/batch"
-    DESCRIPTION = (
-        "Saves one generation as a numbered folder of PNG files and creates "
-        "one downloadable ZIP containing the images and prompt report."
-    )
-
-    def save(
-        self,
-        images,
-        filename_prefix,
-        auto_download=True,
-        prompt_report="",
-        prompt=None,
-        extra_pnginfo=None,
-    ):
-        if len(images) == 0:
-            raise ValueError("images must contain at least one image")
-
-        (
-            full_output_folder,
-            filename,
-            counter,
-            subfolder,
-            _filename_prefix,
-        ) = folder_paths.get_save_image_path(
-            filename_prefix,
-            self.output_dir,
-            images[0].shape[1],
-            images[0].shape[0],
-        )
-
-        batch_name = f"{filename}_{counter:05}"
-        batch_folder = os.path.join(full_output_folder, batch_name)
-        os.makedirs(batch_folder, exist_ok=False)
-
-        saved_paths = []
-        image_results = []
-        image_subfolder = os.path.join(subfolder, batch_name).replace("\\", "/")
-        for batch_number, image in enumerate(images, start=1):
-            pixels = 255.0 * image.cpu().numpy()
-            output_image = Image.fromarray(
-                np.clip(pixels, 0, 255).astype(np.uint8)
-            )
-            metadata = None
-            if not args.disable_metadata:
-                metadata = PngInfo()
-                if prompt is not None:
-                    metadata.add_text("prompt", json.dumps(prompt))
-                if extra_pnginfo is not None:
-                    for key, value in extra_pnginfo.items():
-                        metadata.add_text(key, json.dumps(value))
-
-            image_filename = f"image_{batch_number:02}.png"
-            image_path = os.path.join(batch_folder, image_filename)
-            output_image.save(
-                image_path,
-                pnginfo=metadata,
-                compress_level=self.compress_level,
-            )
-            saved_paths.append(image_path)
-            image_results.append(
-                {
-                    "filename": image_filename,
-                    "subfolder": image_subfolder,
-                    "type": self.type,
-                }
-            )
-
-        zip_filename = f"{batch_name}.zip"
-        zip_path = os.path.join(full_output_folder, zip_filename)
-        create_batch_zip(zip_path, saved_paths, prompt_report or "")
-
-        return {
-            "ui": {
-                "images": image_results,
-                "zip": [
-                    {
-                        "filename": zip_filename,
-                        "subfolder": subfolder.replace("\\", "/"),
-                        "type": self.type,
-                        "count": len(saved_paths),
-                        "auto_download": bool(auto_download),
-                    }
-                ],
+                "reference_latent": ("LATENT",),
+                "apply_to_negative": ("BOOLEAN", {"default": True}),
             }
         }
 
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
+    RETURN_NAMES = ("positive", "negative")
+    FUNCTION = "apply"
+    CATEGORY = "Anima/360 control"
+    DESCRIPTION = (
+        "Attaches a VAE-encoded control image as reference_latents for Qwen "
+        "Image Union DiffSynth LoRA workflows."
+    )
+
+    def apply(self, positive, negative, reference_latent, apply_to_negative=True):
+        reference_samples = reference_latent.get("samples")
+        if reference_samples is None:
+            raise ValueError("reference_latent does not contain samples")
+
+        values = {"reference_latents": [reference_samples]}
+        positive = node_helpers.conditioning_set_values(positive, values, append=True)
+        if apply_to_negative:
+            negative = node_helpers.conditioning_set_values(negative, values, append=True)
+        return (positive, negative)
+
 
 NODE_CLASS_MAPPINGS = {
-    "AnimaVariationGroup": AnimaVariationGroup,
-    "AnimaMultiAngle": AnimaMultiAngle,
-    "AnimaMultiAnglePresetGroup": AnimaMultiAnglePresetGroup,
-    "AnimaEasyMultiAngleGroup": AnimaEasyMultiAngleGroup,
-    "AnimaVariationBatchSampler": AnimaVariationBatchSampler,
-    "AnimaFlexibleVariationBatchSampler": AnimaFlexibleVariationBatchSampler,
-    "AnimaSaveBatchZip": AnimaSaveBatchZip,
+    "Anima360AngleControl": Anima360AngleControl,
+    "AnimaApplyReferenceLatent": AnimaApplyReferenceLatent,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "AnimaVariationGroup": "Anima Variation Group",
-    "AnimaMultiAngle": "Anima MultiAngle",
-    "AnimaMultiAnglePresetGroup": "Anima MultiAngle Preset Group",
-    "AnimaEasyMultiAngleGroup": "Anima Easy MultiAngle Group",
-    "AnimaVariationBatchSampler": "Anima Variation Batch Sampler",
-    "AnimaFlexibleVariationBatchSampler": "Anima Flexible Variation Batch Sampler",
-    "AnimaSaveBatchZip": "Anima Save Batch ZIP",
+    "Anima360AngleControl": "Anima 360 Angle Control",
+    "AnimaApplyReferenceLatent": "Anima Apply Reference Latent",
 }

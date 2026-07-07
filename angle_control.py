@@ -1,0 +1,319 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
+import math
+
+from PIL import Image, ImageDraw
+
+
+def clamp(value, minimum, maximum):
+    return max(minimum, min(maximum, value))
+
+
+def normalize_yaw(yaw_degrees):
+    return float(yaw_degrees) % 360.0
+
+
+def describe_yaw(yaw_degrees):
+    yaw = normalize_yaw(yaw_degrees)
+    sectors = (
+        (22.5, "front view"),
+        (67.5, "front-right three-quarter view"),
+        (112.5, "right profile view"),
+        (157.5, "back-right three-quarter view"),
+        (202.5, "back view"),
+        (247.5, "back-left three-quarter view"),
+        (292.5, "left profile view"),
+        (337.5, "front-left three-quarter view"),
+        (360.0, "front view"),
+    )
+    for limit, label in sectors:
+        if yaw < limit:
+            return label
+    return "front view"
+
+
+def describe_pitch(pitch_degrees):
+    pitch = float(pitch_degrees)
+    if pitch <= -60:
+        return "extreme low-angle worm's-eye view"
+    if pitch <= -30:
+        return "low-angle view"
+    if pitch < 20:
+        return "eye-level view"
+    if pitch < 50:
+        return "high-angle view"
+    return "top-down bird's-eye view"
+
+
+def describe_zoom(zoom):
+    zoom = float(zoom)
+    if zoom < 2:
+        return "extreme wide shot"
+    if zoom < 4:
+        return "wide shot"
+    if zoom < 6:
+        return "full body shot"
+    if zoom < 8:
+        return "cowboy shot"
+    return "upper body close-up"
+
+
+def build_angle_prompt(yaw_degrees, pitch_degrees, zoom):
+    yaw = normalize_yaw(yaw_degrees)
+    return (
+        f"{describe_yaw(yaw)}, {describe_pitch(pitch_degrees)}, "
+        f"{describe_zoom(zoom)}, camera yaw {yaw:.0f} degrees, "
+        "match the control reference perspective"
+    )
+
+
+def join_prompt(*parts):
+    return ", ".join(
+        str(part).strip(" \t\r\n,")
+        for part in parts
+        if str(part).strip(" \t\r\n,")
+    )
+
+
+def build_full_prompt(base_prompt, yaw_degrees, pitch_degrees, zoom, add_angle_prompt):
+    if not add_angle_prompt:
+        return str(base_prompt).strip()
+    return join_prompt(base_prompt, build_angle_prompt(yaw_degrees, pitch_degrees, zoom))
+
+
+def _rotate(point, yaw, pitch):
+    x, y, z = point
+    yaw_rad = math.radians(yaw)
+    pitch_rad = math.radians(pitch)
+
+    cos_yaw = math.cos(yaw_rad)
+    sin_yaw = math.sin(yaw_rad)
+    xz = x * cos_yaw + z * sin_yaw
+    zz = -x * sin_yaw + z * cos_yaw
+
+    cos_pitch = math.cos(pitch_rad)
+    sin_pitch = math.sin(pitch_rad)
+    yz = y * cos_pitch - zz * sin_pitch
+    zp = y * sin_pitch + zz * cos_pitch
+    return xz, yz, zp
+
+
+def _project(point, width, height, yaw, pitch, roll, zoom):
+    x, y, z = _rotate(point, yaw, pitch)
+    distance = 3.2
+    denom = max(0.8, distance + z)
+    scale = min(width, height) * (0.95 + float(zoom) * 0.07)
+    px = x * scale / denom
+    py = y * scale / denom
+
+    roll_rad = math.radians(roll)
+    cos_roll = math.cos(roll_rad)
+    sin_roll = math.sin(roll_rad)
+    rx = px * cos_roll - py * sin_roll
+    ry = px * sin_roll + py * cos_roll
+
+    return (
+        width * 0.5 + rx,
+        height * 0.56 - ry,
+        z,
+        scale / denom,
+    )
+
+
+def _point2(projected):
+    return projected[0], projected[1]
+
+
+def _draw_depth_line(draw, start, end, width, fill):
+    draw.line([_point2(start), _point2(end)], fill=fill, width=width, joint="curve")
+
+
+def render_angle_guide(
+    width,
+    height,
+    yaw_degrees,
+    pitch_degrees,
+    roll_degrees,
+    zoom,
+    line_thickness=6,
+):
+    width = int(clamp(int(width), 256, 4096))
+    height = int(clamp(int(height), 256, 4096))
+    yaw = normalize_yaw(yaw_degrees)
+    pitch = clamp(float(pitch_degrees), -75.0, 75.0)
+    roll = clamp(float(roll_degrees), -45.0, 45.0)
+    zoom = clamp(float(zoom), 0.0, 10.0)
+
+    supersample = 2
+    canvas_width = width * supersample
+    canvas_height = height * supersample
+    image = Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    line_width = max(1, int(line_thickness) * supersample)
+
+    scaled_width = width * supersample
+    scaled_height = height * supersample
+
+    def project(point):
+        return _project(
+            point,
+            scaled_width,
+            scaled_height,
+            yaw,
+            pitch,
+            roll,
+            zoom,
+        )
+
+    joints = {
+        "head": (0.0, 1.33, -0.02),
+        "neck": (0.0, 1.05, 0.0),
+        "chest": (0.0, 0.72, -0.02),
+        "pelvis": (0.0, 0.0, 0.02),
+        "chest_front": (0.0, 0.74, -0.16),
+        "chest_back": (0.0, 0.74, 0.16),
+        "pelvis_front": (0.0, 0.02, -0.12),
+        "pelvis_back": (0.0, 0.02, 0.12),
+        "left_shoulder": (-0.38, 0.94, 0.0),
+        "right_shoulder": (0.38, 0.94, 0.0),
+        "left_elbow": (-0.52, 0.45, -0.04),
+        "right_elbow": (0.52, 0.45, -0.04),
+        "left_wrist": (-0.43, -0.03, -0.08),
+        "right_wrist": (0.43, -0.03, -0.08),
+        "left_hip": (-0.24, 0.0, 0.02),
+        "right_hip": (0.24, 0.0, 0.02),
+        "left_knee": (-0.22, -0.66, 0.05),
+        "right_knee": (0.22, -0.66, 0.05),
+        "left_ankle": (-0.24, -1.22, -0.02),
+        "right_ankle": (0.24, -1.22, -0.02),
+        "nose": (0.0, 1.33, -0.28),
+        "left_eye": (-0.07, 1.38, -0.22),
+        "right_eye": (0.07, 1.38, -0.22),
+        "mouth_left": (-0.06, 1.27, -0.22),
+        "mouth_right": (0.06, 1.27, -0.22),
+    }
+    projected = {name: project(point) for name, point in joints.items()}
+
+    segments = (
+        ("left_ankle", "left_knee"),
+        ("right_ankle", "right_knee"),
+        ("left_knee", "left_hip"),
+        ("right_knee", "right_hip"),
+        ("left_hip", "pelvis"),
+        ("right_hip", "pelvis"),
+        ("pelvis", "chest"),
+        ("chest", "neck"),
+        ("left_shoulder", "right_shoulder"),
+        ("left_shoulder", "left_elbow"),
+        ("left_elbow", "left_wrist"),
+        ("right_shoulder", "right_elbow"),
+        ("right_elbow", "right_wrist"),
+        ("left_shoulder", "left_hip"),
+        ("right_shoulder", "right_hip"),
+        ("chest_front", "pelvis_front"),
+        ("chest_back", "pelvis_back"),
+        ("chest_front", "chest_back"),
+        ("pelvis_front", "pelvis_back"),
+    )
+
+    def segment_depth(segment):
+        first, second = segment
+        return (projected[first][2] + projected[second][2]) * 0.5
+
+    for segment in sorted(segments, key=segment_depth, reverse=True):
+        first, second = segment
+        depth = segment_depth(segment)
+        brightness = int(clamp(220 - depth * 85, 120, 255))
+        _draw_depth_line(
+            draw,
+            projected[first],
+            projected[second],
+            line_width,
+            (brightness, brightness, brightness),
+        )
+
+    head = projected["head"]
+    head_radius = max(10, int(0.18 * head[3]))
+    head_box = [
+        head[0] - head_radius,
+        head[1] - head_radius * 1.12,
+        head[0] + head_radius,
+        head[1] + head_radius * 1.12,
+    ]
+    draw.ellipse(head_box, outline=(255, 255, 255), width=max(1, line_width // 2))
+    _draw_depth_line(draw, projected["neck"], projected["head"], line_width, (235, 235, 235))
+
+    yaw_rad = math.radians(yaw)
+    front_visibility = math.cos(yaw_rad)
+    side_visibility = abs(math.sin(yaw_rad))
+
+    if front_visibility > 0.18:
+        eye_radius = max(2, line_width // 3)
+        for eye_name in ("left_eye", "right_eye"):
+            eye = projected[eye_name]
+            draw.ellipse(
+                [
+                    eye[0] - eye_radius,
+                    eye[1] - eye_radius,
+                    eye[0] + eye_radius,
+                    eye[1] + eye_radius,
+                ],
+                fill=(255, 255, 255),
+            )
+        _draw_depth_line(
+            draw,
+            projected["mouth_left"],
+            projected["mouth_right"],
+            max(1, line_width // 2),
+            (230, 230, 230),
+        )
+        _draw_depth_line(
+            draw,
+            projected["head"],
+            projected["nose"],
+            max(1, line_width // 2),
+            (245, 245, 245),
+        )
+    elif side_visibility > 0.35 and front_visibility > -0.25:
+        _draw_depth_line(
+            draw,
+            projected["head"],
+            projected["nose"],
+            max(1, line_width // 2),
+            (250, 250, 250),
+        )
+    elif front_visibility < -0.18:
+        back_top = project((0.0, 1.48, 0.12))
+        back_low = project((0.0, 1.16, 0.14))
+        _draw_depth_line(
+            draw,
+            back_top,
+            back_low,
+            max(1, line_width // 2),
+            (210, 210, 210),
+        )
+
+    for name in (
+        "left_shoulder",
+        "right_shoulder",
+        "left_elbow",
+        "right_elbow",
+        "left_wrist",
+        "right_wrist",
+        "left_knee",
+        "right_knee",
+        "left_ankle",
+        "right_ankle",
+    ):
+        point = projected[name]
+        radius = max(2, line_width // 3)
+        draw.ellipse(
+            [point[0] - radius, point[1] - radius, point[0] + radius, point[1] + radius],
+            fill=(255, 255, 255),
+        )
+
+    try:
+        resample = Image.Resampling.LANCZOS
+    except AttributeError:
+        resample = Image.LANCZOS
+    return image.resize((width, height), resample)
