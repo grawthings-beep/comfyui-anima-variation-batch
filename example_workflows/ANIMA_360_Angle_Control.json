@@ -65,7 +65,7 @@
       "id": 4,
       "type": "Anima360AngleControl",
       "pos": [-240, -40],
-      "size": [620, 590],
+      "size": [680, 900],
       "flags": {},
       "order": 3,
       "mode": 0,
@@ -88,6 +88,14 @@
         0,
         0,
         5,
+        15,
+        15,
+        25,
+        25,
+        0,
+        0,
+        0,
+        0,
         6,
         true
       ],
@@ -298,7 +306,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima 360 Angle Control\n\nUse the yaw slider for the horizontal angle: 0 front, 90 right profile, 180 back, 270 left profile. Pitch controls low/high angle, roll tilts the camera, and zoom controls framing.\n\nThe custom JS extension draws a live OpenPose preview inside the angle node before queueing. The generated OpenPose-style guide is also VAE-encoded. `Anima Apply Reference Latent` attaches that latent to the positive and negative conditioning as `reference_latents`, then the Qwen Union Control LoRA uses it as structural guidance.\n\nRequired models:\n- diffusion_models/anima-base-v1.0.safetensors\n- text_encoders/qwen_3_06b_base.safetensors\n- vae/qwen_image_vae.safetensors\n- loras/qwen_image_union_diffsynth_lora.safetensors\n\nIf the angle is weak, keep the prompt simple, leave denoise at 1.0, raise LoRA strength slightly, or make the guide lines thicker."
+        "# Anima 360 Angle Control\n\nUse the yaw slider for the horizontal angle: 0 front, 90 right profile, 180 back, 270 left profile. Pitch controls low/high angle, roll tilts the camera, and zoom controls framing.\n\nThe arm and leg sliders adjust each arm raise, elbow bend, leg lift, and knee bend. The custom JS extension draws a reserved live OpenPose preview inside the angle node before queueing. The generated OpenPose-style guide is also VAE-encoded. `Anima Apply Reference Latent` attaches that latent to the positive and negative conditioning as `reference_latents`, then the Qwen Union Control LoRA uses it as structural guidance.\n\nRequired models:\n- diffusion_models/anima-base-v1.0.safetensors\n- text_encoders/qwen_3_06b_base.safetensors\n- vae/qwen_image_vae.safetensors\n- loras/qwen_image_union_diffsynth_lora.safetensors\n\nIf the angle or pose is weak, keep the prompt simple, leave denoise at 1.0, raise LoRA strength slightly, or make the guide lines thicker."
       ],
       "color": "#222",
       "bgcolor": "#000"

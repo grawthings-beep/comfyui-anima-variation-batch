@@ -56,7 +56,9 @@ class WorkflowTests(unittest.TestCase):
             node for node in self.angle_360["nodes"] if node["type"] == "Anima360AngleControl"
         )
         self.assertEqual(angle_node["widgets_values"][1:5], [832, 1216, 45, 0])
-        self.assertGreaterEqual(angle_node["size"][1], 590)
+        self.assertEqual(angle_node["widgets_values"][7:15], [15, 15, 25, 25, 0, 0, 0, 0])
+        self.assertEqual(len(angle_node["widgets_values"]), 17)
+        self.assertGreaterEqual(angle_node["size"][1], 900)
 
         apply_node = next(
             node for node in self.angle_360["nodes"] if node["type"] == "AnimaApplyReferenceLatent"
@@ -76,6 +78,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("app.registerExtension", source)
         self.assertIn("Anima360AngleControl", source)
         self.assertIn("live OpenPose preview", source)
+        self.assertIn("pose_preview", source)
+        self.assertNotIn("onDrawForeground", source)
 
     def test_hires_workflows_do_not_use_removed_custom_nodes(self):
         removed_nodes = {

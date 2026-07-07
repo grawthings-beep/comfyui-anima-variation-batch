@@ -95,15 +95,19 @@ from numeric camera controls:
 - `pitch_degrees`: low-angle to high-angle camera tilt;
 - `roll_degrees`: dutch/canted camera tilt;
 - `zoom`: wide shot through close-up framing;
+- `left_arm_raise`, `right_arm_raise`: raise or lower each arm;
+- `left_elbow_bend`, `right_elbow_bend`: bend or extend each elbow;
+- `left_leg_lift`, `right_leg_lift`: lift either leg forward;
+- `left_knee_bend`, `right_knee_bend`: bend or straighten each knee;
 - `line_thickness`: guide strength before VAE encoding.
 
-The browser extension also draws a live OpenPose preview directly inside the
-node, so yaw/pitch/roll/zoom changes are visible before queueing generation.
+The browser extension draws a reserved live OpenPose preview widget inside the
+node, so camera and limb-pose changes are visible before queueing generation.
 
 The node also encodes a positive prompt that includes the selected camera
-angle. The workflow VAE-encodes the generated OpenPose-style guide and
-`Anima Apply Reference Latent` attaches that latent to the positive and
-negative conditioning as `reference_latents`. With
+angle and larger limb-pose changes. The workflow VAE-encodes the generated
+OpenPose-style guide and `Anima Apply Reference Latent` attaches that latent to
+the positive and negative conditioning as `reference_latents`. With
 `qwen_image_union_diffsynth_lora.safetensors` loaded, Qwen Image receives both
 a structural reference and a matching camera prompt, so the angle is much more
 enforceable than prompt-only view tags.

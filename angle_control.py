@@ -48,6 +48,15 @@ OPENPOSE_JOINTS = (
     "nose",
 )
 
+DEFAULT_LEFT_ARM_RAISE = 15
+DEFAULT_RIGHT_ARM_RAISE = 15
+DEFAULT_LEFT_ELBOW_BEND = 25
+DEFAULT_RIGHT_ELBOW_BEND = 25
+DEFAULT_LEFT_LEG_LIFT = 0
+DEFAULT_RIGHT_LEG_LIFT = 0
+DEFAULT_LEFT_KNEE_BEND = 0
+DEFAULT_RIGHT_KNEE_BEND = 0
+
 
 def clamp(value, minimum, maximum):
     return max(minimum, min(maximum, value))
@@ -111,6 +120,49 @@ def build_angle_prompt(yaw_degrees, pitch_degrees, zoom):
     )
 
 
+def build_pose_prompt(
+    left_arm_raise=DEFAULT_LEFT_ARM_RAISE,
+    right_arm_raise=DEFAULT_RIGHT_ARM_RAISE,
+    left_elbow_bend=DEFAULT_LEFT_ELBOW_BEND,
+    right_elbow_bend=DEFAULT_RIGHT_ELBOW_BEND,
+    left_leg_lift=DEFAULT_LEFT_LEG_LIFT,
+    right_leg_lift=DEFAULT_RIGHT_LEG_LIFT,
+    left_knee_bend=DEFAULT_LEFT_KNEE_BEND,
+    right_knee_bend=DEFAULT_RIGHT_KNEE_BEND,
+):
+    terms = []
+
+    def add_arm(side, raise_value, bend_value):
+        raise_value = float(raise_value)
+        bend_value = float(bend_value)
+        if raise_value >= 70:
+            terms.append(f"{side} arm raised")
+        elif raise_value <= -20:
+            terms.append(f"{side} arm lowered")
+        if bend_value >= 55:
+            terms.append(f"{side} elbow bent")
+        elif bend_value <= -20:
+            terms.append(f"{side} arm extended")
+
+    def add_leg(side, lift_value, bend_value):
+        lift_value = float(lift_value)
+        bend_value = float(bend_value)
+        if lift_value >= 35:
+            terms.append(f"{side} knee lifted forward")
+        elif lift_value <= -20:
+            terms.append(f"{side} leg stretched back")
+        if bend_value >= 40:
+            terms.append(f"{side} knee bent")
+        elif bend_value <= -20:
+            terms.append(f"{side} leg straight")
+
+    add_arm("left", left_arm_raise, left_elbow_bend)
+    add_arm("right", right_arm_raise, right_elbow_bend)
+    add_leg("left", left_leg_lift, left_knee_bend)
+    add_leg("right", right_leg_lift, right_knee_bend)
+    return ", ".join(terms)
+
+
 def join_prompt(*parts):
     return ", ".join(
         str(part).strip(" \t\r\n,")
@@ -119,10 +171,37 @@ def join_prompt(*parts):
     )
 
 
-def build_full_prompt(base_prompt, yaw_degrees, pitch_degrees, zoom, add_angle_prompt):
+def build_full_prompt(
+    base_prompt,
+    yaw_degrees,
+    pitch_degrees,
+    zoom,
+    add_angle_prompt,
+    left_arm_raise=DEFAULT_LEFT_ARM_RAISE,
+    right_arm_raise=DEFAULT_RIGHT_ARM_RAISE,
+    left_elbow_bend=DEFAULT_LEFT_ELBOW_BEND,
+    right_elbow_bend=DEFAULT_RIGHT_ELBOW_BEND,
+    left_leg_lift=DEFAULT_LEFT_LEG_LIFT,
+    right_leg_lift=DEFAULT_RIGHT_LEG_LIFT,
+    left_knee_bend=DEFAULT_LEFT_KNEE_BEND,
+    right_knee_bend=DEFAULT_RIGHT_KNEE_BEND,
+):
     if not add_angle_prompt:
         return str(base_prompt).strip()
-    return join_prompt(base_prompt, build_angle_prompt(yaw_degrees, pitch_degrees, zoom))
+    return join_prompt(
+        base_prompt,
+        build_angle_prompt(yaw_degrees, pitch_degrees, zoom),
+        build_pose_prompt(
+            left_arm_raise,
+            right_arm_raise,
+            left_elbow_bend,
+            right_elbow_bend,
+            left_leg_lift,
+            right_leg_lift,
+            left_knee_bend,
+            right_knee_bend,
+        ),
+    )
 
 
 def _rotate(point, yaw, pitch):
@@ -172,6 +251,106 @@ def _draw_line(draw, start, end, width, fill):
     draw.line([_point2(start), _point2(end)], fill=fill, width=width, joint="curve")
 
 
+def _arm_points(side, shoulder, arm_raise, elbow_bend):
+    arm_raise = clamp(float(arm_raise), -90.0, 160.0)
+    elbow_bend = clamp(float(elbow_bend), -80.0, 150.0)
+    upper_len = 0.51
+    lower_len = 0.49
+
+    upper_angle = math.radians(arm_raise)
+    elbow = (
+        shoulder[0] + side * math.sin(upper_angle) * upper_len * 0.92,
+        shoulder[1] - math.cos(upper_angle) * upper_len,
+        shoulder[2] - 0.04,
+    )
+
+    lower_angle = math.radians(arm_raise - elbow_bend)
+    wrist = (
+        elbow[0] + side * math.sin(lower_angle) * lower_len * 0.92,
+        elbow[1] - math.cos(lower_angle) * lower_len,
+        elbow[2] - 0.04,
+    )
+    return elbow, wrist
+
+
+def _leg_points(side, hip, leg_lift, knee_bend):
+    leg_lift = clamp(float(leg_lift), -45.0, 90.0)
+    knee_bend = clamp(float(knee_bend), -40.0, 120.0)
+    upper_len = 0.66
+    lower_len = 0.57
+
+    upper_angle = math.radians(leg_lift)
+    knee = (
+        hip[0] + side * 0.02,
+        hip[1] - math.cos(upper_angle) * upper_len,
+        hip[2] - math.sin(upper_angle) * upper_len * 0.85 + 0.03,
+    )
+
+    lower_angle = math.radians(leg_lift - knee_bend)
+    ankle = (
+        knee[0] + side * 0.02,
+        knee[1] - math.cos(lower_angle) * lower_len,
+        knee[2] - math.sin(lower_angle) * lower_len * 0.85 - 0.07,
+    )
+    return knee, ankle
+
+
+def build_body_points(
+    left_arm_raise=DEFAULT_LEFT_ARM_RAISE,
+    right_arm_raise=DEFAULT_RIGHT_ARM_RAISE,
+    left_elbow_bend=DEFAULT_LEFT_ELBOW_BEND,
+    right_elbow_bend=DEFAULT_RIGHT_ELBOW_BEND,
+    left_leg_lift=DEFAULT_LEFT_LEG_LIFT,
+    right_leg_lift=DEFAULT_RIGHT_LEG_LIFT,
+    left_knee_bend=DEFAULT_LEFT_KNEE_BEND,
+    right_knee_bend=DEFAULT_RIGHT_KNEE_BEND,
+):
+    joints = {
+        "head": (0.0, 1.33, -0.02),
+        "neck": (0.0, 1.05, 0.0),
+        "chest": (0.0, 0.72, -0.02),
+        "pelvis": (0.0, 0.0, 0.02),
+        "chest_front": (0.0, 0.74, -0.16),
+        "chest_back": (0.0, 0.74, 0.16),
+        "pelvis_front": (0.0, 0.02, -0.12),
+        "pelvis_back": (0.0, 0.02, 0.12),
+        "left_shoulder": (-0.38, 0.94, 0.0),
+        "right_shoulder": (0.38, 0.94, 0.0),
+        "left_hip": (-0.24, 0.0, 0.02),
+        "right_hip": (0.24, 0.0, 0.02),
+        "nose": (0.0, 1.33, -0.28),
+        "left_eye": (-0.07, 1.38, -0.22),
+        "right_eye": (0.07, 1.38, -0.22),
+        "mouth_left": (-0.06, 1.27, -0.22),
+        "mouth_right": (0.06, 1.27, -0.22),
+    }
+    joints["left_elbow"], joints["left_wrist"] = _arm_points(
+        -1,
+        joints["left_shoulder"],
+        left_arm_raise,
+        left_elbow_bend,
+    )
+    joints["right_elbow"], joints["right_wrist"] = _arm_points(
+        1,
+        joints["right_shoulder"],
+        right_arm_raise,
+        right_elbow_bend,
+    )
+    joints["left_knee"], joints["left_ankle"] = _leg_points(
+        -1,
+        joints["left_hip"],
+        left_leg_lift,
+        left_knee_bend,
+    )
+    joints["right_knee"], joints["right_ankle"] = _leg_points(
+        1,
+        joints["right_hip"],
+        right_leg_lift,
+        right_knee_bend,
+    )
+    return joints
+
+
 def render_angle_guide(
     width,
     height,
@@ -180,6 +359,14 @@ def render_angle_guide(
     roll_degrees,
     zoom,
     line_thickness=6,
+    left_arm_raise=DEFAULT_LEFT_ARM_RAISE,
+    right_arm_raise=DEFAULT_RIGHT_ARM_RAISE,
+    left_elbow_bend=DEFAULT_LEFT_ELBOW_BEND,
+    right_elbow_bend=DEFAULT_RIGHT_ELBOW_BEND,
+    left_leg_lift=DEFAULT_LEFT_LEG_LIFT,
+    right_leg_lift=DEFAULT_RIGHT_LEG_LIFT,
+    left_knee_bend=DEFAULT_LEFT_KNEE_BEND,
+    right_knee_bend=DEFAULT_RIGHT_KNEE_BEND,
 ):
     width = int(clamp(int(width), 256, 4096))
     height = int(clamp(int(height), 256, 4096))
@@ -209,33 +396,16 @@ def render_angle_guide(
             zoom,
         )
 
-    joints = {
-        "head": (0.0, 1.33, -0.02),
-        "neck": (0.0, 1.05, 0.0),
-        "chest": (0.0, 0.72, -0.02),
-        "pelvis": (0.0, 0.0, 0.02),
-        "chest_front": (0.0, 0.74, -0.16),
-        "chest_back": (0.0, 0.74, 0.16),
-        "pelvis_front": (0.0, 0.02, -0.12),
-        "pelvis_back": (0.0, 0.02, 0.12),
-        "left_shoulder": (-0.38, 0.94, 0.0),
-        "right_shoulder": (0.38, 0.94, 0.0),
-        "left_elbow": (-0.52, 0.45, -0.04),
-        "right_elbow": (0.52, 0.45, -0.04),
-        "left_wrist": (-0.43, -0.03, -0.08),
-        "right_wrist": (0.43, -0.03, -0.08),
-        "left_hip": (-0.24, 0.0, 0.02),
-        "right_hip": (0.24, 0.0, 0.02),
-        "left_knee": (-0.22, -0.66, 0.05),
-        "right_knee": (0.22, -0.66, 0.05),
-        "left_ankle": (-0.24, -1.22, -0.02),
-        "right_ankle": (0.24, -1.22, -0.02),
-        "nose": (0.0, 1.33, -0.28),
-        "left_eye": (-0.07, 1.38, -0.22),
-        "right_eye": (0.07, 1.38, -0.22),
-        "mouth_left": (-0.06, 1.27, -0.22),
-        "mouth_right": (0.06, 1.27, -0.22),
-    }
+    joints = build_body_points(
+        left_arm_raise,
+        right_arm_raise,
+        left_elbow_bend,
+        right_elbow_bend,
+        left_leg_lift,
+        right_leg_lift,
+        left_knee_bend,
+        right_knee_bend,
+    )
     projected = {name: project(point) for name, point in joints.items()}
 
     def segment_depth(segment):

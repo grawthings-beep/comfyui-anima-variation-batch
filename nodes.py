@@ -5,9 +5,31 @@ import torch
 import node_helpers
 
 try:
-    from .angle_control import build_full_prompt, render_angle_guide
+    from .angle_control import (
+        DEFAULT_LEFT_ARM_RAISE,
+        DEFAULT_LEFT_ELBOW_BEND,
+        DEFAULT_LEFT_KNEE_BEND,
+        DEFAULT_LEFT_LEG_LIFT,
+        DEFAULT_RIGHT_ARM_RAISE,
+        DEFAULT_RIGHT_ELBOW_BEND,
+        DEFAULT_RIGHT_KNEE_BEND,
+        DEFAULT_RIGHT_LEG_LIFT,
+        build_full_prompt,
+        render_angle_guide,
+    )
 except ImportError:
-    from angle_control import build_full_prompt, render_angle_guide
+    from angle_control import (
+        DEFAULT_LEFT_ARM_RAISE,
+        DEFAULT_LEFT_ELBOW_BEND,
+        DEFAULT_LEFT_KNEE_BEND,
+        DEFAULT_LEFT_LEG_LIFT,
+        DEFAULT_RIGHT_ARM_RAISE,
+        DEFAULT_RIGHT_ELBOW_BEND,
+        DEFAULT_RIGHT_KNEE_BEND,
+        DEFAULT_RIGHT_LEG_LIFT,
+        build_full_prompt,
+        render_angle_guide,
+    )
 
 
 def pil_to_image_tensor(image):
@@ -24,7 +46,7 @@ class Anima360AngleControl:
                 "base_prompt": (
                     "STRING",
                     {
-                        "multiline": True,
+                        "multiline": False,
                         "dynamicPrompts": False,
                         "default": (
                             "masterpiece, best quality, score_8, highres, safe, "
@@ -75,6 +97,86 @@ class Anima360AngleControl:
                         "display": "slider",
                     },
                 ),
+                "left_arm_raise": (
+                    "INT",
+                    {
+                        "default": DEFAULT_LEFT_ARM_RAISE,
+                        "min": -90,
+                        "max": 160,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "right_arm_raise": (
+                    "INT",
+                    {
+                        "default": DEFAULT_RIGHT_ARM_RAISE,
+                        "min": -90,
+                        "max": 160,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "left_elbow_bend": (
+                    "INT",
+                    {
+                        "default": DEFAULT_LEFT_ELBOW_BEND,
+                        "min": -80,
+                        "max": 150,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "right_elbow_bend": (
+                    "INT",
+                    {
+                        "default": DEFAULT_RIGHT_ELBOW_BEND,
+                        "min": -80,
+                        "max": 150,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "left_leg_lift": (
+                    "INT",
+                    {
+                        "default": DEFAULT_LEFT_LEG_LIFT,
+                        "min": -45,
+                        "max": 90,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "right_leg_lift": (
+                    "INT",
+                    {
+                        "default": DEFAULT_RIGHT_LEG_LIFT,
+                        "min": -45,
+                        "max": 90,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "left_knee_bend": (
+                    "INT",
+                    {
+                        "default": DEFAULT_LEFT_KNEE_BEND,
+                        "min": -40,
+                        "max": 120,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
+                "right_knee_bend": (
+                    "INT",
+                    {
+                        "default": DEFAULT_RIGHT_KNEE_BEND,
+                        "min": -40,
+                        "max": 120,
+                        "step": 1,
+                        "display": "slider",
+                    },
+                ),
                 "line_thickness": (
                     "INT",
                     {"default": 6, "min": 1, "max": 24, "step": 1},
@@ -94,7 +196,7 @@ class Anima360AngleControl:
     CATEGORY = "Anima/360 control"
     DESCRIPTION = (
         "Generates a custom 360-degree OpenPose-style camera guide image and "
-        "matching prompt conditioning from yaw, pitch, roll, and zoom controls."
+        "matching prompt conditioning from camera and limb-pose controls."
     )
 
     def build(
@@ -107,6 +209,14 @@ class Anima360AngleControl:
         pitch_degrees,
         roll_degrees,
         zoom,
+        left_arm_raise,
+        right_arm_raise,
+        left_elbow_bend,
+        right_elbow_bend,
+        left_leg_lift,
+        right_leg_lift,
+        left_knee_bend,
+        right_knee_bend,
         line_thickness,
         add_angle_prompt,
     ):
@@ -118,6 +228,14 @@ class Anima360AngleControl:
             roll_degrees,
             zoom,
             line_thickness=line_thickness,
+            left_arm_raise=left_arm_raise,
+            right_arm_raise=right_arm_raise,
+            left_elbow_bend=left_elbow_bend,
+            right_elbow_bend=right_elbow_bend,
+            left_leg_lift=left_leg_lift,
+            right_leg_lift=right_leg_lift,
+            left_knee_bend=left_knee_bend,
+            right_knee_bend=right_knee_bend,
         )
         prompt = build_full_prompt(
             base_prompt,
@@ -125,6 +243,14 @@ class Anima360AngleControl:
             pitch_degrees,
             zoom,
             add_angle_prompt,
+            left_arm_raise=left_arm_raise,
+            right_arm_raise=right_arm_raise,
+            left_elbow_bend=left_elbow_bend,
+            right_elbow_bend=right_elbow_bend,
+            left_leg_lift=left_leg_lift,
+            right_leg_lift=right_leg_lift,
+            left_knee_bend=left_knee_bend,
+            right_knee_bend=right_knee_bend,
         )
         tokens = clip.tokenize(prompt)
         positive = clip.encode_from_tokens_scheduled(tokens)

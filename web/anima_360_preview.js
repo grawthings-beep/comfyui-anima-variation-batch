@@ -1,5 +1,8 @@
 import { app } from "../../scripts/app.js";
 
+const PREVIEW_WIDGET_NAME = "pose_preview";
+const PREVIEW_HEIGHT = 260;
+
 const SEGMENTS = [
   ["neck", "right_shoulder", "#ff0000"],
   ["right_shoulder", "right_elbow", "#ff5500"],
@@ -43,7 +46,7 @@ const JOINTS = [
   "nose",
 ];
 
-const POINTS = {
+const BASE_POINTS = {
   head: [0.0, 1.33, -0.02],
   neck: [0.0, 1.05, 0.0],
   chest: [0.0, 0.72, -0.02],
@@ -54,16 +57,8 @@ const POINTS = {
   pelvis_back: [0.0, 0.02, 0.12],
   left_shoulder: [-0.38, 0.94, 0.0],
   right_shoulder: [0.38, 0.94, 0.0],
-  left_elbow: [-0.52, 0.45, -0.04],
-  right_elbow: [0.52, 0.45, -0.04],
-  left_wrist: [-0.43, -0.03, -0.08],
-  right_wrist: [0.43, -0.03, -0.08],
   left_hip: [-0.24, 0.0, 0.02],
   right_hip: [0.24, 0.0, 0.02],
-  left_knee: [-0.22, -0.66, 0.05],
-  right_knee: [0.22, -0.66, 0.05],
-  left_ankle: [-0.24, -1.22, -0.02],
-  right_ankle: [0.24, -1.22, -0.02],
   nose: [0.0, 1.33, -0.28],
   left_eye: [-0.07, 1.38, -0.22],
   right_eye: [0.07, 1.38, -0.22],
@@ -80,10 +75,91 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function radians(value) {
+  return (value * Math.PI) / 180;
+}
+
+function copyPoint(point) {
+  return [point[0], point[1], point[2]];
+}
+
+function armPoints(side, shoulder, armRaise, elbowBend) {
+  const raise = radians(clamp(Number(armRaise), -90, 160));
+  const bend = clamp(Number(elbowBend), -80, 150);
+  const upperLen = 0.51;
+  const lowerLen = 0.49;
+  const elbow = [
+    shoulder[0] + side * Math.sin(raise) * upperLen * 0.92,
+    shoulder[1] - Math.cos(raise) * upperLen,
+    shoulder[2] - 0.04,
+  ];
+
+  const lower = radians(clamp(Number(armRaise), -90, 160) - bend);
+  const wrist = [
+    elbow[0] + side * Math.sin(lower) * lowerLen * 0.92,
+    elbow[1] - Math.cos(lower) * lowerLen,
+    elbow[2] - 0.04,
+  ];
+  return [elbow, wrist];
+}
+
+function legPoints(side, hip, legLift, kneeBend) {
+  const lift = clamp(Number(legLift), -45, 90);
+  const bend = clamp(Number(kneeBend), -40, 120);
+  const upper = radians(lift);
+  const upperLen = 0.66;
+  const lowerLen = 0.57;
+  const knee = [
+    hip[0] + side * 0.02,
+    hip[1] - Math.cos(upper) * upperLen,
+    hip[2] - Math.sin(upper) * upperLen * 0.85 + 0.03,
+  ];
+
+  const lower = radians(lift - bend);
+  const ankle = [
+    knee[0] + side * 0.02,
+    knee[1] - Math.cos(lower) * lowerLen,
+    knee[2] - Math.sin(lower) * lowerLen * 0.85 - 0.07,
+  ];
+  return [knee, ankle];
+}
+
+function buildPoints(node) {
+  const points = Object.fromEntries(
+    Object.entries(BASE_POINTS).map(([name, point]) => [name, copyPoint(point)]),
+  );
+
+  [points.left_elbow, points.left_wrist] = armPoints(
+    -1,
+    points.left_shoulder,
+    widgetValue(node, "left_arm_raise", 15),
+    widgetValue(node, "left_elbow_bend", 25),
+  );
+  [points.right_elbow, points.right_wrist] = armPoints(
+    1,
+    points.right_shoulder,
+    widgetValue(node, "right_arm_raise", 15),
+    widgetValue(node, "right_elbow_bend", 25),
+  );
+  [points.left_knee, points.left_ankle] = legPoints(
+    -1,
+    points.left_hip,
+    widgetValue(node, "left_leg_lift", 0),
+    widgetValue(node, "left_knee_bend", 0),
+  );
+  [points.right_knee, points.right_ankle] = legPoints(
+    1,
+    points.right_hip,
+    widgetValue(node, "right_leg_lift", 0),
+    widgetValue(node, "right_knee_bend", 0),
+  );
+  return points;
+}
+
 function rotate(point, yaw, pitch) {
   const [x, y, z] = point;
-  const yawRad = (yaw * Math.PI) / 180;
-  const pitchRad = (pitch * Math.PI) / 180;
+  const yawRad = radians(yaw);
+  const pitchRad = radians(pitch);
   const cosYaw = Math.cos(yawRad);
   const sinYaw = Math.sin(yawRad);
   const xr = x * cosYaw + z * sinYaw;
@@ -99,7 +175,7 @@ function project(point, box, yaw, pitch, roll, zoom) {
   const scale = Math.min(box.width, box.height) * (0.95 + zoom * 0.07);
   const px = (x * scale) / denom;
   const py = (y * scale) / denom;
-  const rollRad = (roll * Math.PI) / 180;
+  const rollRad = radians(roll);
   const cosRoll = Math.cos(rollRad);
   const sinRoll = Math.sin(rollRad);
   return {
@@ -107,6 +183,23 @@ function project(point, box, yaw, pitch, roll, zoom) {
     y: box.y + box.height * 0.56 - (px * sinRoll + py * cosRoll),
     z,
   };
+}
+
+function drawRoundRect(ctx, x, y, width, height, radius) {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, width, height, radius);
+    return;
+  }
+  const r = Math.min(radius, width * 0.5, height * 0.5);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
 }
 
 function drawSegment(ctx, points, start, end, color, width) {
@@ -120,14 +213,7 @@ function drawSegment(ctx, points, start, end, color, width) {
   ctx.stroke();
 }
 
-function drawPose(ctx, node) {
-  const padding = 14;
-  const box = {
-    x: padding,
-    y: Math.max(320, node.size[1] - 250),
-    width: Math.max(220, node.size[0] - padding * 2),
-    height: 230,
-  };
+function drawPose(ctx, node, box) {
   const yaw = Number(widgetValue(node, "yaw_degrees", 45)) % 360;
   const pitch = clamp(Number(widgetValue(node, "pitch_degrees", 0)), -75, 75);
   const roll = clamp(Number(widgetValue(node, "roll_degrees", 0)), -45, 45);
@@ -139,13 +225,13 @@ function drawPose(ctx, node) {
   ctx.strokeStyle = "#333";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.roundRect(box.x, box.y, box.width, box.height, 8);
+  drawRoundRect(ctx, box.x, box.y, box.width, box.height, 8);
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = "#aaa";
   ctx.font = "12px sans-serif";
-  ctx.fillText(`live OpenPose preview  yaw ${Math.round(yaw)}°`, box.x + 10, box.y + 18);
+  ctx.fillText(`live OpenPose preview  yaw ${Math.round(yaw)} deg`, box.x + 10, box.y + 18);
 
   const poseBox = {
     x: box.x + 12,
@@ -153,8 +239,9 @@ function drawPose(ctx, node) {
     width: box.width - 24,
     height: box.height - 34,
   };
+  const sourcePoints = buildPoints(node);
   const points = {};
-  for (const [name, point] of Object.entries(POINTS)) {
+  for (const [name, point] of Object.entries(sourcePoints)) {
     points[name] = project(point, poseBox, yaw, pitch, roll, zoom);
   }
 
@@ -174,7 +261,7 @@ function drawPose(ctx, node) {
   ctx.ellipse(head.x, head.y, radius, radius * 1.12, 0, 0, Math.PI * 2);
   ctx.stroke();
 
-  const frontVisibility = Math.cos((yaw * Math.PI) / 180);
+  const frontVisibility = Math.cos(radians(yaw));
   if (frontVisibility > 0.18) {
     drawSegment(ctx, points, "mouth_left", "mouth_right", "#ffffff", Math.max(1, thickness * 0.4));
   } else if (frontVisibility < -0.18) {
@@ -202,6 +289,47 @@ function markDirty(node) {
   app.graph?.setDirtyCanvas?.(true, true);
 }
 
+function addPreviewWidget(node) {
+  if (node.widgets?.some((widget) => widget.name === PREVIEW_WIDGET_NAME)) {
+    return;
+  }
+
+  const previewWidget = {
+    name: PREVIEW_WIDGET_NAME,
+    type: "anima_360_preview",
+    serialize: false,
+    computeSize(width) {
+      return [width, PREVIEW_HEIGHT];
+    },
+    draw(ctx, drawNode, widgetWidth, y, widgetHeight = PREVIEW_HEIGHT) {
+      drawPose(ctx, drawNode, {
+        x: 14,
+        y: y + 4,
+        width: Math.max(220, widgetWidth - 28),
+        height: Math.max(180, widgetHeight - 8),
+      });
+    },
+  };
+
+  node.widgets = node.widgets || [];
+  node.widgets.unshift(previewWidget);
+}
+
+function wrapWidgetCallbacks(node) {
+  for (const widget of node.widgets ?? []) {
+    if (widget.name === PREVIEW_WIDGET_NAME || widget._animaPreviewWrapped) {
+      continue;
+    }
+    const originalCallback = widget.callback;
+    widget.callback = (...args) => {
+      const callbackResult = originalCallback?.apply(widget, args);
+      markDirty(node);
+      return callbackResult;
+    };
+    widget._animaPreviewWrapped = true;
+  }
+}
+
 app.registerExtension({
   name: "grawthings.anima.360.preview",
   async beforeRegisterNodeDef(nodeType, nodeData) {
@@ -211,25 +339,14 @@ app.registerExtension({
     const originalCreated = nodeType.prototype.onNodeCreated;
     nodeType.prototype.onNodeCreated = function () {
       const result = originalCreated?.apply(this, arguments);
-      this.size = [Math.max(this.size?.[0] ?? 560, 620), Math.max(this.size?.[1] ?? 430, 590)];
-      for (const widget of this.widgets ?? []) {
-        const originalCallback = widget.callback;
-        widget.callback = (...args) => {
-          const callbackResult = originalCallback?.apply(widget, args);
-          markDirty(this);
-          return callbackResult;
-        };
-      }
+      addPreviewWidget(this);
+      wrapWidgetCallbacks(this);
+      this.size = [
+        Math.max(this.size?.[0] ?? 640, 680),
+        Math.max(this.size?.[1] ?? 820, 900),
+      ];
       markDirty(this);
       return result;
-    };
-
-    const originalDrawForeground = nodeType.prototype.onDrawForeground;
-    nodeType.prototype.onDrawForeground = function (ctx) {
-      originalDrawForeground?.apply(this, arguments);
-      if (!this.flags?.collapsed) {
-        drawPose(ctx, this);
-      }
     };
   },
 });

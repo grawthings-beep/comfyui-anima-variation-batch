@@ -3,6 +3,7 @@ import unittest
 from angle_control import (
     build_angle_prompt,
     build_full_prompt,
+    build_pose_prompt,
     describe_yaw,
     render_angle_guide,
 )
@@ -30,6 +31,22 @@ class AngleControlTests(unittest.TestCase):
             "masterpiece, 1girl",
         )
 
+    def test_pose_prompt_describes_large_limb_changes(self):
+        prompt = build_pose_prompt(
+            left_arm_raise=100,
+            right_arm_raise=15,
+            left_elbow_bend=70,
+            right_elbow_bend=25,
+            left_leg_lift=55,
+            right_leg_lift=0,
+            left_knee_bend=60,
+            right_knee_bend=0,
+        )
+        self.assertIn("left arm raised", prompt)
+        self.assertIn("left elbow bent", prompt)
+        self.assertIn("left knee lifted forward", prompt)
+        self.assertIn("left knee bent", prompt)
+
     def test_rendered_guide_has_expected_shape_and_range(self):
         image = render_angle_guide(320, 512, 45, 10, 0, 5, line_thickness=4)
         self.assertEqual(image.size, (320, 512))
@@ -43,6 +60,24 @@ class AngleControlTests(unittest.TestCase):
         front = render_angle_guide(320, 512, 0, 0, 0, 5, line_thickness=4)
         side = render_angle_guide(320, 512, 90, 0, 0, 5, line_thickness=4)
         diff = sum(abs(a - b) for a, b in zip(front.tobytes(), side.tobytes()))
+        self.assertGreater(diff, 100)
+
+    def test_limb_controls_change_rendered_control_image(self):
+        neutral = render_angle_guide(320, 512, 45, 0, 0, 5, line_thickness=4)
+        posed = render_angle_guide(
+            320,
+            512,
+            45,
+            0,
+            0,
+            5,
+            line_thickness=4,
+            left_arm_raise=110,
+            right_elbow_bend=80,
+            left_leg_lift=60,
+            right_knee_bend=70,
+        )
+        diff = sum(abs(a - b) for a, b in zip(neutral.tobytes(), posed.tobytes()))
         self.assertGreater(diff, 100)
 
 
