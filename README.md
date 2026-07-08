@@ -72,14 +72,39 @@ wget -O "$COMFY/models/upscale_models/4x-AnimeSharp.pth" \
   "https://objectstorage.us-phoenix-1.oraclecloud.com/n/ax6ygfvpvzka/b/open-modeldb-files/o/4x-FatePlus-lite.pth"
 ```
 
+## Optional character LoRA downloads
+
+`config/anima-loras.json` contains download metadata for the private Anima
+character LoRAs, including Bikini Cinderella. The repository contains only
+metadata, not model weights.
+
+List available IDs:
+
+```bash
+python scripts/download_loras.py --list
+```
+
+Download selected LoRAs:
+
+```bash
+hf auth login
+python scripts/download_loras.py \
+  --root /workspace/comfyui \
+  --id bikini-cinderella
+```
+
+Omit `--id` to download every listed character LoRA. Files are installed under
+`models/loras/anima/`. A successful `hf auth login` is required because the
+LoRA repository is private.
+
 ## License
 
 GPL-3.0-only. See `LICENSE`.
 
-This repository does not distribute Anima, Qwen, or upscaler weights. Check the
-license of every model used in your workflow. The official Anima model and
-derivatives are restricted to non-commercial use unless a commercial license is
-obtained.
+This repository does not distribute Anima, Qwen, LoRA, or upscaler weights.
+Check the license of every model used in your workflow. The official Anima
+model and derivatives are restricted to non-commercial use unless a commercial
+license is obtained.
 
 - [Official Anima model card](https://huggingface.co/circlestone-labs/Anima)
 - [ComfyUI](https://github.com/Comfy-Org/ComfyUI)
