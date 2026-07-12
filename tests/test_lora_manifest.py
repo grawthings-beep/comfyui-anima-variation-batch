@@ -38,6 +38,7 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["label"]["trigger"], "l4bel")
         self.assertEqual(by_id["arkrangerblack"]["trigger"], "4rkblack")
         self.assertEqual(by_id["marciana"]["trigger"], "m4rciana")
+        self.assertEqual(by_id["marciana-3"]["trigger"], "m4rciana")
         self.assertEqual(by_id["littlemermaid"]["trigger"], "l1m3rma1d")
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
         self.assertEqual(by_id["anisstar3"]["trigger"], "an1sstar3")
@@ -46,6 +47,11 @@ class LoraManifestTests(unittest.TestCase):
             by_id["marciana"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_marciana.safetensors",
+        )
+        self.assertEqual(
+            by_id["marciana-3"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_marciana%20(3).safetensors",
         )
         self.assertEqual(
             by_id["littlemermaid"]["url"],
@@ -77,6 +83,14 @@ class LoraManifestTests(unittest.TestCase):
             (
                 "uwgm/nikke-loras",
                 "anima_anisstar (2).safetensors",
+            ),
+        )
+        entry = next(item for item in self.entries if item["id"] == "marciana-3")
+        self.assertEqual(
+            parse_hf_resolve_url(entry["url"]),
+            (
+                "uwgm/nikke-loras",
+                "anima_marciana (3).safetensors",
             ),
         )
 
