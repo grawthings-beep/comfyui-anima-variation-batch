@@ -127,8 +127,8 @@
       "id": "snowwhite",
       "name": "Snow White Anima LoRA (trigger: sn0white)",
       "trigger": "sn0white",
-      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_snowwhite.safetensors",
-      "path": "models/loras/anima/anima_snowwhite.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_snowwhite%20(1).safetensors",
+      "path": "models/loras/anima/anima_snowwhite_1.safetensors",
       "min_bytes": 1048576
     },
     {

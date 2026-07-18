@@ -39,6 +39,7 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["arkrangerblack"]["trigger"], "4rkblack")
         self.assertEqual(by_id["marciana"]["trigger"], "m4rciana")
         self.assertEqual(by_id["marciana-3"]["trigger"], "m4rciana")
+        self.assertEqual(by_id["snowwhite"]["trigger"], "sn0white")
         self.assertEqual(by_id["littlemermaid"]["trigger"], "l1m3rma1d")
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
         self.assertEqual(by_id["anisstar3"]["trigger"], "an1sstar3")
@@ -52,6 +53,15 @@ class LoraManifestTests(unittest.TestCase):
             by_id["marciana-3"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_marciana%20(3).safetensors",
+        )
+        self.assertEqual(
+            by_id["snowwhite"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_snowwhite%20(1).safetensors",
+        )
+        self.assertEqual(
+            by_id["snowwhite"]["path"],
+            "models/loras/anima/anima_snowwhite_1.safetensors",
         )
         self.assertEqual(
             by_id["littlemermaid"]["url"],
@@ -91,6 +101,14 @@ class LoraManifestTests(unittest.TestCase):
             (
                 "uwgm/nikke-loras",
                 "anima_marciana (3).safetensors",
+            ),
+        )
+        entry = next(item for item in self.entries if item["id"] == "snowwhite")
+        self.assertEqual(
+            parse_hf_resolve_url(entry["url"]),
+            (
+                "uwgm/nikke-loras",
+                "anima_snowwhite (1).safetensors",
             ),
         )
 
