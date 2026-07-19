@@ -35,6 +35,7 @@ class LoraManifestTests(unittest.TestCase):
 
     def test_recent_loras_are_present(self):
         by_id = {entry["id"]: entry for entry in self.entries}
+        self.assertEqual(by_id["eris"]["trigger"], "3r1s")
         self.assertEqual(by_id["label"]["trigger"], "l4bel")
         self.assertEqual(by_id["arkrangerblack"]["trigger"], "4rkblack")
         self.assertEqual(by_id["marciana"]["trigger"], "m4rciana")
@@ -44,6 +45,11 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
         self.assertEqual(by_id["anisstar3"]["trigger"], "an1sstar3")
         self.assertEqual(by_id["pixel-came"]["trigger"], "CAME")
+        self.assertEqual(
+            by_id["eris"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_eris.safetensors",
+        )
         self.assertEqual(
             by_id["marciana"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
