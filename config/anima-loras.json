@@ -111,8 +111,16 @@
       "id": "moran",
       "name": "Moran Anima LoRA (trigger: m0ran)",
       "trigger": "m0ran",
-      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_moran.safetensors",
-      "path": "models/loras/anima/anima_moran.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_moran%20(1).safetensors",
+      "path": "models/loras/anima/anima_moran_1.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "laplace",
+      "name": "Laplace Anima LoRA (trigger: l4place)",
+      "trigger": "l4place",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_laplace.safetensors",
+      "path": "models/loras/anima/anima_laplace.safetensors",
       "min_bytes": 1048576
     },
     {

@@ -38,8 +38,10 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["eris"]["trigger"], "3r1s")
         self.assertEqual(by_id["label"]["trigger"], "l4bel")
         self.assertEqual(by_id["arkrangerblack"]["trigger"], "4rkblack")
+        self.assertEqual(by_id["laplace"]["trigger"], "l4place")
         self.assertEqual(by_id["marciana"]["trigger"], "m4rciana")
         self.assertEqual(by_id["marciana-3"]["trigger"], "m4rciana")
+        self.assertEqual(by_id["moran"]["trigger"], "m0ran")
         self.assertEqual(by_id["snowwhite"]["trigger"], "sn0white")
         self.assertEqual(by_id["littlemermaid"]["trigger"], "l1m3rma1d")
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
@@ -49,6 +51,20 @@ class LoraManifestTests(unittest.TestCase):
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_eris.safetensors",
+        )
+        self.assertEqual(
+            by_id["moran"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_moran%20(1).safetensors",
+        )
+        self.assertEqual(
+            by_id["moran"]["path"],
+            "models/loras/anima/anima_moran_1.safetensors",
+        )
+        self.assertEqual(
+            by_id["laplace"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_laplace.safetensors",
         )
         self.assertEqual(
             by_id["marciana"]["url"],
@@ -107,6 +123,14 @@ class LoraManifestTests(unittest.TestCase):
             (
                 "uwgm/nikke-loras",
                 "anima_marciana (3).safetensors",
+            ),
+        )
+        entry = next(item for item in self.entries if item["id"] == "moran")
+        self.assertEqual(
+            parse_hf_resolve_url(entry["url"]),
+            (
+                "uwgm/nikke-loras",
+                "anima_moran (1).safetensors",
             ),
         )
         entry = next(item for item in self.entries if item["id"] == "snowwhite")
