@@ -41,8 +41,10 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["laplace"]["trigger"], "l4place")
         self.assertEqual(by_id["marciana"]["trigger"], "m4rciana")
         self.assertEqual(by_id["marciana-3"]["trigger"], "m4rciana")
+        self.assertEqual(by_id["maxwell"]["trigger"], "m4xwell")
         self.assertEqual(by_id["moran"]["trigger"], "m0ran")
         self.assertEqual(by_id["snowwhite"]["trigger"], "sn0white")
+        self.assertEqual(by_id["swimsuit-elegg"]["trigger"], "swimsuitelegg")
         self.assertEqual(by_id["littlemermaid"]["trigger"], "l1m3rma1d")
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
         self.assertEqual(by_id["anisstar3"]["trigger"], "an1sstar3")
@@ -65,6 +67,16 @@ class LoraManifestTests(unittest.TestCase):
             by_id["laplace"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_laplace.safetensors",
+        )
+        self.assertEqual(
+            by_id["maxwell"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_maxwell.safetensors",
+        )
+        self.assertEqual(
+            by_id["swimsuit-elegg"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_swimsuit_elegg.safetensors",
         )
         self.assertEqual(
             by_id["marciana"]["url"],
