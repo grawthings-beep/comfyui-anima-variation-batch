@@ -1,11 +1,14 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from install import MANAGER_INSTALL_ARGUMENTS
 from scripts.install_anima_controls import (
     InstallError,
     discover_comfyui_root,
     download_artifact,
+    find_hf_command,
     install_workflow,
     is_comfyui_root,
     verify_core_support,
@@ -24,6 +27,10 @@ class InstallAnimaControlsTests(unittest.TestCase):
             root = self.make_root(directory)
             self.assertTrue(is_comfyui_root(root))
             self.assertEqual(discover_comfyui_root(str(root)), root.resolve())
+
+    def test_manager_hook_installs_required_patches_but_defers_preprocessors(self):
+        self.assertIn("--skip-preprocessor-models", MANAGER_INSTALL_ARGUMENTS)
+        self.assertNotIn("--skip-workflow", MANAGER_INSTALL_ARGUMENTS)
 
     def test_core_support_check_reports_missing_native_nodes(self):
         manifest = {
@@ -68,6 +75,18 @@ class InstallAnimaControlsTests(unittest.TestCase):
                 dry_run=False,
             )
             self.assertEqual(output.read_bytes(), b"valid")
+
+    def test_hf_command_is_found_in_interpreter_scripts_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            scripts = Path(directory) / "Scripts"
+            scripts.mkdir()
+            command = scripts / "hf.exe"
+            command.write_bytes(b"")
+            with (
+                mock.patch("shutil.which", return_value=None),
+                mock.patch("sysconfig.get_path", return_value=str(scripts)),
+            ):
+                self.assertEqual(find_hf_command(), str(command))
 
     def test_workflow_is_copied_to_default_user_folder(self):
         with tempfile.TemporaryDirectory() as directory:

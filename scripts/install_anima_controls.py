@@ -10,6 +10,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import sysconfig
 import tempfile
 
 
@@ -178,10 +179,17 @@ def find_hf_command() -> str:
         return command
 
     executable_dir = pathlib.Path(sys.executable).resolve().parent
-    for name in ("hf", "hf.exe", "hf.cmd"):
-        candidate = executable_dir / name
-        if candidate.is_file():
-            return str(candidate)
+    script_directories = (
+        pathlib.Path(sysconfig.get_path("scripts")),
+        executable_dir,
+        executable_dir / "Scripts",
+        executable_dir / "bin",
+    )
+    for directory in script_directories:
+        for name in ("hf", "hf.exe", "hf.cmd"):
+            candidate = directory / name
+            if candidate.is_file():
+                return str(candidate)
 
     raise InstallError(
         "the Hugging Face 'hf' command was not found; install it with "
@@ -257,7 +265,7 @@ def install_workflow(
     return destination
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Install native Anima LLLite Pose/Depth patches, ControlNet Aux "
@@ -293,7 +301,7 @@ def main() -> None:
     )
     parser.add_argument("--force", action="store_true", help="Redownload existing assets")
     parser.add_argument("--dry-run", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     try:
         root = discover_comfyui_root(args.root)

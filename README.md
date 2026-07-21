@@ -56,6 +56,20 @@ The controlled workflow uses ComfyUI's native `Load Model Patch` and
 or newer. The installer checks this and stops with an actionable error if the
 core is too old.
 
+On a fresh ComfyUI-Manager installation, the standard `install.py` hook
+automatically downloads the two required LLLite patches (about 31 MB total)
+and copies the workflow. Existing clones that predate this hook should pull
+the latest `main` and run the command below once.
+
+To repair only missing Pose/Depth patch files without reinstalling the
+preprocessors or workflow:
+
+```bash
+python scripts/install_anima_controls.py --root /workspace/comfyui \
+  --skip-controlnet-aux --skip-python-deps \
+  --skip-preprocessor-models --skip-workflow
+```
+
 Update ComfyUI first when needed:
 
 ```bash
