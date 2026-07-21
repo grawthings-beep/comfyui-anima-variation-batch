@@ -672,7 +672,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Hires-Fix + Pose / Depth control\n\n**Flow:** reference images -> DWPose / Depth Anything V2 -> Anima LLLite Pose -> Anima LLLite Depth -> first pass -> ESRGAN 1.5x -> second pass.\n\n## Use\n1. Upload a pose reference to **Pose reference**.\n2. Upload a depth/composition reference to **Depth reference**. The same photo may be used for both.\n3. Edit the prompt and queue. Preview nodes show the actual control maps.\n\n## Starting controls\n- Pose: strength 1.0, active 0.00-0.80.\n- Depth: strength 0.65, active 0.00-0.70.\n- Controls affect the first pass only. The 0.45-denoise second pass redraws detail while preserving its latent structure.\n- If anatomy becomes rigid, lower Depth first. If the pose is weak, raise Pose gradually.\n\n## Requirements\n- ComfyUI native Anima LLLite support (commit 0f42ba5 or newer).\n- comfyui_controlnet_aux.\n- anima-lllite-pose-1 and anima-lllite-depth-1 under models/model_patches.\n\n> Pose/Depth are legacy Preview3 sample patches. They run on Anima Base v1.0 with reduced quality; Pose is a soft prior, not a strict lock."
+        "# Anima Hires-Fix + Pose / Depth control\n\n**Flow:** reference images -> DWPose / Depth Anything V2 -> Anima LLLite Pose -> Anima LLLite Depth -> first pass -> ESRGAN 1.5x -> second pass.\n\n## Use\n1. Upload a pose reference to **Pose reference**.\n2. Upload a depth/composition reference to **Depth reference**. The same photo may be used for both.\n3. Edit the prompt and queue. Preview nodes show the actual control maps.\n\n## Starting controls\n- Pose: strength 1.0, active 0.00-0.80.\n- Depth: strength 0.65, active 0.00-0.70.\n- Controls affect the first pass only. The 0.45-denoise second pass redraws detail while preserving its latent structure.\n- If anatomy becomes rigid, lower Depth first. If the pose is weak, raise Pose gradually.\n\n## Requirements\n- kohya-ss/ComfyUI-Anima-LLLite compatibility node.\n- comfyui_controlnet_aux.\n- anima-lllite-pose-1 and anima-lllite-depth-1 under models/controlnet.\n\nThe repository prestartup hook installs these dependencies automatically for direct-clone and baked ComfyUI images.\n\n> Pose/Depth are Preview3 sample patches. They run on Anima Base v1.0 with reduced quality; Pose is a soft prior, not a strict lock."
       ],
       "color": "#222",
       "bgcolor": "#000"
@@ -770,55 +770,15 @@
       "title": "DWPose (body + hands + face)"
     },
     {
-      "id": 20,
-      "type": "ModelPatchLoader",
+      "id": 21,
+      "type": "AnimaLLLiteApply",
       "pos": [
         -100,
         720
       ],
       "size": [
-        310,
-        58
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "MODEL_PATCH",
-          "type": "MODEL_PATCH",
-          "links": [
-            23
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "ModelPatchLoader",
-        "models": [
-          {
-            "name": "anima-lllite-pose-1.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/Anima-LLLite/resolve/main/model_patches/anima-lllite-pose-1.safetensors",
-            "directory": "model_patches"
-          }
-        ]
-      },
-      "widgets_values": [
-        "anima-lllite-pose-1.safetensors"
-      ],
-      "title": "Load Pose LLLite patch"
-    },
-    {
-      "id": 21,
-      "type": "AnimaLLLiteApply",
-      "pos": [
-        250,
-        720
-      ],
-      "size": [
-        310,
-        166
+        360,
+        190
       ],
       "flags": {},
       "order": 12,
@@ -828,11 +788,6 @@
           "name": "model",
           "type": "MODEL",
           "link": 22
-        },
-        {
-          "name": "model_patch",
-          "type": "MODEL_PATCH",
-          "link": 23
         },
         {
           "name": "image",
@@ -856,13 +811,23 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "AnimaLLLiteApply"
+        "cnr_id": "ComfyUI-Anima-LLLite",
+        "aux_id": "kohya-ss/ComfyUI-Anima-LLLite",
+        "Node name for S&R": "AnimaLLLiteApply",
+        "models": [
+          {
+            "name": "anima-lllite-pose-1.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Anima-LLLite/resolve/main/model_patches/anima-lllite-pose-1.safetensors",
+            "directory": "controlnet"
+          }
+        ]
       },
       "widgets_values": [
+        "anima-lllite-pose-1.safetensors",
         1.0,
         0.0,
-        0.8
+        0.8,
+        true
       ],
       "title": "Apply Pose (strength 1.0)"
     },
@@ -949,55 +914,15 @@
       "title": "Depth Anything V2 Base"
     },
     {
-      "id": 24,
-      "type": "ModelPatchLoader",
+      "id": 25,
+      "type": "AnimaLLLiteApply",
       "pos": [
         -100,
         1160
       ],
       "size": [
-        310,
-        58
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "MODEL_PATCH",
-          "type": "MODEL_PATCH",
-          "links": [
-            27
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "ModelPatchLoader",
-        "models": [
-          {
-            "name": "anima-lllite-depth-1.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/Anima-LLLite/resolve/main/model_patches/anima-lllite-depth-1.safetensors",
-            "directory": "model_patches"
-          }
-        ]
-      },
-      "widgets_values": [
-        "anima-lllite-depth-1.safetensors"
-      ],
-      "title": "Load Depth LLLite patch"
-    },
-    {
-      "id": 25,
-      "type": "AnimaLLLiteApply",
-      "pos": [
-        250,
-        1160
-      ],
-      "size": [
-        310,
-        166
+        360,
+        190
       ],
       "flags": {},
       "order": 13,
@@ -1007,11 +932,6 @@
           "name": "model",
           "type": "MODEL",
           "link": 26
-        },
-        {
-          "name": "model_patch",
-          "type": "MODEL_PATCH",
-          "link": 27
         },
         {
           "name": "image",
@@ -1035,13 +955,23 @@
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "AnimaLLLiteApply"
+        "cnr_id": "ComfyUI-Anima-LLLite",
+        "aux_id": "kohya-ss/ComfyUI-Anima-LLLite",
+        "Node name for S&R": "AnimaLLLiteApply",
+        "models": [
+          {
+            "name": "anima-lllite-depth-1.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Anima-LLLite/resolve/main/model_patches/anima-lllite-depth-1.safetensors",
+            "directory": "controlnet"
+          }
+        ]
       },
       "widgets_values": [
+        "anima-lllite-depth-1.safetensors",
         0.65,
         0.0,
-        0.7
+        0.7,
+        true
       ],
       "title": "Apply Depth (strength 0.65)"
     },
@@ -1274,14 +1204,6 @@
       "MODEL"
     ],
     [
-      23,
-      20,
-      0,
-      21,
-      1,
-      "MODEL_PATCH"
-    ],
-    [
       24,
       18,
       0,
@@ -1294,7 +1216,7 @@
       19,
       0,
       21,
-      2,
+      1,
       "IMAGE"
     ],
     [
@@ -1304,14 +1226,6 @@
       25,
       0,
       "MODEL"
-    ],
-    [
-      27,
-      24,
-      0,
-      25,
-      1,
-      "MODEL_PATCH"
     ],
     [
       28,
@@ -1326,7 +1240,7 @@
       23,
       0,
       25,
-      2,
+      1,
       "IMAGE"
     ],
     [
@@ -1394,7 +1308,7 @@
     },
     "info": {
       "name": "Anima ESRGAN Hires-Fix with Pose and Depth LLLite",
-      "description": "Applies native ComfyUI Anima LLLite Pose and Depth patches to the first pass, then performs the existing ESRGAN 1.5x second pass."
+      "description": "Applies baked-ComfyUI-compatible Anima LLLite Pose and Depth controls to the first pass, then performs the existing ESRGAN 1.5x second pass."
     }
   },
   "version": 0.4

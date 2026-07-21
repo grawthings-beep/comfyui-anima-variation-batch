@@ -56,24 +56,22 @@ class WorkflowTests(unittest.TestCase):
             node_types = {node["type"] for node in workflow["nodes"]}
             self.assertTrue(node_types.isdisjoint(removed_nodes))
 
-    def test_pose_depth_workflow_uses_native_lllite_in_first_pass(self):
+    def test_pose_depth_workflow_uses_compatible_lllite_in_first_pass(self):
         nodes = {node["id"]: node for node in self.pose_depth["nodes"]}
         node_types = [node["type"] for node in self.pose_depth["nodes"]]
-        self.assertEqual(node_types.count("ModelPatchLoader"), 2)
+        self.assertNotIn("ModelPatchLoader", node_types)
         self.assertEqual(node_types.count("AnimaLLLiteApply"), 2)
         self.assertIn("DWPreprocessor", node_types)
         self.assertIn("DepthAnythingV2Preprocessor", node_types)
 
         self.assertEqual(
-            nodes[20]["widgets_values"],
-            ["anima-lllite-pose-1.safetensors"],
+            nodes[21]["widgets_values"],
+            ["anima-lllite-pose-1.safetensors", 1.0, 0.0, 0.8, True],
         )
         self.assertEqual(
-            nodes[24]["widgets_values"],
-            ["anima-lllite-depth-1.safetensors"],
+            nodes[25]["widgets_values"],
+            ["anima-lllite-depth-1.safetensors", 0.65, 0.0, 0.7, True],
         )
-        self.assertEqual(nodes[21]["widgets_values"], [1.0, 0.0, 0.8])
-        self.assertEqual(nodes[25]["widgets_values"], [0.65, 0.0, 0.7])
 
         sources = {
             (target_id, target_slot): (source_id, source_slot, link_type)
@@ -87,20 +85,18 @@ class WorkflowTests(unittest.TestCase):
             ) in self.pose_depth["links"]
         }
         self.assertEqual(sources[(21, 0)], (1, 0, "MODEL"))
-        self.assertEqual(sources[(21, 1)], (20, 0, "MODEL_PATCH"))
-        self.assertEqual(sources[(21, 2)], (19, 0, "IMAGE"))
+        self.assertEqual(sources[(21, 1)], (19, 0, "IMAGE"))
         self.assertEqual(sources[(25, 0)], (21, 0, "MODEL"))
-        self.assertEqual(sources[(25, 1)], (24, 0, "MODEL_PATCH"))
-        self.assertEqual(sources[(25, 2)], (23, 0, "IMAGE"))
+        self.assertEqual(sources[(25, 1)], (23, 0, "IMAGE"))
         self.assertEqual(sources[(7, 0)], (25, 0, "MODEL"))
         self.assertEqual(sources[(14, 0)], (1, 0, "MODEL"))
 
     def test_pose_depth_workflow_embeds_download_metadata(self):
         nodes = {node["id"]: node for node in self.pose_depth["nodes"]}
-        pose_model = nodes[20]["properties"]["models"][0]
-        depth_model = nodes[24]["properties"]["models"][0]
-        self.assertEqual(pose_model["directory"], "model_patches")
-        self.assertEqual(depth_model["directory"], "model_patches")
+        pose_model = nodes[21]["properties"]["models"][0]
+        depth_model = nodes[25]["properties"]["models"][0]
+        self.assertEqual(pose_model["directory"], "controlnet")
+        self.assertEqual(depth_model["directory"], "controlnet")
         self.assertTrue(pose_model["url"].endswith("anima-lllite-pose-1.safetensors"))
         self.assertTrue(depth_model["url"].endswith("anima-lllite-depth-1.safetensors"))
 

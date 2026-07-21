@@ -26,6 +26,7 @@ COMMON_COMFY_ROOTS = (
     pathlib.Path("/workspace/comfyui"),
     pathlib.Path("/opt/ComfyUI"),
     pathlib.Path("/opt/comfyui"),
+    pathlib.Path("/opt/comfyui-baked"),
 )
 
 
@@ -74,48 +75,28 @@ def discover_comfyui_root(explicit: str | None = None) -> pathlib.Path:
     )
 
 
-def verify_core_support(root: pathlib.Path, manifest: dict) -> None:
-    source = root / "comfy_extras" / "nodes_model_patch.py"
-    if not source.is_file():
-        raise InstallError(f"missing ComfyUI model-patch module: {source}")
-
-    text = source.read_text(encoding="utf-8")
-    missing = [
-        name
-        for name in manifest["core"]["required_nodes"]
-        if name not in text
-    ]
-    if missing:
-        commit = manifest["core"]["feature_commit"]
-        raise InstallError(
-            "ComfyUI is too old for native Anima LLLite support; missing "
-            f"{', '.join(missing)}. Update ComfyUI to commit {commit} or newer, "
-            "then rerun this installer."
-        )
-
-
 def run(command: list[str], *, dry_run: bool = False) -> None:
     print("RUN:", " ".join(command))
     if not dry_run:
         subprocess.run(command, check=True)
 
 
-def install_controlnet_aux(
+def install_node_dependency(
     root: pathlib.Path,
-    manifest: dict,
+    settings: dict,
     *,
+    label: str,
     install_python_deps: bool,
     dry_run: bool,
 ) -> pathlib.Path:
-    settings = manifest["controlnet_aux"]
     destination = root / settings["path"]
 
     if destination.exists():
         if not (destination / "__init__.py").is_file():
             raise InstallError(
-                f"refusing to replace non-ControlNet-Aux path: {destination}"
+                f"refusing to replace invalid {label} path: {destination}"
             )
-        print(f"KEEP existing ControlNet Aux: {destination}")
+        print(f"KEEP existing {label}: {destination}")
     else:
         run(
             [
@@ -153,7 +134,8 @@ def install_controlnet_aux(
             dry_run=dry_run,
         )
 
-    if install_python_deps:
+    marker = destination / f".anima-deps-{settings['commit'][:12]}"
+    if install_python_deps and not marker.is_file():
         requirements = destination / "requirements.txt"
         if dry_run or requirements.is_file():
             run(
@@ -167,10 +149,43 @@ def install_controlnet_aux(
                 ],
                 dry_run=dry_run,
             )
+            if not dry_run:
+                marker.touch()
         else:
-            raise InstallError(f"missing ControlNet Aux requirements: {requirements}")
+            print(f"No Python requirements for {label}: {destination}")
 
     return destination
+
+
+def install_controlnet_aux(
+    root: pathlib.Path,
+    manifest: dict,
+    *,
+    install_python_deps: bool,
+    dry_run: bool,
+) -> pathlib.Path:
+    return install_node_dependency(
+        root,
+        manifest["controlnet_aux"],
+        label="ControlNet Aux",
+        install_python_deps=install_python_deps,
+        dry_run=dry_run,
+    )
+
+
+def install_anima_lllite_node(
+    root: pathlib.Path,
+    manifest: dict,
+    *,
+    dry_run: bool,
+) -> pathlib.Path:
+    return install_node_dependency(
+        root,
+        manifest["anima_lllite_node"],
+        label="Anima LLLite compatibility node",
+        install_python_deps=False,
+        dry_run=dry_run,
+    )
 
 
 def find_hf_command() -> str:
@@ -268,7 +283,7 @@ def install_workflow(
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Install native Anima LLLite Pose/Depth patches, ControlNet Aux "
+            "Install Anima LLLite Pose/Depth support, ControlNet Aux "
             "preprocessors, and the ready-to-load ComfyUI workflow."
         )
     )
@@ -278,6 +293,11 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--workflow-dir",
         help="Override the destination (default: user/default/workflows)",
+    )
+    parser.add_argument(
+        "--skip-anima-node",
+        action="store_true",
+        help="Do not install the baked-ComfyUI-compatible Anima LLLite node",
     )
     parser.add_argument(
         "--skip-controlnet-aux",
@@ -306,8 +326,14 @@ def main(argv: list[str] | None = None) -> None:
     try:
         root = discover_comfyui_root(args.root)
         manifest = load_manifest(args.manifest)
-        verify_core_support(root, manifest)
         print(f"ComfyUI root: {root}")
+
+        if not args.skip_anima_node:
+            install_anima_lllite_node(
+                root,
+                manifest,
+                dry_run=args.dry_run,
+            )
 
         if not args.skip_controlnet_aux:
             install_controlnet_aux(
@@ -318,7 +344,7 @@ def main(argv: list[str] | None = None) -> None:
             )
 
         hf_command = find_hf_command()
-        entries = list(manifest["model_patches"])
+        entries = list(manifest["lllite_models"])
         entries.extend(manifest.get("upscale_models", []))
         if not args.skip_preprocessor_models:
             entries.extend(manifest["preprocessor_models"])
@@ -341,7 +367,7 @@ def main(argv: list[str] | None = None) -> None:
     except (InstallError, OSError, subprocess.CalledProcessError) as exc:
         raise SystemExit(f"ERROR: {exc}") from exc
 
-    print("Done. Restart ComfyUI, then load anima_hiresfix_esrgan_pose_depth.json.")
+    print("Done. Load anima_hiresfix_esrgan_pose_depth.json after ComfyUI starts.")
     print("Pose/Depth LLLite weights inherit Anima's non-commercial model license.")
 
 

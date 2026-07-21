@@ -4,13 +4,11 @@
 from scripts.install_anima_controls import main as install_anima_controls
 
 
-# ControlNet Aux downloads its own preprocessor checkpoints on first use. Keep
-# the Manager hook lightweight: install the two LLLite patches, AnimeSharp
-# upscaler (~98 MB total), and workflow. The full installer eagerly installs
-# the preprocessor checkpoints too.
+# ControlNet Aux downloads its own preprocessor checkpoints on first use. The
+# Manager hook installs both required node packs, the two LLLite patches,
+# AnimeSharp (~98 MB total), and the workflow. The full CLI installer can also
+# preload the larger preprocessor checkpoints.
 MANAGER_INSTALL_ARGUMENTS = (
-    "--skip-controlnet-aux",
-    "--skip-python-deps",
     "--skip-preprocessor-models",
 )
 

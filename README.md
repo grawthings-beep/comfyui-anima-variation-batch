@@ -44,53 +44,43 @@ For common RunPod images, the ComfyUI root is often one of:
 
 ```text
 /opt/ComfyUI
+/opt/comfyui-baked
 /workspace/ComfyUI
 /workspace/comfyui
 ```
 
 ## Install Pose and Depth control
 
-The controlled workflow uses ComfyUI's native `Load Model Patch` and
-`Apply Anima LLLite` nodes. They require ComfyUI commit
-[`0f42ba5`](https://github.com/Comfy-Org/ComfyUI/commit/0f42ba51463174fb255f2c4605ae0e0b441fe6d7)
-or newer. The installer checks this and stops with an actionable error if the
-core is too old.
+The controlled workflow uses the pinned
+[`kohya-ss/ComfyUI-Anima-LLLite`](https://github.com/kohya-ss/ComfyUI-Anima-LLLite)
+compatibility node instead of the newer native `ModelPatchLoader`. It works on
+baked ComfyUI images that cannot update their core checkout.
 
-On a fresh ComfyUI-Manager installation, the standard `install.py` hook
-automatically downloads the two required LLLite patches and AnimeSharp
-upscaler (about 98 MB total), then copies the workflow. Existing clones that
-predate this hook should pull the latest `main` and run the command below once.
+Both normal ComfyUI-Manager installs and direct clones are self-bootstrapping.
+The repository's `prestartup_script.py` runs before custom-node discovery and
+installs the Anima LLLite compatibility node, ControlNet Aux, required Python
+packages, two LLLite weights, AnimeSharp, and the workflow. DWPose and Depth
+Anything checkpoints are downloaded lazily on first use.
 
-To repair only missing required model files without reinstalling the
-preprocessors or workflow:
-
-```bash
-python scripts/install_anima_controls.py --root /workspace/comfyui \
-  --skip-controlnet-aux --skip-python-deps \
-  --skip-preprocessor-models --skip-workflow
-```
-
-Update ComfyUI first when needed:
-
-```bash
-cd /workspace/comfyui  # adjust for your image
-git pull --ff-only
-```
+Existing clones should pull the latest `main` and restart ComfyUI once.
 
 Then run the all-in-one installer with the same Python environment that runs
 ComfyUI:
 
 ```bash
-cd /workspace/comfyui/custom_nodes/ComfyUI-AnimaHiresFixWorkflows
-python scripts/install_anima_controls.py --root /workspace/comfyui
+cd /opt/comfyui-baked/custom_nodes/ComfyUI-AnimaVariationBatch
+git pull --ff-only
+python scripts/install_anima_controls.py --root /opt/comfyui-baked
 ```
 
 The installer:
 
 - keeps an existing `comfyui_controlnet_aux` installation, or installs a
   tested revision when it is absent;
+- installs a pinned Anima LLLite compatibility node, removing the dependency
+  on newer ComfyUI core nodes;
 - installs the preprocessor Python requirements;
-- downloads the Pose and Depth LLLite patches to `models/model_patches/`;
+- downloads the Pose and Depth LLLite weights to `models/controlnet/`;
 - downloads AnimeSharp to `models/upscale_models/`;
 - preloads DWPose and Depth Anything V2 Base into the ControlNet Aux cache;
 - copies the ready-to-load workflow to `user/default/workflows/`.

@@ -24,6 +24,11 @@ The LLLite download metadata points to
 mirrors the sample patches published by
 [kohya-ss/Anima-LLLite](https://huggingface.co/kohya-ss/Anima-LLLite).
 
+The installer also fetches the
+[ComfyUI-Anima-LLLite compatibility node](https://github.com/kohya-ss/ComfyUI-Anima-LLLite)
+at a pinned revision. Its upstream source is licensed under Apache-2.0 and is
+not copied into this repository.
+
 ## Control preprocessors
 
 The optional installer fetches

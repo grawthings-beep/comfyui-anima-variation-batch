@@ -1,29 +1,27 @@
 {
-  "core": {
-    "feature_commit": "0f42ba51463174fb255f2c4605ae0e0b441fe6d7",
-    "required_nodes": [
-      "ModelPatchLoader",
-      "AnimaLLLiteApply"
-    ]
+  "anima_lllite_node": {
+    "repository": "https://github.com/kohya-ss/ComfyUI-Anima-LLLite.git",
+    "commit": "6701c8d6fc3bf1b2ed966b87c95ce609c52cebea",
+    "path": "custom_nodes/ComfyUI-Anima-LLLite"
   },
   "controlnet_aux": {
     "repository": "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
     "commit": "e8b689a513c3e6b63edc44066560ca5919c0576e",
     "path": "custom_nodes/comfyui_controlnet_aux"
   },
-  "model_patches": [
+  "lllite_models": [
     {
       "id": "pose",
       "repo_id": "Comfy-Org/Anima-LLLite",
       "filename": "model_patches/anima-lllite-pose-1.safetensors",
-      "path": "models/model_patches/anima-lllite-pose-1.safetensors",
+      "path": "models/controlnet/anima-lllite-pose-1.safetensors",
       "min_bytes": 20000000
     },
     {
       "id": "depth",
       "repo_id": "Comfy-Org/Anima-LLLite",
       "filename": "model_patches/anima-lllite-depth-1.safetensors",
-      "path": "models/model_patches/anima-lllite-depth-1.safetensors",
+      "path": "models/controlnet/anima-lllite-depth-1.safetensors",
       "min_bytes": 7000000
     }
   ],

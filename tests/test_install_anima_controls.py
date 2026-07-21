@@ -1,3 +1,5 @@
+import runpy
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -5,13 +7,11 @@ from unittest import mock
 
 from install import MANAGER_INSTALL_ARGUMENTS
 from scripts.install_anima_controls import (
-    InstallError,
     discover_comfyui_root,
     download_artifact,
     find_hf_command,
     install_workflow,
     is_comfyui_root,
-    verify_core_support,
 )
 
 
@@ -30,41 +30,41 @@ class InstallAnimaControlsTests(unittest.TestCase):
 
     def test_manager_hook_installs_required_models_but_defers_preprocessors(self):
         self.assertIn("--skip-preprocessor-models", MANAGER_INSTALL_ARGUMENTS)
+        self.assertNotIn("--skip-controlnet-aux", MANAGER_INSTALL_ARGUMENTS)
+        self.assertNotIn("--skip-anima-node", MANAGER_INSTALL_ARGUMENTS)
         self.assertNotIn("--skip-workflow", MANAGER_INSTALL_ARGUMENTS)
 
-    def test_core_support_check_reports_missing_native_nodes(self):
-        manifest = {
-            "core": {
-                "feature_commit": "a" * 40,
-                "required_nodes": ["ModelPatchLoader", "AnimaLLLiteApply"],
-            }
-        }
+    def test_prestartup_targets_its_own_comfyui_root(self):
         with tempfile.TemporaryDirectory() as directory:
             root = self.make_root(directory)
-            module = root / "comfy_extras" / "nodes_model_patch.py"
-            module.parent.mkdir()
-            module.write_text("class ModelPatchLoader:\n    pass\n", encoding="utf-8")
-            with self.assertRaisesRegex(InstallError, "AnimaLLLiteApply"):
-                verify_core_support(root, manifest)
-
-            module.write_text(
-                "class ModelPatchLoader:\n    pass\n"
-                "class AnimaLLLiteApply:\n    pass\n",
-                encoding="utf-8",
+            repository = root / "custom_nodes" / "ComfyUI-AnimaVariationBatch"
+            repository.mkdir()
+            script = repository / "prestartup_script.py"
+            shutil.copy2(
+                Path(__file__).parents[1] / "prestartup_script.py",
+                script,
             )
-            verify_core_support(root, manifest)
+
+            with mock.patch(
+                "scripts.install_anima_controls.main"
+            ) as install_controls:
+                runpy.run_path(str(script))
+
+            install_controls.assert_called_once_with(
+                ["--root", str(root), "--skip-preprocessor-models"]
+            )
 
     def test_existing_download_is_not_replaced(self):
         with tempfile.TemporaryDirectory() as directory:
             root = self.make_root(directory)
-            output = root / "models" / "model_patches" / "test.safetensors"
+            output = root / "models" / "controlnet" / "test.safetensors"
             output.parent.mkdir()
             output.write_bytes(b"valid")
             entry = {
                 "id": "test",
                 "repo_id": "owner/repo",
                 "filename": "test.safetensors",
-                "path": "models/model_patches/test.safetensors",
+                "path": "models/controlnet/test.safetensors",
                 "min_bytes": 5,
             }
             download_artifact(
