@@ -1,0 +1,53 @@
+{
+  "core": {
+    "feature_commit": "0f42ba51463174fb255f2c4605ae0e0b441fe6d7",
+    "required_nodes": [
+      "ModelPatchLoader",
+      "AnimaLLLiteApply"
+    ]
+  },
+  "controlnet_aux": {
+    "repository": "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
+    "commit": "e8b689a513c3e6b63edc44066560ca5919c0576e",
+    "path": "custom_nodes/comfyui_controlnet_aux"
+  },
+  "model_patches": [
+    {
+      "id": "pose",
+      "repo_id": "Comfy-Org/Anima-LLLite",
+      "filename": "model_patches/anima-lllite-pose-1.safetensors",
+      "path": "models/model_patches/anima-lllite-pose-1.safetensors",
+      "min_bytes": 20000000
+    },
+    {
+      "id": "depth",
+      "repo_id": "Comfy-Org/Anima-LLLite",
+      "filename": "model_patches/anima-lllite-depth-1.safetensors",
+      "path": "models/model_patches/anima-lllite-depth-1.safetensors",
+      "min_bytes": 7000000
+    }
+  ],
+  "preprocessor_models": [
+    {
+      "id": "dwpose-detector",
+      "repo_id": "yzd-v/DWPose",
+      "filename": "yolox_l.onnx",
+      "path": "custom_nodes/comfyui_controlnet_aux/ckpts/yzd-v/DWPose/yolox_l.onnx",
+      "min_bytes": 200000000
+    },
+    {
+      "id": "dwpose-estimator",
+      "repo_id": "hr16/DWPose-TorchScript-BatchSize5",
+      "filename": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "path": "custom_nodes/comfyui_controlnet_aux/ckpts/hr16/DWPose-TorchScript-BatchSize5/dw-ll_ucoco_384_bs5.torchscript.pt",
+      "min_bytes": 120000000
+    },
+    {
+      "id": "depth-anything-v2-base",
+      "repo_id": "depth-anything/Depth-Anything-V2-Base",
+      "filename": "depth_anything_v2_vitb.pth",
+      "path": "custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Base/depth_anything_v2_vitb.pth",
+      "min_bytes": 350000000
+    }
+  ]
+}

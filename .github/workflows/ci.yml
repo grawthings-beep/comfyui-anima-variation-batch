@@ -27,9 +27,13 @@ jobs:
         run: |
           python -m py_compile \
             __init__.py \
+            scripts/install_anima_controls.py \
             scripts/download_loras.py \
+            tests/test_controls_manifest.py \
+            tests/test_install_anima_controls.py \
             tests/test_lora_manifest.py \
             tests/test_workflow.py
+          python -m json.tool config/anima-controls.json
           python -m json.tool config/anima-loras.json
           python - <<'PY'
           import json
@@ -39,6 +43,7 @@ jobs:
           workflow_names = sorted(path.name for path in workflow_dir.glob("*.json"))
           assert workflow_names == [
               "anima_hiresfix_esrgan_2pass.json",
+              "anima_hiresfix_esrgan_pose_depth.json",
               "anima_hiresfix_latent_2pass.json",
           ]
 
