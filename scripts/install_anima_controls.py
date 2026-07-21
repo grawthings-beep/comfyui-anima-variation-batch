@@ -319,6 +319,7 @@ def main(argv: list[str] | None = None) -> None:
 
         hf_command = find_hf_command()
         entries = list(manifest["model_patches"])
+        entries.extend(manifest.get("upscale_models", []))
         if not args.skip_preprocessor_models:
             entries.extend(manifest["preprocessor_models"])
         for entry in entries:

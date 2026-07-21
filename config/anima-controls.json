@@ -27,6 +27,15 @@
       "min_bytes": 7000000
     }
   ],
+  "upscale_models": [
+    {
+      "id": "anime-sharp-upscaler",
+      "repo_id": "Kim2091/AnimeSharp",
+      "filename": "4x-AnimeSharp.pth",
+      "path": "models/upscale_models/4x-AnimeSharp.pth",
+      "min_bytes": 60000000
+    }
+  ],
   "preprocessor_models": [
     {
       "id": "dwpose-detector",

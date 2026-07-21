@@ -57,11 +57,11 @@ or newer. The installer checks this and stops with an actionable error if the
 core is too old.
 
 On a fresh ComfyUI-Manager installation, the standard `install.py` hook
-automatically downloads the two required LLLite patches (about 31 MB total)
-and copies the workflow. Existing clones that predate this hook should pull
-the latest `main` and run the command below once.
+automatically downloads the two required LLLite patches and AnimeSharp
+upscaler (about 98 MB total), then copies the workflow. Existing clones that
+predate this hook should pull the latest `main` and run the command below once.
 
-To repair only missing Pose/Depth patch files without reinstalling the
+To repair only missing required model files without reinstalling the
 preprocessors or workflow:
 
 ```bash
@@ -91,12 +91,13 @@ The installer:
   tested revision when it is absent;
 - installs the preprocessor Python requirements;
 - downloads the Pose and Depth LLLite patches to `models/model_patches/`;
+- downloads AnimeSharp to `models/upscale_models/`;
 - preloads DWPose and Depth Anything V2 Base into the ControlNet Aux cache;
 - copies the ready-to-load workflow to `user/default/workflows/`.
 
-The downloads total approximately 773 MB: 31 MB of Anima patches and about
-742 MB of preprocessors. To leave preprocessor models for first-run lazy
-download:
+The downloads total approximately 840 MB: 31 MB of Anima patches, 67 MB of
+AnimeSharp, and about 742 MB of preprocessors. To leave preprocessor models
+for first-run lazy download:
 
 ```bash
 python scripts/install_anima_controls.py \
@@ -170,7 +171,7 @@ COMFY=/workspace/ComfyUI
 
 mkdir -p "$COMFY/models/upscale_models"
 wget -O "$COMFY/models/upscale_models/4x-AnimeSharp.pth" \
-  "https://objectstorage.us-phoenix-1.oraclecloud.com/n/ax6ygfvpvzka/b/open-modeldb-files/o/4x-FatePlus-lite.pth"
+  "https://huggingface.co/Kim2091/AnimeSharp/resolve/main/4x-AnimeSharp.pth"
 ```
 
 ## Optional character LoRA downloads

@@ -384,7 +384,14 @@
       ],
       "properties": {
         "cnr_id": "comfy-core",
-        "Node name for S&R": "UpscaleModelLoader"
+        "Node name for S&R": "UpscaleModelLoader",
+        "models": [
+          {
+            "name": "4x-AnimeSharp.pth",
+            "url": "https://huggingface.co/Kim2091/AnimeSharp/resolve/main/4x-AnimeSharp.pth",
+            "directory": "upscale_models"
+          }
+        ]
       },
       "widgets_values": [
         "4x-AnimeSharp.pth"

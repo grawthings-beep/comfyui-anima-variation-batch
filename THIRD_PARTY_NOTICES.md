@@ -35,3 +35,11 @@ but individual detector weights, transitive components, and OpenPose-derived
 code may carry additional terms. Nothing from those projects is copied into
 this repository; users should review the upstream notices before installation
 or redistribution.
+
+## AnimeSharp upscaler
+
+The installer can download
+[4x-AnimeSharp](https://huggingface.co/Kim2091/AnimeSharp), published under
+CC-BY-NC-SA-4.0. The weight is fetched from its upstream repository and is not
+distributed in this repository. Review its license before use or
+redistribution.

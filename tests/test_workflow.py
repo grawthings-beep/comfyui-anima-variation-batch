@@ -104,6 +104,23 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(pose_model["url"].endswith("anima-lllite-pose-1.safetensors"))
         self.assertTrue(depth_model["url"].endswith("anima-lllite-depth-1.safetensors"))
 
+    def test_esrgan_workflows_embed_animesharp_download_metadata(self):
+        for workflow in (self.hires_esrgan, self.pose_depth):
+            with self.subTest(workflow=workflow.get("id")):
+                loader = next(
+                    node
+                    for node in workflow["nodes"]
+                    if node["type"] == "UpscaleModelLoader"
+                )
+                model = loader["properties"]["models"][0]
+                self.assertEqual(model["name"], "4x-AnimeSharp.pth")
+                self.assertEqual(model["directory"], "upscale_models")
+                self.assertEqual(
+                    model["url"],
+                    "https://huggingface.co/Kim2091/AnimeSharp/resolve/"
+                    "main/4x-AnimeSharp.pth",
+                )
+
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}
         link_ids = set()

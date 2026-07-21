@@ -28,7 +28,7 @@ class InstallAnimaControlsTests(unittest.TestCase):
             self.assertTrue(is_comfyui_root(root))
             self.assertEqual(discover_comfyui_root(str(root)), root.resolve())
 
-    def test_manager_hook_installs_required_patches_but_defers_preprocessors(self):
+    def test_manager_hook_installs_required_models_but_defers_preprocessors(self):
         self.assertIn("--skip-preprocessor-models", MANAGER_INSTALL_ARGUMENTS)
         self.assertNotIn("--skip-workflow", MANAGER_INSTALL_ARGUMENTS)
 

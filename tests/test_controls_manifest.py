@@ -30,6 +30,7 @@ class ControlsManifestTests(unittest.TestCase):
     def test_artifact_ids_and_paths_are_unique(self):
         entries = (
             self.manifest["model_patches"]
+            + self.manifest["upscale_models"]
             + self.manifest["preprocessor_models"]
         )
         for key in ("id", "path"):
@@ -46,9 +47,19 @@ class ControlsManifestTests(unittest.TestCase):
         for entry in self.manifest["preprocessor_models"]:
             self.assertTrue(entry["path"].startswith(prefix))
 
+    def test_upscaler_installs_under_upscale_models(self):
+        self.assertEqual(len(self.manifest["upscale_models"]), 1)
+        entry = self.manifest["upscale_models"][0]
+        self.assertEqual(entry["repo_id"], "Kim2091/AnimeSharp")
+        self.assertEqual(
+            entry["path"],
+            "models/upscale_models/4x-AnimeSharp.pth",
+        )
+
     def test_all_download_entries_are_complete(self):
         entries = (
             self.manifest["model_patches"]
+            + self.manifest["upscale_models"]
             + self.manifest["preprocessor_models"]
         )
         for entry in entries:
