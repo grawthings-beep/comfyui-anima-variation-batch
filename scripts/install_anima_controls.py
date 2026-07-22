@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the Anima Pose/Depth workflow and its external assets."""
+"""Install the bundled Anima workflows and their external assets."""
 
 from __future__ import annotations
 
@@ -16,10 +16,8 @@ import tempfile
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = REPO_ROOT / "config" / "anima-controls.json"
-DEFAULT_WORKFLOW = (
-    REPO_ROOT
-    / "example_workflows"
-    / "anima_hiresfix_esrgan_pose_depth.json"
+DEFAULT_WORKFLOWS = tuple(
+    sorted((REPO_ROOT / "example_workflows").glob("*.json"))
 )
 COMMON_COMFY_ROOTS = (
     pathlib.Path("/workspace/ComfyUI"),
@@ -284,12 +282,19 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Install Anima LLLite Pose/Depth support, ControlNet Aux "
-            "preprocessors, and the ready-to-load ComfyUI workflow."
+            "preprocessors, and the ready-to-load ComfyUI workflows."
         )
     )
     parser.add_argument("--root", help="ComfyUI root containing models/ and custom_nodes/")
     parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
-    parser.add_argument("--workflow", default=str(DEFAULT_WORKFLOW))
+    parser.add_argument(
+        "--workflow",
+        action="append",
+        help=(
+            "Install only this workflow (repeatable; default: all bundled "
+            "workflows)"
+        ),
+    )
     parser.add_argument(
         "--workflow-dir",
         help="Override the destination (default: user/default/workflows)",
@@ -358,12 +363,18 @@ def main(argv: list[str] | None = None) -> None:
             )
 
         if not args.skip_workflow:
-            install_workflow(
-                root,
-                pathlib.Path(args.workflow),
-                args.workflow_dir,
-                dry_run=args.dry_run,
+            workflows = (
+                [pathlib.Path(path) for path in args.workflow]
+                if args.workflow
+                else list(DEFAULT_WORKFLOWS)
             )
+            for workflow in workflows:
+                install_workflow(
+                    root,
+                    workflow,
+                    args.workflow_dir,
+                    dry_run=args.dry_run,
+                )
     except (InstallError, OSError, subprocess.CalledProcessError) as exc:
         raise SystemExit(f"ERROR: {exc}") from exc
 

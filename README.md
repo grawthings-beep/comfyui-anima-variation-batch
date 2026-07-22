@@ -5,6 +5,10 @@
 This repository contains Anima-focused 2-pass Hires-fix workflows plus a
 Pose/Depth controlled variant. It does not distribute model weights.
 
+The latent Hires-fix workflow includes a blank-line Prompt Queue: paste up to
+50 Grok-generated scenes at once and ComfyUI runs the complete two-pass
+generation for every scene without manual prompt copying.
+
 ## Workflows
 
 ```text
@@ -27,6 +31,11 @@ The controls affect the first pass only. The second pass uses the controlled
 latent at `denoise 0.45` to redraw detail without applying the control patches
 a second time. Pose and Depth control-map previews are included in the graph.
 
+`anima_hiresfix_latent_2pass.json` does not use ESRGAN. Its built-in
+`AnimaPromptQueue` splits scenes on blank lines, generates up to 50 scenes per
+queue submission, assigns distinct seeds to both passes, and saves results
+under numbered prefixes such as `Anima_latent_queue/scene_001`.
+
 ## Base install
 
 From the ComfyUI custom node directory:
@@ -34,7 +43,7 @@ From the ComfyUI custom node directory:
 ```bash
 cd /path/to/ComfyUI/custom_nodes
 git clone https://github.com/grawthings-beep/comfyui-anima-variation-batch.git \
-  ComfyUI-AnimaHiresFixWorkflows
+  ComfyUI-AnimaVariationBatch
 ```
 
 Restart ComfyUI and load either of the two workflows that do not use
@@ -83,7 +92,7 @@ The installer:
 - downloads the Pose and Depth LLLite weights to `models/controlnet/`;
 - downloads AnimeSharp to `models/upscale_models/`;
 - preloads DWPose and Depth Anything V2 Base into the ControlNet Aux cache;
-- copies the ready-to-load workflow to `user/default/workflows/`.
+- copies all ready-to-load workflows to `user/default/workflows/`.
 
 The downloads total approximately 840 MB: 31 MB of Anima patches, 67 MB of
 AnimeSharp, and about 742 MB of preprocessors. To leave preprocessor models
@@ -148,9 +157,18 @@ The default second-pass denoise is `0.45`. Tune around `0.35` to `0.55`,
 lowering it to preserve the first pass or raising it for stronger detail
 redraw.
 
-`anima_hiresfix_latent_2pass.json` uses only ComfyUI core nodes: it upscales
-the latent by 1.5x with bislerp, then runs a second pass. Its default
-second-pass denoise is `0.55`; tune around `0.50` to `0.60`.
+`anima_hiresfix_latent_2pass.json` needs no external upscaler or control-node
+pack. The dependency-free Prompt Queue ships in this repository; the remaining
+graph upscales the latent by 1.5x with bislerp, then runs a second pass. Its
+default second-pass denoise is `0.55`; tune around `0.50` to `0.60`.
+
+### Latent Prompt Queue
+
+Paste Grok's scenes into the red Prompt Queue node with at least one blank line
+between scenes, then queue the workflow once. `scene_limit` is capped at 50 to
+avoid accidental oversized runs. If a run stops, set `start_scene` to the next
+scene number and queue again. The seed sequence is deterministic from
+`base_seed`, so resumed scenes keep the same seeds and filenames.
 
 ## ESRGAN model download
 

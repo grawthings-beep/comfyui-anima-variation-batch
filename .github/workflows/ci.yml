@@ -28,12 +28,14 @@ jobs:
           python -m py_compile \
             __init__.py \
             install.py \
+            nodes.py \
             prestartup_script.py \
             scripts/install_anima_controls.py \
             scripts/download_loras.py \
             tests/test_controls_manifest.py \
             tests/test_install_anima_controls.py \
             tests/test_lora_manifest.py \
+            tests/test_prompt_queue.py \
             tests/test_workflow.py
           python -m json.tool config/anima-controls.json
           python -m json.tool config/anima-loras.json

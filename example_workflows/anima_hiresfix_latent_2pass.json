@@ -1,8 +1,8 @@
 {
   "id": null,
   "revision": 0,
-  "last_node_id": 14,
-  "last_link_id": 17,
+  "last_node_id": 15,
+  "last_link_id": 21,
   "nodes": [
     {
       "id": 1,
@@ -118,13 +118,21 @@
         200
       ],
       "flags": {},
-      "order": 3,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
           "link": 1
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 18
         }
       ],
       "outputs": [
@@ -160,7 +168,7 @@
         160
       ],
       "flags": {},
-      "order": 4,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -202,7 +210,7 @@
         106
       ],
       "flags": {},
-      "order": 5,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -237,7 +245,7 @@
         262
       ],
       "flags": {},
-      "order": 6,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -259,6 +267,14 @@
           "name": "latent_image",
           "type": "LATENT",
           "link": 6
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": 19
         }
       ],
       "outputs": [
@@ -298,7 +314,7 @@
         46
       ],
       "flags": {},
-      "order": 7,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -340,7 +356,7 @@
         330
       ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
@@ -369,7 +385,7 @@
         82
       ],
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -409,7 +425,7 @@
         262
       ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -431,6 +447,14 @@
           "name": "latent_image",
           "type": "LATENT",
           "link": 14
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": 20
         }
       ],
       "outputs": [
@@ -469,7 +493,7 @@
         46
       ],
       "flags": {},
-      "order": 11,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -511,13 +535,21 @@
         480
       ],
       "flags": {},
-      "order": 12,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
           "link": 17
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": 21
         }
       ],
       "outputs": [],
@@ -530,8 +562,8 @@
       ]
     },
     {
-      "id": 14,
-      "type": "MarkdownNote",
+      "id": 15,
+      "type": "AnimaPromptQueue",
       "pos": [
         -820,
         60
@@ -541,13 +573,73 @@
         620
       ],
       "flags": {},
-      "order": 13,
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "positive_prompt",
+          "type": "STRING",
+          "links": [
+            18
+          ]
+        },
+        {
+          "name": "first_pass_seed",
+          "type": "INT",
+          "links": [
+            19
+          ]
+        },
+        {
+          "name": "second_pass_seed",
+          "type": "INT",
+          "links": [
+            20
+          ]
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-AnimaVariationBatch",
+        "Node name for S&R": "AnimaPromptQueue"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, score_8, highres, safe, 1girl, original character, standing on a rainy neon street, cinematic reflections\n\nmasterpiece, best quality, score_8, highres, safe, 1girl, original character, relaxing beside a sunlit window, warm morning atmosphere\n\nmasterpiece, best quality, score_8, highres, safe, 1girl, original character, exploring an ancient forest shrine, drifting fireflies",
+        1,
+        50,
+        566871253377100,
+        "Anima_latent_queue"
+      ],
+      "title": "Paste Grok scenes here (blank-line separated)",
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 14,
+      "type": "MarkdownNote",
+      "pos": [
+        -820,
+        720
+      ],
+      "size": [
+        560,
+        620
+      ],
+      "flags": {},
+      "order": 14,
       "mode": 0,
       "inputs": [],
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Hires-Fix (Latent 2-pass / 追加モデル不要)\n\n**構成**: 832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)\n\ncomfy-coreノードのみ。アップスケーラーのダウンロード不要。\n画質はESRGAN版の方が線の保存性で優位。こちらは手軽さ重視。\n\n## 必要モデル\n- diffusion_models/anima-base-v1.0.safetensors\n- text_encoders/qwen_3_06b_base.safetensors\n- vae/qwen_image_vae.safetensors\n\n## 調整の要点\n- latent拡大はぼやけるのでdenoiseはESRGAN版より高め(0.5〜0.6)が必要。0.5未満だとボケが残る\n- 構図が動きすぎる場合は0.50まで下げる\n- 1パス目は公式推奨 30steps / cfg4 / er_sde / simple\n- Turbo LoRA併用時は両パスとも 8steps / cfg1\n"
+        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 使い方\n1. Grokで作ったシーンを赤いPrompt Queueへ貼り付ける。\n2. 各シーンの間に空行を1つ以上入れる。\n3. Queue Promptを1回押す。最大50シーンが順番に生成される。\n\n## 再開\n- `start_scene`: 何番目のシーンから開始するか。\n- `scene_limit`: 今回処理する件数。最大50。\n- 途中停止した場合は`start_scene`を次の番号へ変更する。\n\n## 出力\n`output/Anima_latent_queue/scene_001`のようにシーン別で保存される。1パス目と2パス目のseedもシーンごとに自動で変わる。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
       ],
       "color": "#222",
       "bgcolor": "#000"
@@ -689,6 +781,38 @@
       13,
       0,
       "IMAGE"
+    ],
+    [
+      18,
+      15,
+      0,
+      4,
+      1,
+      "STRING"
+    ],
+    [
+      19,
+      15,
+      1,
+      7,
+      4,
+      "INT"
+    ],
+    [
+      20,
+      15,
+      2,
+      11,
+      4,
+      "INT"
+    ],
+    [
+      21,
+      15,
+      3,
+      13,
+      1,
+      "STRING"
     ]
   ],
   "groups": [],

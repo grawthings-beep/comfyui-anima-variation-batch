@@ -7,6 +7,7 @@ from unittest import mock
 
 from install import MANAGER_INSTALL_ARGUMENTS
 from scripts.install_anima_controls import (
+    DEFAULT_WORKFLOWS,
     discover_comfyui_root,
     download_artifact,
     find_hf_command,
@@ -33,6 +34,16 @@ class InstallAnimaControlsTests(unittest.TestCase):
         self.assertNotIn("--skip-controlnet-aux", MANAGER_INSTALL_ARGUMENTS)
         self.assertNotIn("--skip-anima-node", MANAGER_INSTALL_ARGUMENTS)
         self.assertNotIn("--skip-workflow", MANAGER_INSTALL_ARGUMENTS)
+
+    def test_default_installer_includes_every_bundled_workflow(self):
+        self.assertEqual(
+            [path.name for path in DEFAULT_WORKFLOWS],
+            [
+                "anima_hiresfix_esrgan_2pass.json",
+                "anima_hiresfix_esrgan_pose_depth.json",
+                "anima_hiresfix_latent_2pass.json",
+            ],
+        )
 
     def test_prestartup_targets_its_own_comfyui_root(self):
         with tempfile.TemporaryDirectory() as directory:

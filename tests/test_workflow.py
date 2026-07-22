@@ -117,6 +117,43 @@ class WorkflowTests(unittest.TestCase):
                     "main/4x-AnimeSharp.pth",
                 )
 
+    def test_latent_workflow_queues_blank_line_scenes_without_esrgan(self):
+        nodes = {node["id"]: node for node in self.hires_latent["nodes"]}
+        node_types = {node["type"] for node in self.hires_latent["nodes"]}
+        self.assertIn("AnimaPromptQueue", node_types)
+        self.assertIn("LatentUpscaleBy", node_types)
+        self.assertNotIn("UpscaleModelLoader", node_types)
+
+        queue = nodes[15]
+        self.assertEqual(queue["widgets_values"][1:3], [1, 50])
+        self.assertIn("\n\n", queue["widgets_values"][0])
+
+        sources = {
+            (target_id, target_slot): (source_id, source_slot, link_type)
+            for (
+                _link_id,
+                source_id,
+                source_slot,
+                target_id,
+                target_slot,
+                link_type,
+            ) in self.hires_latent["links"]
+        }
+        self.assertEqual(sources[(4, 1)], (15, 0, "STRING"))
+        self.assertEqual(sources[(7, 4)], (15, 1, "INT"))
+        self.assertEqual(sources[(11, 4)], (15, 2, "INT"))
+        self.assertEqual(sources[(13, 1)], (15, 3, "STRING"))
+
+        for node_id, input_name in (
+            (4, "text"),
+            (7, "seed"),
+            (11, "seed"),
+            (13, "filename_prefix"),
+        ):
+            converted_input = nodes[node_id]["inputs"][-1]
+            self.assertEqual(converted_input["name"], input_name)
+            self.assertEqual(converted_input["widget"]["name"], input_name)
+
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}
         link_ids = set()
@@ -132,6 +169,11 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn(target_id, nodes)
             self.assertLess(source_slot, len(nodes[source_id]["outputs"]))
             self.assertLess(target_slot, len(nodes[target_id]["inputs"]))
+            self.assertIn(link_id, nodes[source_id]["outputs"][source_slot]["links"])
+            self.assertEqual(
+                nodes[target_id]["inputs"][target_slot]["link"],
+                link_id,
+            )
             self.assertLess(nodes[source_id]["order"], nodes[target_id]["order"])
 
 
