@@ -121,8 +121,10 @@ class WorkflowTests(unittest.TestCase):
         nodes = {node["id"]: node for node in self.hires_latent["nodes"]}
         node_types = {node["type"] for node in self.hires_latent["nodes"]}
         self.assertIn("AnimaPromptQueue", node_types)
+        self.assertIn("AnimaSaveQueueZip", node_types)
         self.assertIn("LatentUpscaleBy", node_types)
         self.assertNotIn("UpscaleModelLoader", node_types)
+        self.assertNotIn("SaveImage", node_types)
 
         queue = nodes[15]
         self.assertEqual(queue["widgets_values"][1:3], [1, 50])
@@ -148,11 +150,18 @@ class WorkflowTests(unittest.TestCase):
             (4, "text"),
             (7, "seed"),
             (11, "seed"),
-            (13, "filename_prefix"),
         ):
             converted_input = nodes[node_id]["inputs"][-1]
             self.assertEqual(converted_input["name"], input_name)
             self.assertEqual(converted_input["widget"]["name"], input_name)
+
+        zip_saver = nodes[13]
+        self.assertEqual(zip_saver["inputs"][-1]["name"], "file_stems")
+        self.assertNotIn("widget", zip_saver["inputs"][-1])
+        self.assertEqual(zip_saver["widgets_values"], [
+            "anima_batches/Anima_latent_queue",
+            True,
+        ])
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}

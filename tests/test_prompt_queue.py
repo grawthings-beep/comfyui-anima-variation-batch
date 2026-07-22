@@ -22,9 +22,13 @@ class PromptQueueTests(unittest.TestCase):
             spec.loader.exec_module(module)
             registered = module.NODE_CLASS_MAPPINGS["AnimaPromptQueue"]
             self.assertEqual(registered.__name__, "AnimaPromptQueue")
+            self.assertIn("AnimaSaveQueueZip", module.NODE_CLASS_MAPPINGS)
+            self.assertEqual(module.WEB_DIRECTORY, "./web")
         finally:
             sys.modules.pop(module_name, None)
             sys.modules.pop(f"{module_name}.prompt_queue", None)
+            sys.modules.pop(f"{module_name}.zip_output", None)
+            sys.modules.pop(f"{module_name}.batch_archive", None)
 
     def test_splits_whitespace_only_blank_lines_and_preserves_prompt_lines(self):
         text = "scene one\ncontinued\r\n\t\r\nscene two\n\n\nscene three"

@@ -34,7 +34,8 @@ a second time. Pose and Depth control-map previews are included in the graph.
 `anima_hiresfix_latent_2pass.json` does not use ESRGAN. Its built-in
 `AnimaPromptQueue` splits scenes on blank lines, generates up to 50 scenes per
 queue submission, assigns distinct seeds to both passes, and saves results
-under numbered prefixes such as `Anima_latent_queue/scene_001`.
+as one automatically downloaded ZIP containing `scene_001.png`,
+`scene_002.png`, and so on.
 
 ## Base install
 
@@ -169,6 +170,13 @@ between scenes, then queue the workflow once. `scene_limit` is capped at 50 to
 avoid accidental oversized runs. If a run stops, set `start_scene` to the next
 scene number and queue again. The seed sequence is deterministic from
 `base_seed`, so resumed scenes keep the same seeds and filenames.
+
+When the final latent upscale finishes, `AnimaSaveQueueZip` encodes every final
+image directly into one ZIP and triggers a single browser download. It does not
+duplicate the individual PNG files in ComfyUI's output directory. The ZIP node
+also exposes a **Download ZIP** button in case the browser blocks the automatic
+download. Set its `auto_download` widget to false if manual ZIP download is
+preferred.
 
 ## ESRGAN model download
 

@@ -27,18 +27,22 @@ jobs:
         run: |
           python -m py_compile \
             __init__.py \
+            batch_archive.py \
             install.py \
             prompt_queue.py \
             prestartup_script.py \
+            zip_output.py \
             scripts/install_anima_controls.py \
             scripts/download_loras.py \
             tests/test_controls_manifest.py \
+            tests/test_batch_archive.py \
             tests/test_install_anima_controls.py \
             tests/test_lora_manifest.py \
             tests/test_prompt_queue.py \
             tests/test_workflow.py
           python -m json.tool config/anima-controls.json
           python -m json.tool config/anima-loras.json
+          node --check web/download_zip.js
           python - <<'PY'
           import json
           from pathlib import Path

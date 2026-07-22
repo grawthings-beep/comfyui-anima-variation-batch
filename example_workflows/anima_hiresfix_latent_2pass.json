@@ -525,14 +525,14 @@
     },
     {
       "id": 13,
-      "type": "SaveImage",
+      "type": "AnimaSaveQueueZip",
       "pos": [
         2040,
         180
       ],
       "size": [
         420,
-        480
+        190
       ],
       "flags": {},
       "order": 13,
@@ -544,22 +544,23 @@
           "link": 17
         },
         {
-          "name": "filename_prefix",
+          "name": "file_stems",
           "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
           "link": 21
         }
       ],
       "outputs": [],
       "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "SaveImage"
+        "cnr_id": "ComfyUI-AnimaVariationBatch",
+        "Node name for S&R": "AnimaSaveQueueZip"
       },
       "widgets_values": [
-        "Anima_hiresfix_latent"
-      ]
+        "anima_batches/Anima_latent_queue",
+        true
+      ],
+      "title": "ZIP final images + auto-download",
+      "color": "#243",
+      "bgcolor": "#365"
     },
     {
       "id": 15,
@@ -639,7 +640,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 使い方\n1. Grokで作ったシーンを赤いPrompt Queueへ貼り付ける。\n2. 各シーンの間に空行を1つ以上入れる。\n3. Queue Promptを1回押す。最大50シーンが順番に生成される。\n\n## 再開\n- `start_scene`: 何番目のシーンから開始するか。\n- `scene_limit`: 今回処理する件数。最大50。\n- 途中停止した場合は`start_scene`を次の番号へ変更する。\n\n## 出力\n`output/Anima_latent_queue/scene_001`のようにシーン別で保存される。1パス目と2パス目のseedもシーンごとに自動で変わる。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
+        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 使い方\n1. Grokで作ったシーンを赤いPrompt Queueへ貼り付ける。\n2. 各シーンの間に空行を1つ以上入れる。\n3. Queue Promptを1回押す。最大50シーンが順番に生成される。\n\n## 再開\n- `start_scene`: 何番目のシーンから開始するか。\n- `scene_limit`: 今回処理する件数。最大50。\n- 途中停止した場合は`start_scene`を次の番号へ変更する。\n\n## ZIP出力\n全シーン完了後、`scene_001.png`から順に1個のZIPへ格納され、ブラウザのダウンロードが自動開始する。個別PNGはoutputへ重複保存しない。自動ダウンロードがブラウザに止められた場合は緑のZIPノードに表示されるDownload ZIPボタンを押す。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
       ],
       "color": "#222",
       "bgcolor": "#000"
