@@ -3,23 +3,33 @@
 
 from __future__ import annotations
 
+import importlib.util
 import pathlib
-import sys
 import traceback
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
-if str(REPO_ROOT) not in sys.path:
-    # ComfyUI loads prestartup scripts with importlib, which does not guarantee
-    # that the custom-node repository itself is importable.
-    sys.path.insert(0, str(REPO_ROOT))
+INSTALLER_PATH = REPO_ROOT / "scripts" / "install_anima_controls.py"
 
-from scripts.install_anima_controls import main as install_anima_controls
+
+def load_installer():
+    # Loading by file path avoids adding this repository to sys.path. A
+    # top-level path entry here can shadow ComfyUI's own modules during boot.
+    spec = importlib.util.spec_from_file_location(
+        "anima_controls_bootstrap_installer",
+        INSTALLER_PATH,
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load installer: {INSTALLER_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.main
 
 
 def bootstrap() -> None:
     # ComfyUI executes this file before it imports torch or discovers custom
     # nodes. This makes dependencies cloned here visible during the same boot.
     comfy_root = REPO_ROOT.parents[1]
+    install_anima_controls = load_installer()
     install_anima_controls(
         [
             "--root",

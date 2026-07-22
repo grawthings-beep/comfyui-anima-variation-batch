@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
-"""Small dependency-free nodes used by the bundled Anima workflows."""
+"""Dependency-free Prompt Queue node used by the bundled Anima workflow."""
 
 from __future__ import annotations
 

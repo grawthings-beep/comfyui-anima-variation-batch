@@ -1,5 +1,6 @@
 import runpy
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -56,14 +57,32 @@ class InstallAnimaControlsTests(unittest.TestCase):
                 script,
             )
 
-            with mock.patch(
-                "scripts.install_anima_controls.main"
-            ) as install_controls:
+            install_controls = mock.Mock()
+            installer_module = mock.Mock(main=install_controls)
+            loader = mock.Mock()
+            spec = mock.Mock(loader=loader)
+            original_sys_path = list(sys.path)
+            with (
+                mock.patch(
+                    "importlib.util.spec_from_file_location",
+                    return_value=spec,
+                ),
+                mock.patch(
+                    "importlib.util.module_from_spec",
+                    return_value=installer_module,
+                ),
+            ):
                 runpy.run_path(str(script))
 
+            loader.exec_module.assert_called_once_with(installer_module)
             install_controls.assert_called_once_with(
                 ["--root", str(root), "--skip-preprocessor-models"]
             )
+            self.assertEqual(sys.path, original_sys_path)
+
+    def test_repository_cannot_shadow_comfyui_nodes_module(self):
+        root = Path(__file__).parents[1]
+        self.assertFalse((root / "nodes.py").exists())
 
     def test_existing_download_is_not_replaced(self):
         with tempfile.TemporaryDirectory() as directory:

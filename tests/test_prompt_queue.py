@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from nodes import MAX_SEED, AnimaPromptQueue, split_scenes
+from prompt_queue import MAX_SEED, AnimaPromptQueue, split_scenes
 
 
 class PromptQueueTests(unittest.TestCase):
@@ -24,7 +24,7 @@ class PromptQueueTests(unittest.TestCase):
             self.assertEqual(registered.__name__, "AnimaPromptQueue")
         finally:
             sys.modules.pop(module_name, None)
-            sys.modules.pop(f"{module_name}.nodes", None)
+            sys.modules.pop(f"{module_name}.prompt_queue", None)
 
     def test_splits_whitespace_only_blank_lines_and_preserves_prompt_lines(self):
         text = "scene one\ncontinued\r\n\t\r\nscene two\n\n\nscene three"

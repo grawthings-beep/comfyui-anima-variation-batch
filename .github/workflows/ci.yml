@@ -28,7 +28,7 @@ jobs:
           python -m py_compile \
             __init__.py \
             install.py \
-            nodes.py \
+            prompt_queue.py \
             prestartup_script.py \
             scripts/install_anima_controls.py \
             scripts/download_loras.py \
