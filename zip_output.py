@@ -41,10 +41,7 @@ class AnimaSaveQueueZip:
             "required": {
                 "images": ("IMAGE",),
                 "file_stems": ("STRING", {"forceInput": True}),
-                "archive_name": (
-                    "STRING",
-                    {"default": "anima_batches/Anima_latent_queue"},
-                ),
+                "archive_name": ("STRING", {"forceInput": True}),
                 "auto_download": ("BOOLEAN", {"default": True}),
             },
             "hidden": {

@@ -2,7 +2,7 @@
   "id": null,
   "revision": 0,
   "last_node_id": 15,
-  "last_link_id": 21,
+  "last_link_id": 22,
   "nodes": [
     {
       "id": 1,
@@ -547,6 +547,11 @@
           "name": "file_stems",
           "type": "STRING",
           "link": 21
+        },
+        {
+          "name": "archive_name",
+          "type": "STRING",
+          "link": 22
         }
       ],
       "outputs": [],
@@ -555,7 +560,6 @@
         "Node name for S&R": "AnimaSaveQueueZip"
       },
       "widgets_values": [
-        "anima_batches/Anima_latent_queue",
         true
       ],
       "title": "ZIP final images + auto-download",
@@ -605,6 +609,13 @@
           "links": [
             21
           ]
+        },
+        {
+          "name": "archive_name",
+          "type": "STRING",
+          "links": [
+            22
+          ]
         }
       ],
       "properties": {
@@ -613,6 +624,7 @@
       },
       "widgets_values": [
         "masterpiece, best quality, score_8, highres, safe, 1girl, original character, standing on a rainy neon street, cinematic reflections\n\nmasterpiece, best quality, score_8, highres, safe, 1girl, original character, relaxing beside a sunlit window, warm morning atmosphere\n\nmasterpiece, best quality, score_8, highres, safe, 1girl, original character, exploring an ancient forest shrine, drifting fireflies",
+        "1-50",
         1,
         50,
         566871253377100,
@@ -640,7 +652,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 使い方\n1. Grokで作ったシーンを赤いPrompt Queueへ貼り付ける。\n2. 各シーンの間に空行を1つ以上入れる。\n3. Queue Promptを1回押す。最大50シーンが順番に生成される。\n\n## 再開\n- `start_scene`: 何番目のシーンから開始するか。\n- `scene_limit`: 今回処理する件数。最大50。\n- 途中停止した場合は`start_scene`を次の番号へ変更する。\n\n## ZIP出力\n全シーン完了後、`scene_001.png`から順に1個のZIPへ格納され、ブラウザのダウンロードが自動開始する。個別PNGはoutputへ重複保存しない。自動ダウンロードがブラウザに止められた場合は緑のZIPノードに表示されるDownload ZIPボタンを押す。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
+        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 50件ごとの使い方\n1. 今回の最大50プロンプトを赤いPrompt Queueへ貼る。各シーンは空行で区切る。\n2. `batch_range`で `1-50` / `51-100` / ... / `251-300` を選ぶ。\n3. Queue Promptを1回押す。\n\n2回目の50件では`51-100`を選ぶだけで、画像名が`scene_051.png`から始まる。ZIP名にも`051-100`が付くので、複数ZIPを同じ場所へ展開しても重複しない。\n\n## 範囲内での再開\n- `start_in_range`: 選択範囲内の何件目から始めるか。通常は1。\n- `scene_limit`: 今回処理する件数。最大50。\n\n## ZIP出力\n全シーン完了後、1個のZIPへ格納され、ブラウザのダウンロードが自動開始する。個別PNGはoutputへ重複保存しない。自動ダウンロードが止められた場合は緑のZIPノードのDownload ZIPボタンを押す。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
       ],
       "color": "#222",
       "bgcolor": "#000"
@@ -813,6 +825,14 @@
       3,
       13,
       1,
+      "STRING"
+    ],
+    [
+      22,
+      15,
+      4,
+      13,
+      2,
       "STRING"
     ]
   ],

@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from prompt_queue import MAX_SEED, AnimaPromptQueue, split_scenes
+from prompt_queue import BATCH_RANGES, MAX_SEED, AnimaPromptQueue, split_scenes
 
 
 class PromptQueueTests(unittest.TestCase):
@@ -40,23 +40,29 @@ class PromptQueueTests(unittest.TestCase):
     def test_expands_selected_scenes_with_aligned_seeds_and_prefixes(self):
         result = AnimaPromptQueue().expand(
             "scene one\n\nscene two\n\nscene three\n\nscene four",
-            start_scene=2,
+            batch_range="51-100",
+            start_in_range=2,
             scene_limit=2,
             base_seed=100,
             filename_prefix="Anima/test",
         )
         self.assertEqual(result[0], ["scene two", "scene three"])
-        self.assertEqual(result[1], [102, 104])
-        self.assertEqual(result[2], [103, 105])
+        self.assertEqual(result[1], [202, 204])
+        self.assertEqual(result[2], [203, 205])
         self.assertEqual(
             result[3],
-            ["Anima/test/scene_002", "Anima/test/scene_003"],
+            ["Anima/test/scene_052", "Anima/test/scene_053"],
+        )
+        self.assertEqual(
+            result[4],
+            ["anima_batches/test_051-100", "anima_batches/test_051-100"],
         )
 
     def test_seed_values_wrap_at_comfyui_maximum(self):
         result = AnimaPromptQueue().expand(
             "scene one\n\nscene two",
-            start_scene=1,
+            batch_range="1-50",
+            start_in_range=1,
             scene_limit=2,
             base_seed=MAX_SEED,
             filename_prefix="",
@@ -67,12 +73,49 @@ class PromptQueueTests(unittest.TestCase):
 
     def test_empty_input_and_out_of_range_start_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "empty"):
-            AnimaPromptQueue().expand(" \n\n ", 1, 50, 0, "output")
+            AnimaPromptQueue().expand(" \n\n ", "1-50", 1, 50, 0, "output")
         with self.assertRaisesRegex(ValueError, "only 1 scenes"):
-            AnimaPromptQueue().expand("scene one", 2, 50, 0, "output")
+            AnimaPromptQueue().expand("scene one", "1-50", 2, 50, 0, "output")
+
+    def test_range_selector_numbers_separate_fifty_prompt_pastes(self):
+        scenes = "\n\n".join(f"prompt {index}" for index in range(1, 51))
+        result = AnimaPromptQueue().expand(
+            scenes,
+            batch_range="251-300",
+            start_in_range=1,
+            scene_limit=50,
+            base_seed=0,
+            filename_prefix="Anima_latent_queue",
+        )
+        self.assertEqual(len(result[0]), 50)
+        self.assertEqual(result[3][0], "Anima_latent_queue/scene_251")
+        self.assertEqual(result[3][-1], "Anima_latent_queue/scene_300")
+        self.assertEqual(
+            result[4][0],
+            "anima_batches/Anima_latent_queue_251-300",
+        )
+
+    def test_range_end_caps_a_resumed_batch(self):
+        scenes = "\n\n".join(f"prompt {index}" for index in range(1, 51))
+        result = AnimaPromptQueue().expand(
+            scenes,
+            batch_range="101-150",
+            start_in_range=41,
+            scene_limit=50,
+            base_seed=0,
+            filename_prefix="output",
+        )
+        self.assertEqual(len(result[0]), 10)
+        self.assertEqual(result[3][0], "output/scene_141")
+        self.assertEqual(result[3][-1], "output/scene_150")
 
     def test_node_outputs_are_lists_and_scene_limit_is_capped_at_fifty(self):
-        self.assertEqual(AnimaPromptQueue.OUTPUT_IS_LIST, (True, True, True, True))
+        self.assertEqual(
+            AnimaPromptQueue.OUTPUT_IS_LIST,
+            (True, True, True, True, True),
+        )
+        self.assertEqual(BATCH_RANGES[0], "1-50")
+        self.assertEqual(BATCH_RANGES[-1], "251-300")
         scene_limit = AnimaPromptQueue.INPUT_TYPES()["required"]["scene_limit"]
         self.assertEqual(scene_limit[1]["default"], 50)
         self.assertEqual(scene_limit[1]["max"], 50)

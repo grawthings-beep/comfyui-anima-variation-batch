@@ -127,7 +127,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("SaveImage", node_types)
 
         queue = nodes[15]
-        self.assertEqual(queue["widgets_values"][1:3], [1, 50])
+        self.assertEqual(queue["widgets_values"][1:4], ["1-50", 1, 50])
         self.assertIn("\n\n", queue["widgets_values"][0])
 
         sources = {
@@ -145,6 +145,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(sources[(7, 4)], (15, 1, "INT"))
         self.assertEqual(sources[(11, 4)], (15, 2, "INT"))
         self.assertEqual(sources[(13, 1)], (15, 3, "STRING"))
+        self.assertEqual(sources[(13, 2)], (15, 4, "STRING"))
 
         for node_id, input_name in (
             (4, "text"),
@@ -156,12 +157,13 @@ class WorkflowTests(unittest.TestCase):
             self.assertEqual(converted_input["widget"]["name"], input_name)
 
         zip_saver = nodes[13]
-        self.assertEqual(zip_saver["inputs"][-1]["name"], "file_stems")
-        self.assertNotIn("widget", zip_saver["inputs"][-1])
-        self.assertEqual(zip_saver["widgets_values"], [
-            "anima_batches/Anima_latent_queue",
-            True,
-        ])
+        self.assertEqual(
+            [item["name"] for item in zip_saver["inputs"]],
+            ["images", "file_stems", "archive_name"],
+        )
+        self.assertNotIn("widget", zip_saver["inputs"][1])
+        self.assertNotIn("widget", zip_saver["inputs"][2])
+        self.assertEqual(zip_saver["widgets_values"], [True])
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}
