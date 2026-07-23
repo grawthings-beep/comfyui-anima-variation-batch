@@ -50,11 +50,32 @@ def verify_hf_login():
         ) from exc
 
 
+def cleanup_legacy_paths(entry, root, output):
+    if not output.exists():
+        return
+
+    root = root.resolve()
+    output = output.resolve()
+    for value in entry.get("legacy_paths", []):
+        legacy = (root / value).resolve()
+        if legacy == output:
+            continue
+        try:
+            legacy.relative_to(root)
+        except ValueError:
+            print(f"WARN: refusing legacy path outside root: {legacy}")
+            continue
+        if legacy.is_file():
+            legacy.unlink()
+            print(f"REMOVE legacy: {entry['id']} -> {legacy}")
+
+
 def download(entry, root):
     output = root / entry["path"]
     minimum = int(entry.get("min_bytes") or 0)
     if output.exists() and output.stat().st_size >= minimum:
         print(f"SKIP existing: {entry['id']} -> {output}")
+        cleanup_legacy_paths(entry, root, output)
         return
 
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -86,6 +107,7 @@ def download(entry, root):
                 f"downloaded file is too small: {size} bytes"
             )
         temporary.replace(output)
+    cleanup_legacy_paths(entry, root, output)
 
 
 def main():

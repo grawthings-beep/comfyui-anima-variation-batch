@@ -218,7 +218,9 @@ python scripts/download_loras.py \
 ```
 
 Omit `--id` to download every listed character LoRA. Files are installed under
-`models/loras/anima/`.
+`models/loras/anima/` with character-first names such as
+`Rapi - Anima.safetensors`, so ComfyUI's LoRA selector stays readable. When a
+renamed LoRA is present, older `anima_*.safetensors` manifest paths are removed.
 
 ## License
 

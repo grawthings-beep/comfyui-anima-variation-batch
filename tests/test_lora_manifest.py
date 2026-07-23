@@ -1,8 +1,9 @@
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.download_loras import parse_hf_resolve_url, select_loras
+from scripts.download_loras import cleanup_legacy_paths, parse_hf_resolve_url, select_loras
 
 
 MANIFEST_PATH = (
@@ -33,6 +34,15 @@ class LoraManifestTests(unittest.TestCase):
             )
         )
 
+    def test_lora_filenames_start_with_readable_labels(self):
+        for entry in self.entries:
+            filename = Path(entry["path"]).name
+            self.assertFalse(filename.startswith("anima_"), entry["id"])
+            self.assertFalse(filename.endswith("_anima.safetensors"), entry["id"])
+            for legacy_path in entry.get("legacy_paths", []):
+                self.assertTrue(legacy_path.startswith("models/loras/anima/"))
+                self.assertNotEqual(legacy_path, entry["path"])
+
     def test_recent_loras_are_present(self):
         by_id = {entry["id"]: entry for entry in self.entries}
         self.assertEqual(by_id["eris"]["trigger"], "3r1s")
@@ -45,6 +55,8 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["moran"]["trigger"], "m0ran")
         self.assertEqual(by_id["snowwhite"]["trigger"], "sn0white")
         self.assertEqual(by_id["swimsuit-elegg"]["trigger"], "swimsuitelegg")
+        self.assertEqual(by_id["swimsuit-rapi"]["trigger"], "swimsuitrapi")
+        self.assertEqual(by_id["white-cinderella"]["trigger"], "whitecinderella")
         self.assertEqual(by_id["anis"]["trigger"], "an1s")
         self.assertEqual(by_id["littlemermaid"]["trigger"], "l1m3rma1d")
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
@@ -62,7 +74,7 @@ class LoraManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             by_id["moran"]["path"],
-            "models/loras/anima/anima_moran_1.safetensors",
+            "models/loras/anima/Moran - Anima v1.safetensors",
         )
         self.assertEqual(
             by_id["laplace"]["url"],
@@ -78,6 +90,16 @@ class LoraManifestTests(unittest.TestCase):
             by_id["swimsuit-elegg"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_swimsuit_elegg.safetensors",
+        )
+        self.assertEqual(
+            by_id["swimsuit-rapi"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_swimsuitrapi.safetensors",
+        )
+        self.assertEqual(
+            by_id["white-cinderella"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_whitecinderella.safetensors",
         )
         self.assertEqual(
             by_id["anis"]["url"],
@@ -101,7 +123,7 @@ class LoraManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             by_id["snowwhite"]["path"],
-            "models/loras/anima/anima_snowwhite_1.safetensors",
+            "models/loras/anima/Snow White - Anima v1.safetensors",
         )
         self.assertEqual(
             by_id["littlemermaid"]["url"],
@@ -125,6 +147,25 @@ class LoraManifestTests(unittest.TestCase):
             [entry["id"] for entry in selected],
             ["label", "arkrangerblack"],
         )
+
+    def test_legacy_paths_are_removed_only_after_replacement_exists(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            current = root / "models" / "loras" / "anima" / "Rapi - Anima.safetensors"
+            legacy = root / "models" / "loras" / "anima" / "anima_rapi.safetensors"
+            legacy.parent.mkdir(parents=True)
+            legacy.write_bytes(b"old")
+            entry = {
+                "id": "rapi",
+                "legacy_paths": ["models/loras/anima/anima_rapi.safetensors"],
+            }
+
+            cleanup_legacy_paths(entry, root, current)
+            self.assertTrue(legacy.exists())
+
+            current.write_bytes(b"new")
+            cleanup_legacy_paths(entry, root, current)
+            self.assertFalse(legacy.exists())
 
     def test_hugging_face_urls_can_be_passed_to_hf_download(self):
         entry = next(item for item in self.entries if item["id"] == "anisstar")

@@ -8,71 +8,106 @@
       "name": "Mint Anima LoRA (trigger: m1nt)",
       "trigger": "m1nt",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_lora.safetensors",
-      "path": "models/loras/anima/mint_anima.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Mint - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/mint_anima.safetensors"
+      ]
     },
     {
       "id": "eleg",
-      "name": "Eleg Anima LoRA (trigger: elegg)",
+      "name": "Elegg Anima LoRA (trigger: elegg)",
       "trigger": "elegg",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/elegg_anima.safetensors",
-      "path": "models/loras/anima/elegg_anima.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Elegg - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/elegg_anima.safetensors"
+      ]
     },
     {
       "id": "swimsuit-elegg",
       "name": "Swimsuit Elegg Anima LoRA (trigger: swimsuitelegg)",
       "trigger": "swimsuitelegg",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_swimsuit_elegg.safetensors",
-      "path": "models/loras/anima/anima_swimsuit_elegg.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Swimsuit Elegg - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_swimsuit_elegg.safetensors"
+      ]
     },
     {
       "id": "eris",
       "name": "Eris Anima LoRA (trigger: 3r1s)",
       "trigger": "3r1s",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_eris.safetensors",
-      "path": "models/loras/anima/anima_eris.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Eris - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_eris.safetensors"
+      ]
     },
     {
       "id": "noir",
       "name": "Noir Anima LoRA (trigger: n0ir)",
       "trigger": "n0ir",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_noir.safetensors",
-      "path": "models/loras/anima/anima_noir.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Noir - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_noir.safetensors"
+      ]
     },
     {
       "id": "anis",
       "name": "Anis Anima LoRA (trigger: an1s)",
       "trigger": "an1s",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_anis.safetensors",
-      "path": "models/loras/anima/anima_anis.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Anis - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_anis.safetensors"
+      ]
     },
     {
       "id": "anisstar",
-      "name": "Anisstar Anima LoRA v3 pruned (trigger: an1sstar)",
+      "name": "Anis Star Anima LoRA v2 pruned (trigger: an1sstar)",
       "trigger": "an1sstar",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_anisstar%20(2).safetensors",
-      "path": "models/loras/anima/anima_anisstar_v2.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Anis Star - Anima v2.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_anisstar_v2.safetensors"
+      ]
     },
     {
       "id": "anisstar3",
       "name": "Anis Star 3 Anima LoRA (trigger: an1sstar3)",
       "trigger": "an1sstar3",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_anisstar3.safetensors",
-      "path": "models/loras/anima/anima_anisstar3.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Anis Star 3 - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_anisstar3.safetensors"
+      ]
     },
     {
       "id": "rapi",
       "name": "Rapi Anima LoRA (trigger: r4pi)",
       "trigger": "r4pi",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_rapi.safetensors",
-      "path": "models/loras/anima/anima_rapi.safetensors",
+      "path": "models/loras/anima/Rapi - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_rapi.safetensors"
+      ]
+    },
+    {
+      "id": "swimsuit-rapi",
+      "name": "Swimsuit Rapi Anima LoRA (trigger: swimsuitrapi)",
+      "trigger": "swimsuitrapi",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_swimsuitrapi.safetensors",
+      "path": "models/loras/anima/Swimsuit Rapi - Anima.safetensors",
       "min_bytes": 1048576
     },
     {
@@ -80,39 +115,62 @@
       "name": "Ain Anima LoRA (trigger: 41n)",
       "trigger": "41n",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_ain.safetensors",
-      "path": "models/loras/anima/anima_ain.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Ain - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_ain.safetensors"
+      ]
     },
     {
       "id": "prika",
       "name": "Prika Anima LoRA (trigger: pr1ka)",
       "trigger": "pr1ka",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_prika.safetensors",
-      "path": "models/loras/anima/anima_prika.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Prika - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_prika.safetensors"
+      ]
     },
     {
       "id": "siren",
       "name": "Siren Anima LoRA (trigger: s1ren)",
       "trigger": "s1ren",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_siren.safetensors",
-      "path": "models/loras/anima/anima_siren.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Siren - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_siren.safetensors"
+      ]
     },
     {
       "id": "cinderella",
       "name": "Cinderella Anima LoRA (trigger: c1nde)",
       "trigger": "c1nde",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/c1nde_anima.safetensors",
-      "path": "models/loras/anima/c1nde_anima.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Cinderella - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/c1nde_anima.safetensors"
+      ]
     },
     {
       "id": "bikini-cinderella",
       "name": "Bikini Cinderella Anima LoRA (trigger: bikinicinderella)",
       "trigger": "bikinicinderella",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_bikinicinderella.safetensors",
-      "path": "models/loras/anima/anima_bikinicinderella.safetensors",
+      "path": "models/loras/anima/Bikini Cinderella - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_bikinicinderella.safetensors"
+      ]
+    },
+    {
+      "id": "white-cinderella",
+      "name": "White Cinderella Anima LoRA (trigger: whitecinderella)",
+      "trigger": "whitecinderella",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_whitecinderella.safetensors",
+      "path": "models/loras/anima/White Cinderella - Anima.safetensors",
       "min_bytes": 1048576
     },
     {
@@ -120,104 +178,143 @@
       "name": "Mast Anima LoRA (trigger: m4st)",
       "trigger": "m4st",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_mast.safetensors",
-      "path": "models/loras/anima/anima_mast.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Mast - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_mast.safetensors"
+      ]
     },
     {
       "id": "maxwell",
       "name": "Maxwell Anima LoRA (trigger: m4xwell)",
       "trigger": "m4xwell",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_maxwell.safetensors",
-      "path": "models/loras/anima/anima_maxwell.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Maxwell - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_maxwell.safetensors"
+      ]
     },
     {
       "id": "moran",
       "name": "Moran Anima LoRA (trigger: m0ran)",
       "trigger": "m0ran",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_moran%20(1).safetensors",
-      "path": "models/loras/anima/anima_moran_1.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Moran - Anima v1.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_moran_1.safetensors"
+      ]
     },
     {
       "id": "laplace",
       "name": "Laplace Anima LoRA (trigger: l4place)",
       "trigger": "l4place",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_laplace.safetensors",
-      "path": "models/loras/anima/anima_laplace.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Laplace - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_laplace.safetensors"
+      ]
     },
     {
       "id": "marciana",
       "name": "Marciana Anima LoRA (trigger: m4rciana)",
       "trigger": "m4rciana",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_marciana.safetensors",
-      "path": "models/loras/anima/anima_marciana.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Marciana - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_marciana.safetensors"
+      ]
     },
     {
       "id": "marciana-3",
       "name": "Marciana Anima LoRA (3) (trigger: m4rciana)",
       "trigger": "m4rciana",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_marciana%20(3).safetensors",
-      "path": "models/loras/anima/anima_marciana_3.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Marciana - Anima v3.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_marciana_3.safetensors"
+      ]
     },
     {
       "id": "snowwhite",
       "name": "Snow White Anima LoRA (trigger: sn0white)",
       "trigger": "sn0white",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_snowwhite%20(1).safetensors",
-      "path": "models/loras/anima/anima_snowwhite_1.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Snow White - Anima v1.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_snowwhite_1.safetensors"
+      ]
     },
     {
       "id": "blanc",
       "name": "Blanc Anima LoRA (trigger: bl4nc)",
       "trigger": "bl4nc",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_blanc.safetensors",
-      "path": "models/loras/anima/anima_blanc.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Blanc - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_blanc.safetensors"
+      ]
     },
     {
       "id": "privaty",
       "name": "Privaty Anima LoRA (trigger: pr1vaty)",
       "trigger": "pr1vaty",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_privaty.safetensors",
-      "path": "models/loras/anima/anima_privaty.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Privaty - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_privaty.safetensors"
+      ]
     },
     {
       "id": "label",
       "name": "Label Anima LoRA (trigger: l4bel)",
       "trigger": "l4bel",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_label.safetensors",
-      "path": "models/loras/anima/anima_label.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Label - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_label.safetensors"
+      ]
     },
     {
       "id": "arkrangerblack",
       "name": "Ark Ranger Black Anima LoRA (trigger: 4rkblack)",
       "trigger": "4rkblack",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_arkrangerblack.safetensors",
-      "path": "models/loras/anima/anima_arkrangerblack.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Ark Ranger Black - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_arkrangerblack.safetensors"
+      ]
     },
     {
       "id": "littlemermaid",
       "name": "Little Mermaid Anima LoRA (trigger: l1m3rma1d)",
       "trigger": "l1m3rma1d",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_littlemermaid.safetensors",
-      "path": "models/loras/anima/anima_littlemermaid.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/Little Mermaid - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/anima_littlemermaid.safetensors"
+      ]
     },
     {
       "id": "pixel-came",
       "name": "Pixel AnimaB CAME LoRA (trigger: CAME)",
       "trigger": "CAME",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/pixel-AnimaB_V10-V1-CAME.safetensors",
-      "path": "models/loras/anima/pixel-AnimaB_V10-V1-CAME.safetensors",
-      "min_bytes": 1048576
+      "path": "models/loras/anima/CAME - Pixel AnimaB V10.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
+        "models/loras/anima/pixel-AnimaB_V10-V1-CAME.safetensors"
+      ]
     }
   ]
 }
