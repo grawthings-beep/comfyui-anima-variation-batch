@@ -226,6 +226,14 @@
       ]
     },
     {
+      "id": "laplace-2",
+      "name": "Laplace 2 Anima LoRA (trigger: l4place)",
+      "trigger": "l4place",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_laplace2.safetensors",
+      "path": "models/loras/anima/Laplace 2 - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
       "id": "marciana",
       "name": "Marciana Anima LoRA (trigger: m4rciana)",
       "trigger": "m4rciana",

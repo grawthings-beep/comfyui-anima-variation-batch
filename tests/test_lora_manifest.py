@@ -49,6 +49,7 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["label"]["trigger"], "l4bel")
         self.assertEqual(by_id["arkrangerblack"]["trigger"], "4rkblack")
         self.assertEqual(by_id["laplace"]["trigger"], "l4place")
+        self.assertEqual(by_id["laplace-2"]["trigger"], "l4place")
         self.assertEqual(by_id["marciana"]["trigger"], "m4rciana")
         self.assertEqual(by_id["marciana-3"]["trigger"], "m4rciana")
         self.assertEqual(by_id["maxwell"]["trigger"], "m4xwell")
@@ -81,6 +82,15 @@ class LoraManifestTests(unittest.TestCase):
             by_id["laplace"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_laplace.safetensors",
+        )
+        self.assertEqual(
+            by_id["laplace-2"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_laplace2.safetensors",
+        )
+        self.assertEqual(
+            by_id["laplace-2"]["path"],
+            "models/loras/anima/Laplace 2 - Anima.safetensors",
         )
         self.assertEqual(
             by_id["maxwell"]["url"],
