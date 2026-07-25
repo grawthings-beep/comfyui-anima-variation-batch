@@ -624,9 +624,9 @@
       },
       "widgets_values": [
         "masterpiece, best quality, score_8, highres, safe, 1girl, original character, standing on a rainy neon street, cinematic reflections\n\nmasterpiece, best quality, score_8, highres, safe, 1girl, original character, relaxing beside a sunlit window, warm morning atmosphere\n\nmasterpiece, best quality, score_8, highres, safe, 1girl, original character, exploring an ancient forest shrine, drifting fireflies",
-        "1-50",
+        "1-500",
         1,
-        50,
+        500,
         566871253377100,
         "Anima_latent_queue"
       ],
@@ -652,7 +652,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 50件ごとの使い方\n1. 今回の最大50プロンプトを赤いPrompt Queueへ貼る。各シーンは空行で区切る。\n2. `batch_range`で `1-50` / `51-100` / ... / `251-300` を選ぶ。\n3. Queue Promptを1回押す。\n\n2回目の50件では`51-100`を選ぶだけで、画像名が`scene_051.png`から始まる。ZIP名にも`051-100`が付くので、複数ZIPを同じ場所へ展開しても重複しない。\n\n## 範囲内での再開\n- `start_in_range`: 選択範囲内の何件目から始めるか。通常は1。\n- `scene_limit`: 今回処理する件数。最大50。\n\n## ZIP出力\n全シーン完了後、1個のZIPへ格納され、ブラウザのダウンロードが自動開始する。個別PNGはoutputへ重複保存しない。自動ダウンロードが止められた場合は緑のZIPノードのDownload ZIPボタンを押す。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
+        "# Anima Prompt Queue + Latent Hires-Fix\n\n## 最大500シーンを1回で生成\n1. 最大500プロンプトを赤いPrompt Queueへ貼る。各シーンは空行で区切る。\n2. `batch_range`を`1-500`、`start_in_range`を1、`scene_limit`を500にする（初期値のままでよい）。\n3. Queue Promptを1回押す。\n\n画像名は`scene_001.png`から`scene_500.png`までの通し番号になる。完了後は全画像が1個のZIPに入り、自動ダウンロードされる。\n\n## 途中再開・分割生成\n- `start_in_range`: 何件目から再開するか。通常は1。\n- `scene_limit`: 今回処理する件数。最大500。\n- 50件ずつ回す場合は`1-50` / `51-100` / ... / `451-500`を選べる。\n\nZIP名には実際の生成範囲が付くため、複数ZIPを同じ場所へ展開しても重複しない。\n\n## ZIP出力\n全シーン完了後、1個のZIPへ格納され、ブラウザのダウンロードが自動開始する。個別PNGはoutputへ重複保存しない。自動ダウンロードが止められた場合は緑のZIPノードのDownload ZIPボタンを押す。\n\n## Hires-Fix\n832x1216で1パス目 → latentをbislerpで1.5x拡大 → denoise 0.55で2パス目(1248x1824)。ESRGANモデルは不要。\n"
       ],
       "color": "#222",
       "bgcolor": "#000"

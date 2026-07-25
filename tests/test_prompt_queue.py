@@ -55,7 +55,7 @@ class PromptQueueTests(unittest.TestCase):
         )
         self.assertEqual(
             result[4],
-            ["anima_batches/test_051-100", "anima_batches/test_051-100"],
+            ["anima_batches/test_052-053", "anima_batches/test_052-053"],
         )
 
     def test_seed_values_wrap_at_comfyui_maximum(self):
@@ -95,6 +95,26 @@ class PromptQueueTests(unittest.TestCase):
             "anima_batches/Anima_latent_queue_251-300",
         )
 
+    def test_one_queue_expands_five_hundred_scenes(self):
+        scenes = "\n\n".join(f"prompt {index}" for index in range(1, 501))
+        result = AnimaPromptQueue().expand(
+            scenes,
+            batch_range="1-500",
+            start_in_range=1,
+            scene_limit=500,
+            base_seed=1000,
+            filename_prefix="Anima_latent_queue",
+        )
+        self.assertEqual(len(result[0]), 500)
+        self.assertEqual(result[3][0], "Anima_latent_queue/scene_001")
+        self.assertEqual(result[3][-1], "Anima_latent_queue/scene_500")
+        self.assertEqual(result[1][0], 1000)
+        self.assertEqual(result[1][-1], 1998)
+        self.assertEqual(
+            result[4][0],
+            "anima_batches/Anima_latent_queue_001-500",
+        )
+
     def test_range_end_caps_a_resumed_batch(self):
         scenes = "\n\n".join(f"prompt {index}" for index in range(1, 51))
         result = AnimaPromptQueue().expand(
@@ -109,16 +129,20 @@ class PromptQueueTests(unittest.TestCase):
         self.assertEqual(result[3][0], "output/scene_141")
         self.assertEqual(result[3][-1], "output/scene_150")
 
-    def test_node_outputs_are_lists_and_scene_limit_is_capped_at_fifty(self):
+    def test_node_outputs_are_lists_and_scene_limit_is_capped_at_five_hundred(self):
         self.assertEqual(
             AnimaPromptQueue.OUTPUT_IS_LIST,
             (True, True, True, True, True),
         )
-        self.assertEqual(BATCH_RANGES[0], "1-50")
-        self.assertEqual(BATCH_RANGES[-1], "251-300")
+        self.assertEqual(BATCH_RANGES[0], "1-500")
+        self.assertEqual(BATCH_RANGES[-1], "451-500")
         scene_limit = AnimaPromptQueue.INPUT_TYPES()["required"]["scene_limit"]
-        self.assertEqual(scene_limit[1]["default"], 50)
-        self.assertEqual(scene_limit[1]["max"], 50)
+        self.assertEqual(scene_limit[1]["default"], 500)
+        self.assertEqual(scene_limit[1]["max"], 500)
+        start_in_range = AnimaPromptQueue.INPUT_TYPES()["required"][
+            "start_in_range"
+        ]
+        self.assertEqual(start_in_range[1]["max"], 500)
 
 
 if __name__ == "__main__":

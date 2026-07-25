@@ -127,7 +127,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("SaveImage", node_types)
 
         queue = nodes[15]
-        self.assertEqual(queue["widgets_values"][1:4], ["1-50", 1, 50])
+        self.assertEqual(queue["widgets_values"][1:4], ["1-500", 1, 500])
         self.assertIn("\n\n", queue["widgets_values"][0])
 
         sources = {

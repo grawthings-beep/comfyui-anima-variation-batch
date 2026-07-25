@@ -8,12 +8,17 @@ import re
 
 MAX_SEED = 0xFFFFFFFFFFFFFFFF
 BATCH_RANGES = (
+    "1-500",
     "1-50",
     "51-100",
     "101-150",
     "151-200",
     "201-250",
     "251-300",
+    "301-350",
+    "351-400",
+    "401-450",
+    "451-500",
 )
 
 
@@ -50,9 +55,9 @@ class AnimaPromptQueue:
                 "batch_range": (list(BATCH_RANGES),),
                 "start_in_range": (
                     "INT",
-                    {"default": 1, "min": 1, "max": 50},
+                    {"default": 1, "min": 1, "max": 500},
                 ),
-                "scene_limit": ("INT", {"default": 50, "min": 1, "max": 50}),
+                "scene_limit": ("INT", {"default": 500, "min": 1, "max": 500}),
                 "base_seed": (
                     "INT",
                     {"default": 566871253377100, "min": 0, "max": MAX_SEED},
@@ -131,7 +136,8 @@ class AnimaPromptQueue:
             )
         ]
         archive_base = clean_prefix.rsplit("/", 1)[-1]
-        range_tag = f"{range_start:03d}-{range_end:03d}"
+        absolute_end = absolute_start_index + len(selected)
+        range_tag = f"{absolute_start_index + 1:03d}-{absolute_end:03d}"
         archive_names = [
             f"anima_batches/{archive_base}_{range_tag}"
         ] * len(selected)

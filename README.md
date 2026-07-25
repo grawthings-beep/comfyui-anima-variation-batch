@@ -165,18 +165,18 @@ default second-pass denoise is `0.55`; tune around `0.50` to `0.60`.
 
 ### Latent Prompt Queue
 
-Paste Grok's scenes into the red Prompt Queue node with at least one blank line
-between scenes, then choose `batch_range`: `1-50`, `51-100`, `101-150`,
-`151-200`, `201-250`, or `251-300`. Each run accepts a fresh paste of up to 50
-prompts. The selected range controls absolute filenames and seeds, so the
-second paste produces `scene_051.png` through `scene_100.png` instead of
-overwriting the first set.
+Paste up to 500 Grok scenes into the red Prompt Queue node with at least one
+blank line between scenes. The default `batch_range` is `1-500` and
+`scene_limit` is 500, so one click on Queue Prompt processes the full list.
+Outputs use absolute names from `scene_001.png` through `scene_500.png`, and
+the completed download is named like
+`Anima_latent_queue_001-500_00001.zip`.
 
-`start_in_range` defaults to 1 and supports resuming partway through the
-selected 50-scene range. `scene_limit` remains capped at 50. The seed sequence
-is deterministic from `base_seed`, so resumed scenes keep the same seeds and
-filenames. ZIP filenames also contain the zero-padded selected range, such as
-`Anima_latent_queue_051-100_00001.zip`.
+`start_in_range` defaults to 1 and supports resuming partway through the list.
+The seed sequence is deterministic from `base_seed`, so resumed scenes keep
+the same seeds and filenames. For smaller runs, the range menu still provides
+50-scene chunks from `1-50` through `451-500`; the actual generated range is
+included in the ZIP filename to avoid collisions.
 
 When the final latent upscale finishes, `AnimaSaveQueueZip` encodes every final
 image directly into one ZIP and triggers a single browser download. It does not
