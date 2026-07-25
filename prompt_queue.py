@@ -9,6 +9,7 @@ import re
 MAX_SEED = 0xFFFFFFFFFFFFFFFF
 BATCH_RANGES = (
     "1-500",
+    "301-500",
     "1-50",
     "51-100",
     "101-150",

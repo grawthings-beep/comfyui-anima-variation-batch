@@ -115,6 +115,26 @@ class PromptQueueTests(unittest.TestCase):
             "anima_batches/Anima_latent_queue_001-500",
         )
 
+    def test_fresh_two_hundred_scene_paste_can_continue_at_301(self):
+        scenes = "\n\n".join(f"prompt {index}" for index in range(301, 501))
+        result = AnimaPromptQueue().expand(
+            scenes,
+            batch_range="301-500",
+            start_in_range=1,
+            scene_limit=500,
+            base_seed=1000,
+            filename_prefix="Anima_latent_queue",
+        )
+        self.assertEqual(len(result[0]), 200)
+        self.assertEqual(result[0][0], "prompt 301")
+        self.assertEqual(result[0][-1], "prompt 500")
+        self.assertEqual(result[3][0], "Anima_latent_queue/scene_301")
+        self.assertEqual(result[3][-1], "Anima_latent_queue/scene_500")
+        self.assertEqual(
+            result[4][0],
+            "anima_batches/Anima_latent_queue_301-500",
+        )
+
     def test_range_end_caps_a_resumed_batch(self):
         scenes = "\n\n".join(f"prompt {index}" for index in range(1, 51))
         result = AnimaPromptQueue().expand(
@@ -135,6 +155,7 @@ class PromptQueueTests(unittest.TestCase):
             (True, True, True, True, True),
         )
         self.assertEqual(BATCH_RANGES[0], "1-500")
+        self.assertEqual(BATCH_RANGES[1], "301-500")
         self.assertEqual(BATCH_RANGES[-1], "451-500")
         scene_limit = AnimaPromptQueue.INPUT_TYPES()["required"]["scene_limit"]
         self.assertEqual(scene_limit[1]["default"], 500)

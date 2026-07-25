@@ -175,8 +175,10 @@ the completed download is named like
 `start_in_range` defaults to 1 and supports resuming partway through the list.
 The seed sequence is deterministic from `base_seed`, so resumed scenes keep
 the same seeds and filenames. For smaller runs, the range menu still provides
-50-scene chunks from `1-50` through `451-500`; the actual generated range is
-included in the ZIP filename to avoid collisions.
+the `301-500` continuation preset and 50-scene chunks from `1-50` through
+`451-500`. With `301-500`, a fresh paste of 200 prompts is saved as
+`scene_301.png` through `scene_500.png`. The actual generated range is included
+in the ZIP filename to avoid collisions.
 
 When the final latent upscale finishes, `AnimaSaveQueueZip` encodes every final
 image directly into one ZIP and triggers a single browser download. It does not
