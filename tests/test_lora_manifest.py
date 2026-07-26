@@ -64,7 +64,10 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
         self.assertEqual(by_id["anisstar3"]["trigger"], "an1sstar3")
         self.assertEqual(by_id["pixel-came"]["trigger"], "CAME")
-        self.assertEqual(by_id["latexturn"]["trigger"], "latexturn")
+        self.assertNotIn("latexturn", by_id)
+        self.assertEqual(by_id["trex-studio-style"]["trigger"], "trex studio style")
+        self.assertEqual(by_id["togawagatame"]["trigger"], "togawagatame")
+        self.assertEqual(by_id["diving"]["trigger"], "diving")
         self.assertEqual(
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
@@ -108,13 +111,31 @@ class LoraManifestTests(unittest.TestCase):
             "models/loras/anima/Old Maxwell - Anima.safetensors",
         )
         self.assertEqual(
-            by_id["latexturn"]["url"],
+            by_id["trex-studio-style"]["url"],
             "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
-            "latexturn_anima_base_v1.safetensors",
+            "T-Rex_Studio_Style_Anima_V1.safetensors",
         )
         self.assertEqual(
-            by_id["latexturn"]["path"],
-            "models/loras/anima/Latex Turn - Anima Base v1.safetensors",
+            by_id["trex-studio-style"]["path"],
+            "models/loras/anima/T-Rex Studio Style - Anima v1.safetensors",
+        )
+        self.assertEqual(
+            by_id["togawagatame"]["url"],
+            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
+            "togawagatame_anima_v1.safetensors",
+        )
+        self.assertEqual(
+            by_id["togawagatame"]["path"],
+            "models/loras/anima/Togawagatame - Anima v1.safetensors",
+        )
+        self.assertEqual(
+            by_id["diving"]["url"],
+            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
+            "divingAnima_v40.safetensors",
+        )
+        self.assertEqual(
+            by_id["diving"]["path"],
+            "models/loras/anima/Diving - Anima v40.safetensors",
         )
         self.assertEqual(
             by_id["swimsuit-elegg"]["url"],

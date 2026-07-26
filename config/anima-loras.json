@@ -333,11 +333,27 @@
       ]
     },
     {
-      "id": "latexturn",
-      "name": "Latex Turn Anima Base v1 LoRA (trigger: latexturn)",
-      "trigger": "latexturn",
-      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/latexturn_anima_base_v1.safetensors",
-      "path": "models/loras/anima/Latex Turn - Anima Base v1.safetensors",
+      "id": "trex-studio-style",
+      "name": "T-Rex Studio Style Anima v1 LoRA (trigger: trex studio style)",
+      "trigger": "trex studio style",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/T-Rex_Studio_Style_Anima_V1.safetensors",
+      "path": "models/loras/anima/T-Rex Studio Style - Anima v1.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "togawagatame",
+      "name": "Togawagatame Anima v1 LoRA (trigger: togawagatame)",
+      "trigger": "togawagatame",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/togawagatame_anima_v1.safetensors",
+      "path": "models/loras/anima/Togawagatame - Anima v1.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "diving",
+      "name": "Diving Anima v40 LoRA (trigger: diving)",
+      "trigger": "diving",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/divingAnima_v40.safetensors",
+      "path": "models/loras/anima/Diving - Anima v40.safetensors",
       "min_bytes": 1048576
     }
   ]
