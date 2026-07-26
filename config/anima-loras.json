@@ -331,6 +331,14 @@
       "legacy_paths": [
         "models/loras/anima/pixel-AnimaB_V10-V1-CAME.safetensors"
       ]
+    },
+    {
+      "id": "latexturn",
+      "name": "Latex Turn Anima Base v1 LoRA (trigger: latexturn)",
+      "trigger": "latexturn",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/latexturn_anima_base_v1.safetensors",
+      "path": "models/loras/anima/Latex Turn - Anima Base v1.safetensors",
+      "min_bytes": 1048576
     }
   ]
 }

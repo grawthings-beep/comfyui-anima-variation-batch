@@ -64,6 +64,7 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["bikini-cinderella"]["trigger"], "bikinicinderella")
         self.assertEqual(by_id["anisstar3"]["trigger"], "an1sstar3")
         self.assertEqual(by_id["pixel-came"]["trigger"], "CAME")
+        self.assertEqual(by_id["latexturn"]["trigger"], "latexturn")
         self.assertEqual(
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
@@ -105,6 +106,15 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(
             by_id["old-maxwell"]["path"],
             "models/loras/anima/Old Maxwell - Anima.safetensors",
+        )
+        self.assertEqual(
+            by_id["latexturn"]["url"],
+            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
+            "latexturn_anima_base_v1.safetensors",
+        )
+        self.assertEqual(
+            by_id["latexturn"]["path"],
+            "models/loras/anima/Latex Turn - Anima Base v1.safetensors",
         )
         self.assertEqual(
             by_id["swimsuit-elegg"]["url"],
