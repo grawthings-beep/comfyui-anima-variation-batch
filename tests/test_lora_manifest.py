@@ -76,6 +76,9 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["trex-studio-style"]["trigger"], "trex studio style")
         self.assertEqual(by_id["togawagatame"]["trigger"], "togawagatame")
         self.assertNotIn("diving", by_id)
+        self.assertEqual(by_id["hisako-kotobuki"]["trigger"], "hisako_kotobuki")
+        self.assertEqual(by_id["arisu-terui"]["trigger"], "arisu_terui")
+        self.assertEqual(by_id["komaro-michinoku"]["trigger"], "komaro_michinoku")
         self.assertEqual(
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
@@ -190,9 +193,36 @@ class LoraManifestTests(unittest.TestCase):
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_anisstar3.safetensors",
         )
+        self.assertEqual(
+            by_id["hisako-kotobuki"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "hisako_kotobuki_animaXL.safetensors",
+        )
+        self.assertEqual(
+            by_id["hisako-kotobuki"]["path"],
+            "models/loras/anima/Hisako Kotobuki - AnimaXL.safetensors",
+        )
+        self.assertEqual(
+            by_id["arisu-terui"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "arisu_terui_animaXL.safetensors",
+        )
+        self.assertEqual(
+            by_id["arisu-terui"]["path"],
+            "models/loras/anima/Arisu Terui - AnimaXL.safetensors",
+        )
+        self.assertEqual(
+            by_id["komaro-michinoku"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "komaro_michinoku_animaXL.safetensors",
+        )
+        self.assertEqual(
+            by_id["komaro-michinoku"]["path"],
+            "models/loras/anima/Komaro Michinoku - AnimaXL.safetensors",
+        )
 
     def test_pose_loras_are_separate_from_character_loras(self):
-        self.assertEqual(len(self.pose_entries), 17)
+        self.assertEqual(len(self.pose_entries), 3)
         for key in ("id", "url", "path"):
             values = [entry[key] for entry in self.pose_entries]
             self.assertEqual(len(values), len(set(values)), key)
@@ -203,30 +233,31 @@ class LoraManifestTests(unittest.TestCase):
             self.assertNotIn(entry["path"], {item["path"] for item in self.entries})
 
         by_id = {entry["id"]: entry for entry in self.pose_entries}
-        self.assertIn("01-ballsdeep", by_id)
-        self.assertIn("07-spooning-pov", by_id)
-        self.assertIn("17-irnart-poses-missionary", by_id)
         self.assertEqual(
-            by_id["07-spooning-pov"]["url"],
-            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
-            "07_Spooning_POV_Anima.safetensors",
+            set(by_id),
+            {"01-ballsdeep", "02-superposition-sexpose", "03-female-pov"},
         )
         self.assertEqual(
-            by_id["07-spooning-pov"]["path"],
-            "models/loras/anima_pose/07 Spooning POV - Anima.safetensors",
+            by_id["03-female-pov"]["url"],
+            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
+            "03_FemalePOV_Anima.safetensors",
+        )
+        self.assertEqual(
+            by_id["03-female-pov"]["path"],
+            "models/loras/anima_pose/03 Female POV - Anima.safetensors",
         )
 
     def test_pose_lora_hugging_face_urls_can_be_passed_to_hf_download(self):
         entry = next(
             item
             for item in self.pose_entries
-            if item["id"] == "04-jacko-challenge-pose"
+            if item["id"] == "02-superposition-sexpose"
         )
         self.assertEqual(
             parse_hf_resolve_url(entry["url"]),
             (
                 "uwgm/nikke-civitai-backup",
-                "04_JackO_Challenge_Pose_Anima.safetensors",
+                "02_SuperPosition_SexPose_Anima.safetensors",
             ),
         )
 
@@ -287,6 +318,14 @@ class LoraManifestTests(unittest.TestCase):
             (
                 "uwgm/nikke-loras",
                 "anima_snowwhite (1).safetensors",
+            ),
+        )
+        entry = next(item for item in self.entries if item["id"] == "hisako-kotobuki")
+        self.assertEqual(
+            parse_hf_resolve_url(entry["url"]),
+            (
+                "uwgm/nikke-loras",
+                "hisako_kotobuki_animaXL.safetensors",
             ),
         )
 
