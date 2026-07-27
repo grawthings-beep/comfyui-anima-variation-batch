@@ -121,6 +121,7 @@ class WorkflowTests(unittest.TestCase):
         nodes = {node["id"]: node for node in self.hires_latent["nodes"]}
         node_types = {node["type"] for node in self.hires_latent["nodes"]}
         self.assertIn("AnimaPromptQueue", node_types)
+        self.assertIn("AnimaPoseLoRASelect", node_types)
         self.assertIn("AnimaSaveQueueZip", node_types)
         self.assertIn("LatentUpscaleBy", node_types)
         self.assertNotIn("UpscaleModelLoader", node_types)
@@ -164,6 +165,45 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("widget", zip_saver["inputs"][1])
         self.assertNotIn("widget", zip_saver["inputs"][2])
         self.assertEqual(zip_saver["widgets_values"], [True])
+
+    def test_latent_workflow_applies_selected_pose_lora_to_both_passes(self):
+        nodes = {node["id"]: node for node in self.hires_latent["nodes"]}
+        selectors = [
+            node for node in self.hires_latent["nodes"]
+            if node["type"] == "AnimaPoseLoRASelect"
+        ]
+        loaders = [
+            node for node in self.hires_latent["nodes"]
+            if node["type"] == "LoraLoaderModelOnly"
+        ]
+        self.assertEqual(len(selectors), 1)
+        self.assertEqual(len(loaders), 2)
+
+        selector = selectors[0]
+        first_loader = next(node for node in loaders if "1st pass" in node["title"])
+        second_loader = next(node for node in loaders if "2nd pass" in node["title"])
+        self.assertTrue(selector["widgets_values"][0].startswith("anima_pose/"))
+        self.assertEqual(selector["widgets_values"][1:], [0.8, 0.8])
+
+        sources = {
+            (target_id, target_slot): (source_id, source_slot, link_type)
+            for (
+                _link_id,
+                source_id,
+                source_slot,
+                target_id,
+                target_slot,
+                link_type,
+            ) in self.hires_latent["links"]
+        }
+        self.assertEqual(sources[(first_loader["id"], 0)], (1, 0, "MODEL"))
+        self.assertEqual(sources[(second_loader["id"], 0)], (1, 0, "MODEL"))
+        self.assertEqual(sources[(first_loader["id"], 1)], (selector["id"], 0, "*"))
+        self.assertEqual(sources[(second_loader["id"], 1)], (selector["id"], 0, "*"))
+        self.assertEqual(sources[(first_loader["id"], 2)], (selector["id"], 1, "FLOAT"))
+        self.assertEqual(sources[(second_loader["id"], 2)], (selector["id"], 2, "FLOAT"))
+        self.assertEqual(sources[(7, 0)], (first_loader["id"], 0, "MODEL"))
+        self.assertEqual(sources[(11, 0)], (second_loader["id"], 0, "MODEL"))
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}

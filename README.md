@@ -163,6 +163,12 @@ pack. The dependency-free Prompt Queue ships in this repository; the remaining
 graph upscales the latent by 1.5x with bislerp, then runs a second pass. Its
 default second-pass denoise is `0.55`; tune around `0.50` to `0.60`.
 
+The latent batch workflow also has an optional pose LoRA selector feeding two
+`LoraLoaderModelOnly` nodes, one before each KSampler. Install the separated
+pose LoRAs below before using it. The default pose strength is `0.8` for both
+passes; lower the second pass first if the pose LoRA starts to overpower final
+detail.
+
 ### Latent Prompt Queue
 
 Paste up to 500 Grok scenes into the red Prompt Queue node with at least one
@@ -199,7 +205,7 @@ wget -O "$COMFY/models/upscale_models/4x-AnimeSharp.pth" \
   "https://huggingface.co/Kim2091/AnimeSharp/resolve/main/4x-AnimeSharp.pth"
 ```
 
-## Optional character LoRA downloads
+## Optional LoRA downloads
 
 `config/anima-loras.json` contains download metadata for the private Anima
 character LoRAs. The repository contains only metadata, not model weights.
@@ -223,6 +229,20 @@ Omit `--id` to download every listed character LoRA. Files are installed under
 `models/loras/anima/` with character-first names such as
 `Rapi - Anima.safetensors`, so ComfyUI's LoRA selector stays readable. When a
 renamed LoRA is present, older `anima_*.safetensors` manifest paths are removed.
+
+Pose/action LoRAs are intentionally kept in a separate manifest and folder so
+they do not mix with character LoRAs:
+
+```bash
+python scripts/download_loras.py --manifest config/anima-pose-loras.json --list
+python scripts/download_loras.py \
+  --root /workspace/comfyui \
+  --manifest config/anima-pose-loras.json
+```
+
+Those files install under `models/loras/anima_pose/` with numbered readable
+names. The latent batch workflow's `Anima Pose LoRA Select` node reads that
+manifest and sends the selected LoRA name to both Hires-fix passes.
 
 ## License
 

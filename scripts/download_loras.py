@@ -112,7 +112,7 @@ def download(entry, root):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Download private Anima character LoRAs from the project manifest."
+        description="Download private Anima LoRAs from a project manifest."
     )
     parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
     parser.add_argument(
@@ -133,7 +133,7 @@ def main():
     entries = select_loras(manifest.get("loras", []), args.selected_ids)
     if args.list:
         for entry in entries:
-            print(f"{entry['id']:20} trigger={entry['trigger']:12} {entry['path']}")
+            print(f"{entry['id']:34} trigger={entry['trigger']:28} {entry['path']}")
         return
 
     verify_hf_login()

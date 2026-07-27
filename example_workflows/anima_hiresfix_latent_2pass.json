@@ -1,8 +1,8 @@
 {
   "id": null,
   "revision": 0,
-  "last_node_id": 15,
-  "last_link_id": 22,
+  "last_node_id": 18,
+  "last_link_id": 28,
   "nodes": [
     {
       "id": 1,
@@ -118,7 +118,7 @@
         200
       ],
       "flags": {},
-      "order": 4,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -168,7 +168,7 @@
         160
       ],
       "flags": {},
-      "order": 5,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -210,7 +210,7 @@
         106
       ],
       "flags": {},
-      "order": 6,
+      "order": 9,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -245,13 +245,13 @@
         262
       ],
       "flags": {},
-      "order": 7,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 3
+          "link": 23
         },
         {
           "name": "positive",
@@ -314,7 +314,7 @@
         46
       ],
       "flags": {},
-      "order": 8,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -356,7 +356,7 @@
         330
       ],
       "flags": {},
-      "order": 9,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -385,7 +385,7 @@
         82
       ],
       "flags": {},
-      "order": 10,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
@@ -425,13 +425,13 @@
         262
       ],
       "flags": {},
-      "order": 11,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 11
+          "link": 24
         },
         {
           "name": "positive",
@@ -493,7 +493,7 @@
         46
       ],
       "flags": {},
-      "order": 12,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -535,7 +535,7 @@
         190
       ],
       "flags": {},
-      "order": 13,
+      "order": 16,
       "mode": 0,
       "inputs": [
         {
@@ -646,7 +646,7 @@
         620
       ],
       "flags": {},
-      "order": 14,
+      "order": 17,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -656,6 +656,170 @@
       ],
       "color": "#222",
       "bgcolor": "#000"
+    },
+    {
+      "id": 16,
+      "type": "AnimaPoseLoRASelect",
+      "pos": [
+        -200,
+        500
+      ],
+      "size": [
+        340,
+        130
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "lora_name",
+          "type": "*",
+          "links": [
+            25,
+            26
+          ]
+        },
+        {
+          "name": "first_pass_strength",
+          "type": "FLOAT",
+          "links": [
+            27
+          ]
+        },
+        {
+          "name": "second_pass_strength",
+          "type": "FLOAT",
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-AnimaVariationBatch",
+        "Node name for S&R": "AnimaPoseLoRASelect"
+      },
+      "widgets_values": [
+        "anima_pose/01 BallsDeep - Anima v1.safetensors",
+        0.8,
+        0.8
+      ],
+      "title": "Pose LoRA selector",
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 17,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        240,
+        700
+      ],
+      "size": [
+        360,
+        98
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3
+        },
+        {
+          "name": "lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
+          "link": 25
+        },
+        {
+          "name": "strength_model",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "anima_pose/01 BallsDeep - Anima v1.safetensors",
+        0.8
+      ],
+      "title": "Pose LoRA 1st pass"
+    },
+    {
+      "id": 18,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1380,
+        420
+      ],
+      "size": [
+        360,
+        98
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 11
+        },
+        {
+          "name": "lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
+          "link": 26
+        },
+        {
+          "name": "strength_model",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "anima_pose/01 BallsDeep - Anima v1.safetensors",
+        0.8
+      ],
+      "title": "Pose LoRA 2nd pass"
     }
   ],
   "links": [
@@ -679,7 +843,7 @@
       3,
       1,
       0,
-      7,
+      17,
       0,
       "MODEL"
     ],
@@ -743,7 +907,7 @@
       11,
       1,
       0,
-      11,
+      18,
       0,
       "MODEL"
     ],
@@ -834,6 +998,54 @@
       13,
       2,
       "STRING"
+    ],
+    [
+      23,
+      17,
+      0,
+      7,
+      0,
+      "MODEL"
+    ],
+    [
+      24,
+      18,
+      0,
+      11,
+      0,
+      "MODEL"
+    ],
+    [
+      25,
+      16,
+      0,
+      17,
+      1,
+      "*"
+    ],
+    [
+      26,
+      16,
+      0,
+      18,
+      1,
+      "*"
+    ],
+    [
+      27,
+      16,
+      1,
+      17,
+      2,
+      "FLOAT"
+    ],
+    [
+      28,
+      16,
+      2,
+      18,
+      2,
+      "FLOAT"
     ]
   ],
   "groups": [],

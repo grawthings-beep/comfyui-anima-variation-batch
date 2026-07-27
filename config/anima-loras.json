@@ -347,14 +347,6 @@
       "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/togawagatame_anima_v1.safetensors",
       "path": "models/loras/anima/Togawagatame - Anima v1.safetensors",
       "min_bytes": 1048576
-    },
-    {
-      "id": "diving",
-      "name": "Diving Anima v40 LoRA (trigger: diving)",
-      "trigger": "diving",
-      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/divingAnima_v40.safetensors",
-      "path": "models/loras/anima/Diving - Anima v40.safetensors",
-      "min_bytes": 1048576
     }
   ]
 }

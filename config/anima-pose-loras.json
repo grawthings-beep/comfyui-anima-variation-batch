@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "repository": "https://huggingface.co/uwgm/nikke-civitai-backup",
+  "authentication": "hf auth login",
+  "description": "Anima pose LoRAs installed separately from character LoRAs.",
+  "loras": [
+    {
+      "id": "01-ballsdeep",
+      "name": "BallsDeep Anima pose LoRA (trigger: ballsdeep)",
+      "trigger": "ballsdeep",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/01_BallsDeep_Anima_V1.safetensors",
+      "path": "models/loras/anima_pose/01 BallsDeep - Anima v1.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "02-superposition-sexpose",
+      "name": "SuperPosition SexPose Anima pose LoRA (trigger: superposition sexpose)",
+      "trigger": "superposition sexpose",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/02_SuperPosition_SexPose_Anima.safetensors",
+      "path": "models/loras/anima_pose/02 SuperPosition SexPose - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "03-female-pov",
+      "name": "Female POV Anima pose LoRA (trigger: female pov)",
+      "trigger": "female pov",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/03_FemalePOV_Anima.safetensors",
+      "path": "models/loras/anima_pose/03 Female POV - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "04-jacko-challenge-pose",
+      "name": "Jack-O Challenge Pose Anima pose LoRA (trigger: jacko challenge pose)",
+      "trigger": "jacko challenge pose",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/04_JackO_Challenge_Pose_Anima.safetensors",
+      "path": "models/loras/anima_pose/04 Jack-O Challenge Pose - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "05-cowgirl-position",
+      "name": "Cowgirl Position Anima pose LoRA (trigger: cowgirl position)",
+      "trigger": "cowgirl position",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/05_Cowgirl_Position_Anima.safetensors",
+      "path": "models/loras/anima_pose/05 Cowgirl Position - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "06-pronebone-pov",
+      "name": "Prone Bone POV Anima pose LoRA (trigger: prone bone pov)",
+      "trigger": "prone bone pov",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/06_ProneBone_POV_Anima.safetensors",
+      "path": "models/loras/anima_pose/06 Prone Bone POV - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "07-spooning-pov",
+      "name": "Spooning POV Anima pose LoRA (trigger: spooning pov)",
+      "trigger": "spooning pov",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/07_Spooning_POV_Anima.safetensors",
+      "path": "models/loras/anima_pose/07 Spooning POV - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "08-standing-carry-ekiben",
+      "name": "Standing Carry Ekiben Anima pose LoRA (trigger: standing carry ekiben)",
+      "trigger": "standing carry ekiben",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/08_StandingCarry_Ekiben_Anima.safetensors",
+      "path": "models/loras/anima_pose/08 Standing Carry Ekiben - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "09-thigh-grab-lifting-sex",
+      "name": "Thigh Grab Lifting Sex Anima pose LoRA (trigger: thigh grab lifting sex)",
+      "trigger": "thigh grab lifting sex",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/09_ThighGrab_LiftingSex_Anima.safetensors",
+      "path": "models/loras/anima_pose/09 Thigh Grab Lifting Sex - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "10-standing-split-stool-sex",
+      "name": "Standing Split Stool Sex Anima pose LoRA (trigger: standing split stool sex)",
+      "trigger": "standing split stool sex",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/10_Standing_SplitStool_Sex_Anima.safetensors",
+      "path": "models/loras/anima_pose/10 Standing Split Stool Sex - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "11-sixty-nine-69",
+      "name": "Sixty Nine 69 Anima pose LoRA (trigger: sixty nine 69)",
+      "trigger": "sixty nine 69",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/11_SixtyNine_69_Anima.safetensors",
+      "path": "models/loras/anima_pose/11 Sixty Nine 69 - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "12-deepthroat",
+      "name": "Deepthroat Anima pose LoRA (trigger: deepthroat)",
+      "trigger": "deepthroat",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/12_Deepthroat_Anima.safetensors",
+      "path": "models/loras/anima_pose/12 Deepthroat - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "13-deeper-penetration-deepthroat",
+      "name": "Deeper Penetration Deepthroat Anima pose LoRA (trigger: deeper penetration deepthroat)",
+      "trigger": "deeper penetration deepthroat",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/13_DeeperPenetration_Deepthroat_Anima.safetensors",
+      "path": "models/loras/anima_pose/13 Deeper Penetration Deepthroat - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "14-rough-sex-fucked-silly",
+      "name": "Rough Sex Fucked Silly Anima pose LoRA (trigger: rough sex fucked silly)",
+      "trigger": "rough sex fucked silly",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/14_RoughSex_FuckedSilly_Anima.safetensors",
+      "path": "models/loras/anima_pose/14 Rough Sex Fucked Silly - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "15-lifting-ass-fucking-blowjob",
+      "name": "Lifting Ass Fucking Blowjob Anima pose LoRA (trigger: lifting ass fucking blowjob)",
+      "trigger": "lifting ass fucking blowjob",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/15_LiftingAss_FuckingBlowjob_Anima.safetensors",
+      "path": "models/loras/anima_pose/15 Lifting Ass Fucking Blowjob - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "16-hentai-comic-hardcore",
+      "name": "Hentai Comic Hardcore Anima pose LoRA (trigger: hentai comic hardcore)",
+      "trigger": "hentai comic hardcore",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/16_HentaiComic_HardCore_Anima.safetensors",
+      "path": "models/loras/anima_pose/16 Hentai Comic Hardcore - Anima.safetensors",
+      "min_bytes": 1048576
+    },
+    {
+      "id": "17-irnart-poses-missionary",
+      "name": "IrnArt Poses Missionary Anima pose LoRA (trigger: irnart poses missionary)",
+      "trigger": "irnart poses missionary",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/17_IrnArt_Poses_Missionary_Anima.safetensors",
+      "path": "models/loras/anima_pose/17 IrnArt Poses Missionary - Anima.safetensors",
+      "min_bytes": 1048576
+    }
+  ]
+}

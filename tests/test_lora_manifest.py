@@ -11,6 +11,11 @@ MANIFEST_PATH = (
     / "config"
     / "anima-loras.json"
 )
+POSE_MANIFEST_PATH = (
+    Path(__file__).parents[1]
+    / "config"
+    / "anima-pose-loras.json"
+)
 
 
 class LoraManifestTests(unittest.TestCase):
@@ -18,6 +23,9 @@ class LoraManifestTests(unittest.TestCase):
     def setUpClass(cls):
         cls.entries = json.loads(
             MANIFEST_PATH.read_text(encoding="utf-8")
+        )["loras"]
+        cls.pose_entries = json.loads(
+            POSE_MANIFEST_PATH.read_text(encoding="utf-8")
         )["loras"]
 
     def test_ids_urls_and_paths_are_unique(self):
@@ -67,7 +75,7 @@ class LoraManifestTests(unittest.TestCase):
         self.assertNotIn("latexturn", by_id)
         self.assertEqual(by_id["trex-studio-style"]["trigger"], "trex studio style")
         self.assertEqual(by_id["togawagatame"]["trigger"], "togawagatame")
-        self.assertEqual(by_id["diving"]["trigger"], "diving")
+        self.assertNotIn("diving", by_id)
         self.assertEqual(
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
@@ -129,15 +137,6 @@ class LoraManifestTests(unittest.TestCase):
             "models/loras/anima/Togawagatame - Anima v1.safetensors",
         )
         self.assertEqual(
-            by_id["diving"]["url"],
-            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
-            "divingAnima_v40.safetensors",
-        )
-        self.assertEqual(
-            by_id["diving"]["path"],
-            "models/loras/anima/Diving - Anima v40.safetensors",
-        )
-        self.assertEqual(
             by_id["swimsuit-elegg"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_swimsuit_elegg.safetensors",
@@ -190,6 +189,45 @@ class LoraManifestTests(unittest.TestCase):
             by_id["anisstar3"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_anisstar3.safetensors",
+        )
+
+    def test_pose_loras_are_separate_from_character_loras(self):
+        self.assertEqual(len(self.pose_entries), 17)
+        for key in ("id", "url", "path"):
+            values = [entry[key] for entry in self.pose_entries]
+            self.assertEqual(len(values), len(set(values)), key)
+
+        for entry in self.pose_entries:
+            self.assertTrue(entry["path"].startswith("models/loras/anima_pose/"))
+            self.assertTrue(entry["path"].endswith(".safetensors"))
+            self.assertNotIn(entry["path"], {item["path"] for item in self.entries})
+
+        by_id = {entry["id"]: entry for entry in self.pose_entries}
+        self.assertIn("01-ballsdeep", by_id)
+        self.assertIn("07-spooning-pov", by_id)
+        self.assertIn("17-irnart-poses-missionary", by_id)
+        self.assertEqual(
+            by_id["07-spooning-pov"]["url"],
+            "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/"
+            "07_Spooning_POV_Anima.safetensors",
+        )
+        self.assertEqual(
+            by_id["07-spooning-pov"]["path"],
+            "models/loras/anima_pose/07 Spooning POV - Anima.safetensors",
+        )
+
+    def test_pose_lora_hugging_face_urls_can_be_passed_to_hf_download(self):
+        entry = next(
+            item
+            for item in self.pose_entries
+            if item["id"] == "04-jacko-challenge-pose"
+        )
+        self.assertEqual(
+            parse_hf_resolve_url(entry["url"]),
+            (
+                "uwgm/nikke-civitai-backup",
+                "04_JackO_Challenge_Pose_Anima.safetensors",
+            ),
         )
 
     def test_selection_accepts_multiple_ids(self):
