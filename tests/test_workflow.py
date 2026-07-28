@@ -6,7 +6,6 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 WORKFLOW_DIR = ROOT / "example_workflows"
 HIRES_ESRGAN_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_esrgan_2pass.json"
-POSE_DEPTH_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_esrgan_pose_depth.json"
 HIRES_LATENT_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_latent_2pass.json"
 TWO_CHARACTER_WORKFLOW_PATH = (
     WORKFLOW_DIR / "anima_two_character_regional_hiresfix.json"
@@ -17,12 +16,10 @@ class WorkflowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.hires_esrgan = cls.load(HIRES_ESRGAN_WORKFLOW_PATH)
-        cls.pose_depth = cls.load(POSE_DEPTH_WORKFLOW_PATH)
         cls.hires_latent = cls.load(HIRES_LATENT_WORKFLOW_PATH)
         cls.two_character = cls.load(TWO_CHARACTER_WORKFLOW_PATH)
         cls.workflows = (
             cls.hires_esrgan,
-            cls.pose_depth,
             cls.hires_latent,
             cls.two_character,
         )
@@ -37,7 +34,6 @@ class WorkflowTests(unittest.TestCase):
             workflow_names,
             [
                 "anima_hiresfix_esrgan_2pass.json",
-                "anima_hiresfix_esrgan_pose_depth.json",
                 "anima_hiresfix_latent_2pass.json",
                 "anima_two_character_regional_hiresfix.json",
             ],
@@ -62,54 +58,9 @@ class WorkflowTests(unittest.TestCase):
             node_types = {node["type"] for node in workflow["nodes"]}
             self.assertTrue(node_types.isdisjoint(removed_nodes))
 
-    def test_pose_depth_workflow_uses_compatible_lllite_in_first_pass(self):
-        nodes = {node["id"]: node for node in self.pose_depth["nodes"]}
-        node_types = [node["type"] for node in self.pose_depth["nodes"]]
-        self.assertNotIn("ModelPatchLoader", node_types)
-        self.assertEqual(node_types.count("AnimaLLLiteApply"), 2)
-        self.assertIn("DWPreprocessor", node_types)
-        self.assertIn("DepthAnythingV2Preprocessor", node_types)
-
-        self.assertEqual(
-            nodes[21]["widgets_values"],
-            ["anima-lllite-pose-1.safetensors", 1.0, 0.0, 0.8, True],
-        )
-        self.assertEqual(
-            nodes[25]["widgets_values"],
-            ["anima-lllite-depth-1.safetensors", 0.65, 0.0, 0.7, True],
-        )
-
-        sources = {
-            (target_id, target_slot): (source_id, source_slot, link_type)
-            for (
-                _link_id,
-                source_id,
-                source_slot,
-                target_id,
-                target_slot,
-                link_type,
-            ) in self.pose_depth["links"]
-        }
-        self.assertEqual(sources[(21, 0)], (1, 0, "MODEL"))
-        self.assertEqual(sources[(21, 1)], (19, 0, "IMAGE"))
-        self.assertEqual(sources[(25, 0)], (21, 0, "MODEL"))
-        self.assertEqual(sources[(25, 1)], (23, 0, "IMAGE"))
-        self.assertEqual(sources[(7, 0)], (25, 0, "MODEL"))
-        self.assertEqual(sources[(14, 0)], (1, 0, "MODEL"))
-
-    def test_pose_depth_workflow_embeds_download_metadata(self):
-        nodes = {node["id"]: node for node in self.pose_depth["nodes"]}
-        pose_model = nodes[21]["properties"]["models"][0]
-        depth_model = nodes[25]["properties"]["models"][0]
-        self.assertEqual(pose_model["directory"], "controlnet")
-        self.assertEqual(depth_model["directory"], "controlnet")
-        self.assertTrue(pose_model["url"].endswith("anima-lllite-pose-1.safetensors"))
-        self.assertTrue(depth_model["url"].endswith("anima-lllite-depth-1.safetensors"))
-
     def test_esrgan_workflows_embed_animesharp_download_metadata(self):
         for workflow in (
             self.hires_esrgan,
-            self.pose_depth,
             self.two_character,
         ):
             with self.subTest(workflow=workflow.get("id")):
