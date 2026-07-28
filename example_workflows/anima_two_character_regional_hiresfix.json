@@ -1,8 +1,8 @@
 {
   "id": null,
   "revision": 0,
-  "last_node_id": 28,
-  "last_link_id": 43,
+  "last_node_id": 29,
+  "last_link_id": 44,
   "nodes": [
     {
       "id": 1,
@@ -22,8 +22,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            19,
-            31
+            44
           ]
         }
       ],
@@ -766,6 +765,72 @@
       "mode": 0
     },
     {
+      "id": 29,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        -1120,
+        1190
+      ],
+      "size": [
+        360,
+        98
+      ],
+      "order": 15,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 44
+        },
+        {
+          "name": "lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
+          "link": null
+        },
+        {
+          "name": "strength_model",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            19,
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoraLoaderModelOnly",
+        "models": [
+          {
+            "name": "anima-turbo-lora-v0.2.safetensors",
+            "url": "https://huggingface.co/circlestone-labs/Anima-Official-LoRAs/resolve/main/anima-turbo-lora-v0.2.safetensors",
+            "directory": "loras"
+          }
+        ]
+      },
+      "widgets_values": [
+        "anima-turbo-lora-v0.2.safetensors",
+        1.0
+      ],
+      "title": "Global Anima Turbo LoRA v0.2",
+      "color": "#27323a",
+      "bgcolor": "#34434d",
+      "flags": {},
+      "mode": 0
+    },
+    {
       "id": 14,
       "type": "EmptyLatentImage",
       "pos": [
@@ -776,7 +841,7 @@
         310,
         106
       ],
-      "order": 15,
+      "order": 16,
       "inputs": [],
       "outputs": [
         {
@@ -811,7 +876,7 @@
         360,
         500
       ],
-      "order": 16,
+      "order": 17,
       "inputs": [
         {
           "name": "images",
@@ -840,7 +905,7 @@
         310,
         262
       ],
-      "order": 17,
+      "order": 18,
       "inputs": [
         {
           "name": "model",
@@ -879,13 +944,13 @@
       "widgets_values": [
         566871253377100,
         "fixed",
-        30,
-        4,
-        "er_sde",
+        12,
+        1,
+        "euler",
         "simple",
         1
       ],
-      "title": "Regional KSampler 1st pass",
+      "title": "Turbo regional KSampler 1st pass",
       "flags": {},
       "mode": 0
     },
@@ -900,7 +965,7 @@
         200,
         46
       ],
-      "order": 18,
+      "order": 19,
       "inputs": [
         {
           "name": "samples",
@@ -943,7 +1008,7 @@
         340,
         420
       ],
-      "order": 19,
+      "order": 20,
       "inputs": [
         {
           "name": "images",
@@ -972,7 +1037,7 @@
         320,
         58
       ],
-      "order": 20,
+      "order": 21,
       "inputs": [],
       "outputs": [
         {
@@ -1012,7 +1077,7 @@
         250,
         46
       ],
-      "order": 21,
+      "order": 22,
       "inputs": [
         {
           "name": "upscale_model",
@@ -1054,7 +1119,7 @@
         250,
         82
       ],
-      "order": 22,
+      "order": 23,
       "inputs": [
         {
           "name": "image",
@@ -1094,7 +1159,7 @@
         200,
         46
       ],
-      "order": 23,
+      "order": 24,
       "inputs": [
         {
           "name": "pixels",
@@ -1136,7 +1201,7 @@
         310,
         262
       ],
-      "order": 24,
+      "order": 25,
       "inputs": [
         {
           "name": "model",
@@ -1175,13 +1240,13 @@
       "widgets_values": [
         566871253377101,
         "fixed",
-        20,
-        4,
-        "er_sde",
+        12,
+        1,
+        "euler",
         "simple",
         0.38
       ],
-      "title": "Regional KSampler 2nd pass (denoise 0.38)",
+      "title": "Turbo regional KSampler 2nd pass (denoise 0.38)",
       "flags": {},
       "mode": 0
     },
@@ -1196,7 +1261,7 @@
         200,
         46
       ],
-      "order": 25,
+      "order": 26,
       "inputs": [
         {
           "name": "samples",
@@ -1238,7 +1303,7 @@
         430,
         500
       ],
-      "order": 26,
+      "order": 27,
       "inputs": [
         {
           "name": "images",
@@ -1269,12 +1334,12 @@
         560,
         720
       ],
-      "order": 27,
+      "order": 28,
       "inputs": [],
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Two-Character Regional Hires-Fix\n\nThis graph generates both characters in the same diffusion trajectory. Each character receives its own complete prompt and model-only character LoRA through a freely positioned soft regional mask. These masks are influence maps inside one latent, not separately rendered images. Any area outside both masks uses the unhooked shared-scene default conditioning. This reduces the identity bleeding caused by loading both character LoRAs globally, while preserving shared pose, lighting, eye contact, and contact between the characters better than sequential replacement inpaint.\n\n## Use\n1. Describe the complete shared scene and interaction in the green node.\n2. Select Character A and B. Their manifest triggers are injected automatically. Add visible hair, eyes, clothes, expression, and body direction in each details field.\n3. Move each live A/B center and adjust its width and height. Keep a feathered overlap where hands or bodies interact.\n4. Queue once. Mask positions automatically feed matching location text to both prompts, and the same regional conditioning is used in both passes.\n\n## Quality defaults\n- Regional mode: `default` gives each character full-image context, then blends only its masked prediction. `mask bounds` is faster but can weaken interaction continuity.\n- Character LoRA: start at 0.80; tune roughly 0.65-0.95.\n- Feather: 4-10 percent. Increase for soft interaction; reduce if identities mix.\n- First pass: 832x1216, 30 steps, CFG 4, er_sde/simple.\n- Hires-fix: AnimeSharp 4x, Lanczos to effective 1.5x, then denoise 0.38. Tune 0.32-0.42.\n\n## Requirements\n- Current ComfyUI core with CreateHookLoraModelOnly and ConditioningSetProperties.\n- WAI-ANIMA or Anima Base, qwen_3_06b_base, qwen_image_vae.\n- 4x-AnimeSharp.pth or another anime ESRGAN model.\n- Two installed character LoRAs listed in config/anima-loras.json.\n\nDo not place both character LoRAs in a global LoraLoader before the KSamplers; that defeats the regional identity separation."
+        "# Anima Two-Character Regional Hires-Fix + Turbo\n\nThis graph generates both characters in the same diffusion trajectory. Anima Turbo v0.2 is loaded globally once and feeds both passes. Each character receives its own complete prompt and model-only character LoRA through a freely positioned soft regional mask. These masks are influence maps inside one latent, not separately rendered images. Any area outside both masks uses the unhooked shared-scene default conditioning.\n\n## Use\n1. Describe the complete shared scene and interaction in the green node.\n2. Select Character A and B. Their manifest triggers are injected automatically. Add visible hair, eyes, clothes, expression, and body direction in each details field.\n3. Move each live A/B center and adjust its width and height. Keep a feathered overlap where hands or bodies interact.\n4. Keep the global Turbo loader enabled, then queue. The same Turbo model and regional conditioning are used in both passes.\n\n## Quality defaults\n- Turbo LoRA: strength 1.00. Reduce toward 0.70 if the result is too rigid or stylized.\n- Both passes: 12 steps, CFG 1, Euler/simple. CFG 1 ignores the negative prompt; try CFG 1.5-2.0 when negatives are important.\n- Regional mode: `default` gives each character full-image context, then blends only its masked prediction.\n- Character LoRA: start at 0.80; tune roughly 0.65-0.95.\n- Feather: 4-10 percent. Increase for soft interaction; reduce if identities mix.\n- Hires-fix: AnimeSharp 4x, Lanczos to effective 1.5x, then denoise 0.38. Tune 0.32-0.42.\n\n## Requirements\n- Current ComfyUI core with CreateHookLoraModelOnly and ConditioningSetProperties.\n- WAI-ANIMA or Anima Base, qwen_3_06b_base, qwen_image_vae.\n- anima-turbo-lora-v0.2.safetensors under models/loras.\n- 4x-AnimeSharp.pth or another anime ESRGAN model.\n- Two installed character LoRAs listed in config/anima-loras.json.\n\nTurbo is the only global LoRA. Do not place both character LoRAs in a global loader; that defeats regional identity separation."
       ],
       "title": "Read first",
       "flags": {},
@@ -1428,7 +1493,7 @@
     ],
     [
       19,
-      1,
+      29,
       0,
       16,
       0,
@@ -1524,7 +1589,7 @@
     ],
     [
       31,
-      1,
+      29,
       0,
       23,
       0,
@@ -1625,6 +1690,14 @@
       27,
       0,
       "CLIP"
+    ],
+    [
+      44,
+      1,
+      0,
+      29,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [

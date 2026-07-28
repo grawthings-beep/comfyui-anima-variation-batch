@@ -23,6 +23,7 @@ example_workflows/anima_two_character_regional_hiresfix.json
 for a coherent image containing two different LoRA characters:
 
 ```text
+checkpoint -> global Anima Turbo LoRA --------------------------+
 shared scene + Character A details + A LoRA hook + soft A mask --+
 shared scene + Character B details + B LoRA hook + soft B mask --+-> same first pass
                                                                    -> ESRGAN 1.5x
@@ -35,6 +36,11 @@ instead of loading both LoRAs globally. This reduces identity and clothing
 bleed while retaining shared lighting, eye contact, body spacing, and contact
 between the characters. The masks are soft influence maps inside one latent,
 not separately rendered images or a cut-and-paste composite.
+
+The global `LoraLoaderModelOnly` applies
+[`anima-turbo-lora-v0.2.safetensors`](https://huggingface.co/circlestone-labs/Anima-Official-LoRAs/blob/main/anima-turbo-lora-v0.2.safetensors)
+once, then sends that same model to both KSamplers. Turbo is global by design;
+the two character LoRAs remain isolated in their regional hooks.
 
 The green pair node lists readable character names from
 `config/anima-loras.json` and injects each selected LoRA's trigger
@@ -62,10 +68,15 @@ image context and only its denoised prediction is masked. Switching both to
 continuity. Start with:
 
 ```text
+Turbo LoRA strength:     1.00 (reduce toward 0.70 for more variety)
+Sampler:                 12 steps, CFG 1, Euler/simple
 Character LoRA strength: 0.80 (typical range 0.65-0.95)
 Mask feather:            6%   (typical range 4-10%)
 Second-pass denoise:     0.38 (typical range 0.32-0.42)
 ```
+
+At CFG 1 the negative prompt is inactive. Raise CFG to roughly `1.5-2.0` when
+negative prompting matters, at some cost to Turbo speed and appearance.
 
 The primary path is regional rather than sequential replacement inpaint:
 inpainting Character B after Character A can overwrite crossing arms, hands,
@@ -112,7 +123,11 @@ models/vae/qwen_image_vae.safetensors
 The two-character regional workflow defaults to
 `models/diffusion_models/waiANIMA_v10Base10.safetensors`, matching the RunPod
 image manifest. The official `anima-base-v1.0.safetensors` can be selected in
-the same loader instead.
+the same loader instead. It also expects:
+
+```text
+models/loras/anima-turbo-lora-v0.2.safetensors
+```
 
 The ESRGAN workflows start at 832x1216, upscale the first pass with a 4x
 ESRGAN model, resize to an effective 1.5x with Lanczos, VAE-re-encode, then run

@@ -178,7 +178,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(node_types.count("ConditioningCombine"), 1)
         self.assertEqual(node_types.count("ConditioningSetDefaultCombine"), 1)
         self.assertEqual(node_types.count("KSampler"), 2)
-        self.assertNotIn("LoraLoaderModelOnly", node_types)
+        self.assertEqual(node_types.count("LoraLoaderModelOnly"), 1)
         self.assertNotIn("VAEEncodeForInpaint", node_types)
 
         selector = nodes[4]
@@ -191,6 +191,7 @@ class WorkflowTests(unittest.TestCase):
         default_combine = nodes[28]
         first_sampler = nodes[16]
         second_sampler = nodes[23]
+        turbo = nodes[29]
 
         self.assertIn("trigger:", selector["widgets_values"][1])
         self.assertIn("trigger:", selector["widgets_values"][4])
@@ -200,6 +201,20 @@ class WorkflowTests(unittest.TestCase):
         )
         self.assertEqual(regional_a["widgets_values"], [1, "default"])
         self.assertEqual(regional_b["widgets_values"], [1, "default"])
+        self.assertEqual(
+            turbo["widgets_values"],
+            ["anima-turbo-lora-v0.2.safetensors", 1.0],
+        )
+        turbo_model = turbo["properties"]["models"][0]
+        self.assertEqual(turbo_model["name"], "anima-turbo-lora-v0.2.safetensors")
+        self.assertEqual(turbo_model["directory"], "loras")
+        self.assertEqual(
+            turbo_model["url"],
+            "https://huggingface.co/circlestone-labs/Anima-Official-LoRAs/"
+            "resolve/main/anima-turbo-lora-v0.2.safetensors",
+        )
+        self.assertEqual(first_sampler["widgets_values"][2:6], [12, 1, "euler", "simple"])
+        self.assertEqual(second_sampler["widgets_values"][2:6], [12, 1, "euler", "simple"])
         self.assertEqual(first_sampler["widgets_values"][-1], 1)
         self.assertEqual(second_sampler["widgets_values"][-1], 0.38)
         self.assertEqual(nodes[1]["widgets_values"][0], "waiANIMA_v10Base10.safetensors")
@@ -241,9 +256,10 @@ class WorkflowTests(unittest.TestCase):
             sources[(default_combine["id"], 1)],
             (27, 0, "CONDITIONING"),
         )
+        self.assertEqual(sources[(turbo["id"], 0)], (1, 0, "MODEL"))
 
         for sampler_id in (first_sampler["id"], second_sampler["id"]):
-            self.assertEqual(sources[(sampler_id, 0)], (1, 0, "MODEL"))
+            self.assertEqual(sources[(sampler_id, 0)], (turbo["id"], 0, "MODEL"))
             self.assertEqual(sources[(sampler_id, 1)], (28, 0, "CONDITIONING"))
             self.assertEqual(sources[(sampler_id, 2)], (8, 0, "CONDITIONING"))
 
