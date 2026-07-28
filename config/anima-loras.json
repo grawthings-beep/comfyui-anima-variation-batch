@@ -333,7 +333,17 @@
         "models/loras/anima/Hisako Kotobuki - AnimaXL.safetensors",
         "models/loras/anima/hisako_kotobuki_animaXL.safetensors",
         "models/loras/anima/Arisu Terui - AnimaXL.safetensors",
-        "models/loras/anima/arisu_terui_animaXL.safetensors",
+        "models/loras/anima/arisu_terui_animaXL.safetensors"
+      ]
+    },
+    {
+      "id": "michinoku-komaro",
+      "name": "Michinoku Komaro Anima LoRA (trigger: michinoku_komaro)",
+      "trigger": "michinoku_komaro",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_michinokukomaro.safetensors",
+      "path": "models/loras/anima/Michinoku Komaro - Anima.safetensors",
+      "min_bytes": 1048576,
+      "legacy_paths": [
         "models/loras/anima/Komaro Michinoku - AnimaXL.safetensors",
         "models/loras/anima/komaro_michinoku_animaXL.safetensors"
       ]

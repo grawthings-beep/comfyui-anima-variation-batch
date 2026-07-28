@@ -81,6 +81,10 @@ class LoraManifestTests(unittest.TestCase):
         self.assertNotIn("komaro-michinoku", by_id)
         self.assertEqual(by_id["kotobuki-hisako"]["trigger"], "kotobukihisako")
         self.assertEqual(
+            by_id["michinoku-komaro"]["trigger"],
+            "michinoku_komaro",
+        )
+        self.assertEqual(
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
             "anima_eris.safetensors",
@@ -211,9 +215,18 @@ class LoraManifestTests(unittest.TestCase):
             "models/loras/anima/Arisu Terui - AnimaXL.safetensors",
             by_id["kotobuki-hisako"]["legacy_paths"],
         )
+        self.assertEqual(
+            by_id["michinoku-komaro"]["url"],
+            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
+            "anima_michinokukomaro.safetensors",
+        )
+        self.assertEqual(
+            by_id["michinoku-komaro"]["path"],
+            "models/loras/anima/Michinoku Komaro - Anima.safetensors",
+        )
         self.assertIn(
             "models/loras/anima/Komaro Michinoku - AnimaXL.safetensors",
-            by_id["kotobuki-hisako"]["legacy_paths"],
+            by_id["michinoku-komaro"]["legacy_paths"],
         )
 
     def test_pose_loras_are_separate_from_character_loras(self):
@@ -321,6 +334,18 @@ class LoraManifestTests(unittest.TestCase):
             (
                 "uwgm/nikke-loras",
                 "anima_kotobukihisako.safetensors",
+            ),
+        )
+        entry = next(
+            item
+            for item in self.entries
+            if item["id"] == "michinoku-komaro"
+        )
+        self.assertEqual(
+            parse_hf_resolve_url(entry["url"]),
+            (
+                "uwgm/nikke-loras",
+                "anima_michinokukomaro.safetensors",
             ),
         )
 
