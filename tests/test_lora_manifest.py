@@ -76,9 +76,10 @@ class LoraManifestTests(unittest.TestCase):
         self.assertEqual(by_id["trex-studio-style"]["trigger"], "trex studio style")
         self.assertEqual(by_id["togawagatame"]["trigger"], "togawagatame")
         self.assertNotIn("diving", by_id)
-        self.assertEqual(by_id["hisako-kotobuki"]["trigger"], "hisako_kotobuki")
-        self.assertEqual(by_id["arisu-terui"]["trigger"], "arisu_terui")
-        self.assertEqual(by_id["komaro-michinoku"]["trigger"], "komaro_michinoku")
+        self.assertNotIn("hisako-kotobuki", by_id)
+        self.assertNotIn("arisu-terui", by_id)
+        self.assertNotIn("komaro-michinoku", by_id)
+        self.assertEqual(by_id["kotobuki-hisako"]["trigger"], "kotobukihisako")
         self.assertEqual(
             by_id["eris"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
@@ -194,31 +195,25 @@ class LoraManifestTests(unittest.TestCase):
             "anima_anisstar3.safetensors",
         )
         self.assertEqual(
-            by_id["hisako-kotobuki"]["url"],
+            by_id["kotobuki-hisako"]["url"],
             "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
-            "hisako_kotobuki_animaXL.safetensors",
+            "anima_kotobukihisako.safetensors",
         )
         self.assertEqual(
-            by_id["hisako-kotobuki"]["path"],
+            by_id["kotobuki-hisako"]["path"],
+            "models/loras/anima/Kotobuki Hisako - Anima.safetensors",
+        )
+        self.assertIn(
             "models/loras/anima/Hisako Kotobuki - AnimaXL.safetensors",
+            by_id["kotobuki-hisako"]["legacy_paths"],
         )
-        self.assertEqual(
-            by_id["arisu-terui"]["url"],
-            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
-            "arisu_terui_animaXL.safetensors",
-        )
-        self.assertEqual(
-            by_id["arisu-terui"]["path"],
+        self.assertIn(
             "models/loras/anima/Arisu Terui - AnimaXL.safetensors",
+            by_id["kotobuki-hisako"]["legacy_paths"],
         )
-        self.assertEqual(
-            by_id["komaro-michinoku"]["url"],
-            "https://huggingface.co/uwgm/nikke-loras/resolve/main/"
-            "komaro_michinoku_animaXL.safetensors",
-        )
-        self.assertEqual(
-            by_id["komaro-michinoku"]["path"],
+        self.assertIn(
             "models/loras/anima/Komaro Michinoku - AnimaXL.safetensors",
+            by_id["kotobuki-hisako"]["legacy_paths"],
         )
 
     def test_pose_loras_are_separate_from_character_loras(self):
@@ -320,12 +315,12 @@ class LoraManifestTests(unittest.TestCase):
                 "anima_snowwhite (1).safetensors",
             ),
         )
-        entry = next(item for item in self.entries if item["id"] == "hisako-kotobuki")
+        entry = next(item for item in self.entries if item["id"] == "kotobuki-hisako")
         self.assertEqual(
             parse_hf_resolve_url(entry["url"]),
             (
                 "uwgm/nikke-loras",
-                "hisako_kotobuki_animaXL.safetensors",
+                "anima_kotobukihisako.safetensors",
             ),
         )
 

@@ -322,35 +322,19 @@
       ]
     },
     {
-      "id": "hisako-kotobuki",
-      "name": "Hisako Kotobuki AnimaXL LoRA (trigger: hisako_kotobuki)",
-      "trigger": "hisako_kotobuki",
-      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/hisako_kotobuki_animaXL.safetensors",
-      "path": "models/loras/anima/Hisako Kotobuki - AnimaXL.safetensors",
+      "id": "kotobuki-hisako",
+      "name": "Kotobuki Hisako Anima LoRA (trigger: kotobukihisako)",
+      "trigger": "kotobukihisako",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/anima_kotobukihisako.safetensors",
+      "path": "models/loras/anima/Kotobuki Hisako - Anima.safetensors",
       "min_bytes": 1048576,
       "legacy_paths": [
-        "models/loras/anima/hisako_kotobuki_animaXL.safetensors"
-      ]
-    },
-    {
-      "id": "arisu-terui",
-      "name": "Arisu Terui AnimaXL LoRA (trigger: arisu_terui)",
-      "trigger": "arisu_terui",
-      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/arisu_terui_animaXL.safetensors",
-      "path": "models/loras/anima/Arisu Terui - AnimaXL.safetensors",
-      "min_bytes": 1048576,
-      "legacy_paths": [
-        "models/loras/anima/arisu_terui_animaXL.safetensors"
-      ]
-    },
-    {
-      "id": "komaro-michinoku",
-      "name": "Komaro Michinoku AnimaXL LoRA (trigger: komaro_michinoku)",
-      "trigger": "komaro_michinoku",
-      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/komaro_michinoku_animaXL.safetensors",
-      "path": "models/loras/anima/Komaro Michinoku - AnimaXL.safetensors",
-      "min_bytes": 1048576,
-      "legacy_paths": [
+        "models/loras/anima/anima_kotobukihisako.safetensors",
+        "models/loras/anima/Hisako Kotobuki - AnimaXL.safetensors",
+        "models/loras/anima/hisako_kotobuki_animaXL.safetensors",
+        "models/loras/anima/Arisu Terui - AnimaXL.safetensors",
+        "models/loras/anima/arisu_terui_animaXL.safetensors",
+        "models/loras/anima/Komaro Michinoku - AnimaXL.safetensors",
         "models/loras/anima/komaro_michinoku_animaXL.safetensors"
       ]
     },
