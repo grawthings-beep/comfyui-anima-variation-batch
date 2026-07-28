@@ -1,9 +1,10 @@
-# ComfyUI Anima Hires-Fix and Regional Workflows
+# ComfyUI Anima Hires-Fix and Inpaint Workflows
 
 [![CI](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml/badge.svg)](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml)
 
 This repository contains Anima-focused 2-pass Hires-fix workflows and a
-two-character regional LoRA workflow. It does not distribute model weights.
+two-character Mask Editor inpaint workflow. It does not distribute model
+weights.
 
 The latent Hires-fix workflow includes a blank-line Prompt Queue: paste up to
 50 Grok-generated scenes at once and ComfyUI runs the complete two-pass
@@ -14,81 +15,62 @@ generation for every scene without manual prompt copying.
 ```text
 example_workflows/anima_hiresfix_esrgan_2pass.json
 example_workflows/anima_hiresfix_latent_2pass.json
-example_workflows/anima_two_character_regional_hiresfix.json
+example_workflows/anima_two_character_inpaint_hiresfix.json
 ```
 
-### Two-character regional Hires-fix
+### Two-character Mask Editor inpaint + Hires-fix
 
-`anima_two_character_regional_hiresfix.json` is the recommended starting point
-for a coherent image containing two different LoRA characters:
+`anima_two_character_inpaint_hiresfix.json` separates composition from
+identity replacement:
 
 ```text
-checkpoint -> global Anima Turbo LoRA --------------------------+
-shared scene + Character A details + A LoRA hook + soft A mask --+
-shared scene + Character B details + B LoRA hook + soft B mask --+-> same first pass
-                                                                   -> ESRGAN 1.5x
-                                                                   -> regional second pass
+checkpoint -> global Anima Turbo -> Character A LoRA -> base interaction
+base image + hand-painted B mask -> Character B LoRA -> masked inpaint
+original base + masked inpaint result -> exact pixel composite
+composite -> AnimeSharp 4x -> Lanczos 1160x1536 -> low-denoise Hires-fix
 ```
 
-Both characters are solved in the same diffusion trajectory. The LoRAs are
-attached to their masked conditioning with ComfyUI's model-only hook system,
-instead of loading both LoRAs globally. This reduces identity and clothing
-bleed while retaining shared lighting, eye contact, body spacing, and contact
-between the characters. The masks are soft influence maps inside one latent,
-not separately rendered images or a cut-and-paste composite.
+The first stage generates the complete physical interaction with Character A's
+LoRA and a temporary Character B. This establishes crossing arms, hands, gaze,
+height difference, lighting, and shadows before any identity replacement.
+After the base image is generated, copy it from the purple Save node into
+`Load Base + Paint Character B Mask`, open ComfyUI's Mask Editor, and paint
+Character B. Include B's hair, clothing, limbs, and contact limbs belonging to
+B, while leaving A's face and hair outside the mask.
 
-The global `LoraLoaderModelOnly` applies
-[`anima-turbo-lora-v0.2.safetensors`](https://huggingface.co/circlestone-labs/Anima-Official-LoRAs/blob/main/anima-turbo-lora-v0.2.safetensors)
-once, then sends that same model to both KSamplers. Turbo is global by design;
-the two character LoRAs remain isolated in their regional hooks.
+The red final Save node is disabled when the workflow opens, so the missing
+input image cannot block the base pass. After saving the mask, select that node
+and press `Ctrl+M` once to enable it, then queue again.
 
-The green pair node lists readable character names from
-`config/anima-loras.json` and injects each selected LoRA's trigger
-automatically. Style LoRAs in that manifest are excluded from this character
-menu. Describe the complete interaction in `shared_scene`, then add visible
-hair, eye, clothing, expression, and body-direction details for each character.
-This follows the
-[official Anima multiple-character prompting guidance](https://huggingface.co/circlestone-labs/Anima#natural-language-prompting-tips),
-which recommends describing each named character's appearance.
+`Anima Character LoRA Select` reads `config/anima-loras.json` and shows short
+character names instead of long `anima/...safetensors` filenames. It selects
+the model file only and never edits prompts. Enter the exact trigger yourself
+in both prompt boxes.
 
-`Anima Two-Character Free Regional Masks` displays the A/B layout live inside
-the node and also outputs the exact mask preview. Each character has independent
-X, Y, width, and height controls. Its derived position description is connected
-back to the character prompt automatically, so moving A or B vertically does
-not leave a stale left/right prompt behind. Defaults cover the left and right
-halves with a feathered center overlap. Move and overlap the regions around
-touching hands or bodies; reduce the overlap if identities begin to mix.
-Any area left outside both masks is filled by an unhooked shared-scene default
-conditioning, keeping the background coherent without leaking either character
-LoRA across the whole image.
-
-The regional nodes default to `default`, so each character sees the complete
-image context and only its denoised prediction is masked. Switching both to
-`mask bounds` can run faster, but cropped context can weaken interaction
-continuity. Start with:
+The Character A and B LoRAs are applied to different samplers:
 
 ```text
-Turbo LoRA strength:     1.00 (reduce toward 0.70 for more variety)
-Sampler:                 12 steps, CFG 1, Euler/simple
-Character LoRA strength: 0.80 (typical range 0.65-0.95)
-Mask feather:            6%   (typical range 4-10%)
-Second-pass denoise:     0.38 (typical range 0.32-0.42)
+Turbo LoRA strength:        1.00
+Character A LoRA strength:  0.80, base sampler only
+Character B LoRA strength:  0.90, masked inpaint sampler only
+Base sampler:               12 steps, CFG 1.5, Euler/simple, denoise 1.00
+Inpaint sampler:            12 steps, CFG 1.5, Euler/simple, denoise 0.82
+Mask expansion:             8 px plus 12 px latent grow
+Final Hires-fix:            12 steps, CFG 1.5, denoise 0.32, Turbo only
 ```
 
-At CFG 1 the negative prompt is inactive. Raise CFG to roughly `1.5-2.0` when
-negative prompting matters, at some cost to Turbo speed and appearance.
+Use inpaint denoise `0.70-0.78` when the pose should barely move, `0.80-0.88`
+for a normal character replacement, or `0.90-1.00` when B's identity is not
+appearing strongly enough. The final `ImageCompositeMasked` restores original
+pixels outside the expanded mask before upscaling, preventing whole-image VAE
+drift.
 
-The primary path is regional rather than sequential replacement inpaint:
-inpainting Character B after Character A can overwrite crossing arms, hands,
-shadows, and eye contact. Use ComfyUI's Mask Editor for a final local repair
-only after the regional result has established both characters.
-
-This workflow needs a current ComfyUI core containing
-`CreateHookLoraModelOnly` and `ConditioningSetProperties`; it adds no Python
-package or third-party node dependency. See the official
-[LoRA hook](https://docs.comfy.org/built-in-nodes/CreateHookLoraModelOnly) and
-[masked conditioning](https://docs.comfy.org/built-in-nodes/ConditioningSetProperties)
-node documentation.
+The workflow uses only current ComfyUI core inpaint nodes plus this repository's
+lightweight readable LoRA selector. It follows ComfyUI's official
+[Mask Editor inpaint workflow](https://docs.comfy.org/tutorials/basic/inpaint)
+with `VAEEncodeForInpaint`, then uses
+[`ImageCompositeMasked`](https://docs.comfy.org/built-in-nodes/ImageCompositeMasked)
+to preserve the unpainted area.
 
 `anima_hiresfix_latent_2pass.json` does not use ESRGAN. Its built-in
 `AnimaPromptQueue` splits scenes on blank lines, generates up to 50 scenes per
@@ -120,7 +102,7 @@ models/text_encoders/qwen_3_06b_base.safetensors
 models/vae/qwen_image_vae.safetensors
 ```
 
-The two-character regional workflow defaults to
+The two-character inpaint workflow defaults to
 `models/diffusion_models/waiANIMA_v10Base10.safetensors`, matching the RunPod
 image manifest. The official `anima-base-v1.0.safetensors` can be selected in
 the same loader instead. It also expects:
@@ -129,9 +111,11 @@ the same loader instead. It also expects:
 models/loras/anima-turbo-lora-v0.2.safetensors
 ```
 
-The ESRGAN workflows start at 832x1216, upscale the first pass with a 4x
-ESRGAN model, resize to an effective 1.5x with Lanczos, VAE-re-encode, then run
-a second pass. They additionally need an anime ESRGAN upscaler such as:
+The single-character ESRGAN workflow starts at 832x1216, upscales the first
+pass with a 4x ESRGAN model, resizes to an effective 1.5x with Lanczos,
+VAE-re-encodes, then runs a second pass. The two-character inpaint workflow
+starts at 768x1024 and resizes its composited result to an exact 1160x1536.
+Both need an anime ESRGAN upscaler such as:
 
 ```text
 models/upscale_models/4x-AnimeSharp.pth
@@ -228,8 +212,9 @@ names. The latent batch workflow's `Anima Pose LoRA Select` node reads that
 manifest and sends the selected LoRA name to both Hires-fix passes.
 
 The two-character workflow reads the normal character manifest directly.
-Selecting Character A or B by its readable label automatically sends the
-corresponding `anima/...safetensors` path and trigger to the regional graph.
+Selecting Character A or B by its readable short name sends only the
+corresponding `anima/...safetensors` path to that character's sampler. Prompt
+triggers stay fully manual.
 
 ## License
 

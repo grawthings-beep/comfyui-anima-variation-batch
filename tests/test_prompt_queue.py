@@ -23,12 +23,17 @@ class PromptQueueTests(unittest.TestCase):
             registered = module.NODE_CLASS_MAPPINGS["AnimaPromptQueue"]
             self.assertEqual(registered.__name__, "AnimaPromptQueue")
             self.assertIn("AnimaPoseLoRASelect", module.NODE_CLASS_MAPPINGS)
+            self.assertIn(
+                "AnimaCharacterLoRASelect",
+                module.NODE_CLASS_MAPPINGS,
+            )
             self.assertIn("AnimaSaveQueueZip", module.NODE_CLASS_MAPPINGS)
             self.assertEqual(module.WEB_DIRECTORY, "./web")
         finally:
             sys.modules.pop(module_name, None)
             sys.modules.pop(f"{module_name}.prompt_queue", None)
             sys.modules.pop(f"{module_name}.pose_lora_select", None)
+            sys.modules.pop(f"{module_name}.inpaint_lora_select", None)
             sys.modules.pop(f"{module_name}.zip_output", None)
             sys.modules.pop(f"{module_name}.batch_archive", None)
 
