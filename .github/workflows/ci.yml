@@ -46,6 +46,7 @@ jobs:
           python -m json.tool config/anima-loras.json
           node --check web/download_zip.js
           node --check web/two_character_layout.js
+          node tests/test_two_character_layout.js
           python - <<'PY'
           import json
           from pathlib import Path

@@ -64,8 +64,10 @@ class TwoCharacterLayoutWidget {
             48
         );
         const feather = numberWidgetValue(node, "feather_pct", 6);
-        const top = numberWidgetValue(node, "top_pct", 2);
-        const bottom = numberWidgetValue(node, "bottom_pct", 98);
+        const topValue = numberWidgetValue(node, "top_pct", 2);
+        const bottomValue = numberWidgetValue(node, "bottom_pct", 98);
+        const top = Math.min(topValue, bottomValue);
+        const bottom = Math.max(topValue, bottomValue);
 
         ctx.save();
         ctx.fillStyle = "#111820";
@@ -105,7 +107,20 @@ class TwoCharacterLayoutWidget {
                 x + 18,
                 x + previewWidth - 18
             );
-            const labelY = clipped(hardY + 22, y + 22, y + previewHeight - 8);
+            const labelY = clipped(
+                y + (((top + bottom) / 2) / 100) * previewHeight,
+                y + 18,
+                y + previewHeight - 18
+            );
+
+            ctx.fillStyle = `${color}e8`;
+            ctx.beginPath();
+            ctx.arc(labelX, labelY, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 16px sans-serif";
             ctx.textAlign = "center";
