@@ -340,6 +340,7 @@
     },
     {
       "id": "pixel-came",
+      "usage": "style",
       "name": "Pixel AnimaB CAME LoRA (trigger: CAME)",
       "trigger": "CAME",
       "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/pixel-AnimaB_V10-V1-CAME.safetensors",
@@ -351,6 +352,7 @@
     },
     {
       "id": "trex-studio-style",
+      "usage": "style",
       "name": "T-Rex Studio Style Anima v1 LoRA (trigger: trex studio style)",
       "trigger": "trex studio style",
       "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/T-Rex_Studio_Style_Anima_V1.safetensors",
@@ -359,6 +361,7 @@
     },
     {
       "id": "togawagatame",
+      "usage": "style",
       "name": "Togawagatame Anima v1 LoRA (trigger: togawagatame)",
       "trigger": "togawagatame",
       "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/togawagatame_anima_v1.safetensors",

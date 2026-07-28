@@ -1,9 +1,10 @@
-# ComfyUI Anima Hires-Fix and Control Workflows
+# ComfyUI Anima Hires-Fix, Regional, and Control Workflows
 
 [![CI](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml/badge.svg)](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml)
 
-This repository contains Anima-focused 2-pass Hires-fix workflows plus a
-Pose/Depth controlled variant. It does not distribute model weights.
+This repository contains Anima-focused 2-pass Hires-fix workflows, a
+two-character regional LoRA workflow, and a Pose/Depth controlled variant.
+It does not distribute model weights.
 
 The latent Hires-fix workflow includes a blank-line Prompt Queue: paste up to
 50 Grok-generated scenes at once and ComfyUI runs the complete two-pass
@@ -15,6 +16,7 @@ generation for every scene without manual prompt copying.
 example_workflows/anima_hiresfix_esrgan_2pass.json
 example_workflows/anima_hiresfix_esrgan_pose_depth.json
 example_workflows/anima_hiresfix_latent_2pass.json
+example_workflows/anima_two_character_regional_hiresfix.json
 ```
 
 `anima_hiresfix_esrgan_pose_depth.json` adds two controls before the existing
@@ -30,6 +32,61 @@ depth reference -> Depth Anything V2  -> Anima Depth LLLite --+-> first pass
 The controls affect the first pass only. The second pass uses the controlled
 latent at `denoise 0.45` to redraw detail without applying the control patches
 a second time. Pose and Depth control-map previews are included in the graph.
+
+### Two-character regional Hires-fix
+
+`anima_two_character_regional_hiresfix.json` is the recommended starting point
+for a coherent image containing two different LoRA characters:
+
+```text
+shared scene + Character A details + A LoRA hook + soft A mask --+
+shared scene + Character B details + B LoRA hook + soft B mask --+-> same first pass
+                                                                   -> ESRGAN 1.5x
+                                                                   -> regional second pass
+```
+
+Both characters are solved in the same diffusion trajectory. The LoRAs are
+attached to their masked conditioning with ComfyUI's model-only hook system,
+instead of loading both LoRAs globally. This reduces identity and clothing
+bleed while retaining shared lighting, eye contact, body spacing, and contact
+between the characters.
+
+The green pair node lists readable character names from
+`config/anima-loras.json` and injects each selected LoRA's trigger
+automatically. Style LoRAs in that manifest are excluded from this character
+menu. Describe the complete interaction in `shared_scene`, then add visible
+hair, eye, clothing, expression, and body-direction details for each character.
+This follows the
+[official Anima multiple-character prompting guidance](https://huggingface.co/circlestone-labs/Anima#natural-language-prompting-tips),
+which recommends describing each named character's appearance.
+
+`Anima Two-Character Regional Masks` displays the A/B layout live inside the
+node and also outputs the exact mask preview. Defaults cover the left and right
+halves with a feathered center overlap. Keep the overlap around touching hands
+or bodies; reduce it if identities begin to mix.
+
+The regional nodes default to `default`, so each character sees the complete
+image context and only its denoised prediction is masked. Switching both to
+`mask bounds` can run faster, but cropped context can weaken interaction
+continuity. Start with:
+
+```text
+Character LoRA strength: 0.80 (typical range 0.65-0.95)
+Mask feather:            6%   (typical range 4-10%)
+Second-pass denoise:     0.38 (typical range 0.32-0.42)
+```
+
+The primary path is regional rather than sequential replacement inpaint:
+inpainting Character B after Character A can overwrite crossing arms, hands,
+shadows, and eye contact. Use ComfyUI's Mask Editor for a final local repair
+only after the regional result has established both characters.
+
+This workflow needs a current ComfyUI core containing
+`CreateHookLoraModelOnly` and `ConditioningSetProperties`; it adds no Python
+package or third-party node dependency. See the official
+[LoRA hook](https://docs.comfy.org/built-in-nodes/CreateHookLoraModelOnly) and
+[masked conditioning](https://docs.comfy.org/built-in-nodes/ConditioningSetProperties)
+node documentation.
 
 `anima_hiresfix_latent_2pass.json` does not use ESRGAN. Its built-in
 `AnimaPromptQueue` splits scenes on blank lines, generates up to 50 scenes per
@@ -47,8 +104,8 @@ git clone https://github.com/grawthings-beep/comfyui-anima-variation-batch.git \
   ComfyUI-AnimaVariationBatch
 ```
 
-Restart ComfyUI and load either of the two workflows that do not use
-Pose/Depth, or continue with the control installer below.
+Restart ComfyUI and load any workflow that does not use Pose/Depth, or
+continue with the control installer below.
 
 For common RunPod images, the ComfyUI root is often one of:
 
@@ -138,13 +195,18 @@ why the workflow exposes both strength and active denoising ranges prominently.
 
 ## Hires-fix details
 
-All workflows expect the Anima base stack:
+The single-character workflows expect the official Anima base stack:
 
 ```text
 models/diffusion_models/anima-base-v1.0.safetensors
 models/text_encoders/qwen_3_06b_base.safetensors
 models/vae/qwen_image_vae.safetensors
 ```
+
+The two-character regional workflow defaults to
+`models/diffusion_models/waiANIMA_v10Base10.safetensors`, matching the RunPod
+image manifest. The official `anima-base-v1.0.safetensors` can be selected in
+the same loader instead.
 
 The ESRGAN workflows start at 832x1216, upscale the first pass with a 4x
 ESRGAN model, resize to an effective 1.5x with Lanczos, VAE-re-encode, then run
@@ -243,6 +305,10 @@ python scripts/download_loras.py \
 Those files install under `models/loras/anima_pose/` with numbered readable
 names. The latent batch workflow's `Anima Pose LoRA Select` node reads that
 manifest and sends the selected LoRA name to both Hires-fix passes.
+
+The two-character workflow reads the normal character manifest directly.
+Selecting Character A or B by its readable label automatically sends the
+corresponding `anima/...safetensors` path and trigger to the regional graph.
 
 ## License
 

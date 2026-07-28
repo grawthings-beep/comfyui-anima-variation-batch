@@ -8,6 +8,9 @@ WORKFLOW_DIR = ROOT / "example_workflows"
 HIRES_ESRGAN_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_esrgan_2pass.json"
 POSE_DEPTH_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_esrgan_pose_depth.json"
 HIRES_LATENT_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_latent_2pass.json"
+TWO_CHARACTER_WORKFLOW_PATH = (
+    WORKFLOW_DIR / "anima_two_character_regional_hiresfix.json"
+)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -16,10 +19,12 @@ class WorkflowTests(unittest.TestCase):
         cls.hires_esrgan = cls.load(HIRES_ESRGAN_WORKFLOW_PATH)
         cls.pose_depth = cls.load(POSE_DEPTH_WORKFLOW_PATH)
         cls.hires_latent = cls.load(HIRES_LATENT_WORKFLOW_PATH)
+        cls.two_character = cls.load(TWO_CHARACTER_WORKFLOW_PATH)
         cls.workflows = (
             cls.hires_esrgan,
             cls.pose_depth,
             cls.hires_latent,
+            cls.two_character,
         )
 
     @staticmethod
@@ -34,6 +39,7 @@ class WorkflowTests(unittest.TestCase):
                 "anima_hiresfix_esrgan_2pass.json",
                 "anima_hiresfix_esrgan_pose_depth.json",
                 "anima_hiresfix_latent_2pass.json",
+                "anima_two_character_regional_hiresfix.json",
             ],
         )
 
@@ -101,7 +107,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(depth_model["url"].endswith("anima-lllite-depth-1.safetensors"))
 
     def test_esrgan_workflows_embed_animesharp_download_metadata(self):
-        for workflow in (self.hires_esrgan, self.pose_depth):
+        for workflow in (
+            self.hires_esrgan,
+            self.pose_depth,
+            self.two_character,
+        ):
             with self.subTest(workflow=workflow.get("id")):
                 loader = next(
                     node
@@ -204,6 +214,68 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(sources[(second_loader["id"], 2)], (selector["id"], 2, "FLOAT"))
         self.assertEqual(sources[(7, 0)], (first_loader["id"], 0, "MODEL"))
         self.assertEqual(sources[(11, 0)], (second_loader["id"], 0, "MODEL"))
+
+    def test_two_character_workflow_separates_prompts_loras_and_masks(self):
+        nodes = {node["id"]: node for node in self.two_character["nodes"]}
+        node_types = [node["type"] for node in self.two_character["nodes"]]
+
+        self.assertEqual(node_types.count("AnimaCharacterPairPrompt"), 1)
+        self.assertEqual(node_types.count("AnimaTwoCharacterMasks"), 1)
+        self.assertEqual(node_types.count("CreateHookLoraModelOnly"), 2)
+        self.assertEqual(node_types.count("ConditioningSetProperties"), 2)
+        self.assertEqual(node_types.count("ConditioningCombine"), 1)
+        self.assertEqual(node_types.count("KSampler"), 2)
+        self.assertNotIn("LoraLoaderModelOnly", node_types)
+        self.assertNotIn("VAEEncodeForInpaint", node_types)
+
+        selector = nodes[4]
+        masks = nodes[5]
+        hook_a = nodes[9]
+        hook_b = nodes[10]
+        regional_a = nodes[11]
+        regional_b = nodes[12]
+        first_sampler = nodes[16]
+        second_sampler = nodes[23]
+
+        self.assertIn("trigger:", selector["widgets_values"][1])
+        self.assertIn("trigger:", selector["widgets_values"][4])
+        self.assertEqual(masks["widgets_values"], [832, 1216, 26, 74, 48, 2, 98, 6])
+        self.assertEqual(regional_a["widgets_values"], [1, "default"])
+        self.assertEqual(regional_b["widgets_values"], [1, "default"])
+        self.assertEqual(first_sampler["widgets_values"][-1], 1)
+        self.assertEqual(second_sampler["widgets_values"][-1], 0.38)
+        self.assertEqual(nodes[1]["widgets_values"][0], "waiANIMA_v10Base10.safetensors")
+
+        sources = {
+            (target_id, target_slot): (source_id, source_slot, link_type)
+            for (
+                _link_id,
+                source_id,
+                source_slot,
+                target_id,
+                target_slot,
+                link_type,
+            ) in self.two_character["links"]
+        }
+        self.assertEqual(sources[(6, 1)], (4, 0, "STRING"))
+        self.assertEqual(sources[(7, 1)], (4, 1, "STRING"))
+        self.assertEqual(sources[(hook_a["id"], 0)], (4, 2, "*"))
+        self.assertEqual(sources[(hook_a["id"], 1)], (4, 3, "FLOAT"))
+        self.assertEqual(sources[(hook_b["id"], 0)], (4, 4, "*"))
+        self.assertEqual(sources[(hook_b["id"], 1)], (4, 5, "FLOAT"))
+        self.assertEqual(sources[(regional_a["id"], 0)], (6, 0, "CONDITIONING"))
+        self.assertEqual(sources[(regional_a["id"], 1)], (5, 0, "MASK"))
+        self.assertEqual(sources[(regional_a["id"], 2)], (9, 0, "HOOKS"))
+        self.assertEqual(sources[(regional_b["id"], 0)], (7, 0, "CONDITIONING"))
+        self.assertEqual(sources[(regional_b["id"], 1)], (5, 1, "MASK"))
+        self.assertEqual(sources[(regional_b["id"], 2)], (10, 0, "HOOKS"))
+        self.assertEqual(sources[(13, 0)], (11, 0, "CONDITIONING"))
+        self.assertEqual(sources[(13, 1)], (12, 0, "CONDITIONING"))
+
+        for sampler_id in (first_sampler["id"], second_sampler["id"]):
+            self.assertEqual(sources[(sampler_id, 0)], (1, 0, "MODEL"))
+            self.assertEqual(sources[(sampler_id, 1)], (13, 0, "CONDITIONING"))
+            self.assertEqual(sources[(sampler_id, 2)], (8, 0, "CONDITIONING"))
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}

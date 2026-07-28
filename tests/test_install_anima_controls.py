@@ -43,6 +43,7 @@ class InstallAnimaControlsTests(unittest.TestCase):
                 "anima_hiresfix_esrgan_2pass.json",
                 "anima_hiresfix_esrgan_pose_depth.json",
                 "anima_hiresfix_latent_2pass.json",
+                "anima_two_character_regional_hiresfix.json",
             ],
         )
 
