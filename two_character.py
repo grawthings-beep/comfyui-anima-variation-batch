@@ -109,14 +109,43 @@ def resolve_character(selection):
     return entries[0]
 
 
-def compose_character_prompt(shared_scene, position, entry, details):
+def describe_position(center_x_pct, center_y_pct):
+    x = float(center_x_pct)
+    y = float(center_y_pct)
+    horizontal = "left" if x < 45.0 else "right" if x > 55.0 else "center"
+    vertical = "upper" if y < 45.0 else "lower" if y > 55.0 else "middle"
+
+    if vertical == "middle":
+        return (
+            "central region"
+            if horizontal == "center"
+            else f"{horizontal}-side region"
+        )
+    if horizontal == "center":
+        return f"{vertical}-center region"
+    return f"{vertical}-{horizontal} region"
+
+
+def compose_character_prompt(
+    shared_scene,
+    position,
+    entry,
+    details,
+    location=None,
+):
     scene = str(shared_scene).strip()
     description = str(details).strip().rstrip(".")
+    location = str(location or "").strip()
+    if not location:
+        location = (
+            "left-side region"
+            if position == "A"
+            else "right-side region"
+        )
     parts = [
         scene,
         (
-            f"Character {position}, located on the "
-            f"{'left' if position == 'A' else 'right'} side: "
+            f"Character {position}, located in the {location}: "
             f"{entry['trigger']}."
         ),
     ]
@@ -140,6 +169,77 @@ def soft_region_bounds(center_pct, width_pct, feather_pct):
         hard_left,
         hard_right,
         hard_right + feather,
+    )
+
+
+def soft_box_bounds(
+    center_x_pct,
+    center_y_pct,
+    width_pct,
+    height_pct,
+    feather_pct,
+):
+    return {
+        "x": soft_region_bounds(center_x_pct, width_pct, feather_pct),
+        "y": soft_region_bounds(center_y_pct, height_pct, feather_pct),
+    }
+
+
+def _soft_interval(values, hard_low, hard_high, feather):
+    if feather <= 0.0:
+        return ((values >= hard_low) & (values <= hard_high)).float()
+    enter = ((values - (hard_low - feather)) / feather).clamp(0.0, 1.0)
+    leave = (((hard_high + feather) - values) / feather).clamp(
+        0.0, 1.0
+    )
+    enter = enter * enter * (3.0 - 2.0 * enter)
+    leave = leave * leave * (3.0 - 2.0 * leave)
+    return enter * leave
+
+
+def build_soft_box_masks(width, height, character_a, character_b, feather_pct):
+    import torch
+
+    width = int(width)
+    height = int(height)
+    x = torch.linspace(0.0, 100.0, width)
+    y = torch.linspace(0.0, 100.0, height)
+    feather = max(0.0, float(feather_pct))
+
+    def person_mask(box):
+        center_x, center_y, box_width, box_height = map(float, box)
+        half_width = max(0.0, box_width) / 2.0
+        half_height = max(0.0, box_height) / 2.0
+        horizontal = _soft_interval(
+            x,
+            center_x - half_width,
+            center_x + half_width,
+            feather,
+        ).unsqueeze(0)
+        vertical = _soft_interval(
+            y,
+            center_y - half_height,
+            center_y + half_height,
+            feather,
+        ).unsqueeze(1)
+        return (vertical * horizontal).clamp(0.0, 1.0)
+
+    mask_a = person_mask(character_a)
+    mask_b = person_mask(character_b)
+
+    base = torch.tensor([0.045, 0.055, 0.075]).view(1, 1, 3)
+    color_a = torch.tensor([0.72, 0.22, 0.12]).view(1, 1, 3)
+    color_b = torch.tensor([0.08, 0.48, 0.72]).view(1, 1, 3)
+    preview = (
+        base
+        + mask_a.unsqueeze(-1) * color_a
+        + mask_b.unsqueeze(-1) * color_b
+    ).clamp(0.0, 1.0)
+
+    return (
+        mask_a.unsqueeze(0),
+        mask_b.unsqueeze(0),
+        preview.unsqueeze(0),
     )
 
 
@@ -223,7 +323,17 @@ class AnimaCharacterPairPrompt:
                         "step": 0.05,
                     },
                 ),
-            }
+            },
+            "optional": {
+                "character_a_position": (
+                    "STRING",
+                    {"forceInput": True},
+                ),
+                "character_b_position": (
+                    "STRING",
+                    {"forceInput": True},
+                ),
+            },
         }
 
     RETURN_TYPES = (
@@ -233,6 +343,7 @@ class AnimaCharacterPairPrompt:
         "FLOAT",
         ANY,
         "FLOAT",
+        "STRING",
     )
     RETURN_NAMES = (
         "character_a_prompt",
@@ -241,6 +352,7 @@ class AnimaCharacterPairPrompt:
         "character_a_strength",
         "character_b_lora",
         "character_b_strength",
+        "shared_prompt",
     )
     FUNCTION = "build"
     CATEGORY = "Anima/Regional"
@@ -254,6 +366,8 @@ class AnimaCharacterPairPrompt:
         character_b,
         character_b_details,
         character_b_strength,
+        character_a_position=None,
+        character_b_position=None,
     ):
         entry_a = resolve_character(character_a)
         entry_b = resolve_character(character_b)
@@ -264,17 +378,20 @@ class AnimaCharacterPairPrompt:
                 "A",
                 entry_a,
                 character_a_details,
+                character_a_position,
             ),
             compose_character_prompt(
                 global_prompt,
                 "B",
                 entry_b,
                 character_b_details,
+                character_b_position,
             ),
             entry_a["lora_name"],
             float(character_a_strength),
             entry_b["lora_name"],
             float(character_b_strength),
+            global_prompt,
         )
 
 
@@ -363,20 +480,6 @@ class AnimaTwoCharacterMasks:
     FUNCTION = "build"
     CATEGORY = "Anima/Regional"
 
-    @staticmethod
-    def _soft_interval(values, hard_low, hard_high, feather):
-        import torch
-
-        if feather <= 0.0:
-            return ((values >= hard_low) & (values <= hard_high)).float()
-        enter = ((values - (hard_low - feather)) / feather).clamp(0.0, 1.0)
-        leave = (((hard_high + feather) - values) / feather).clamp(
-            0.0, 1.0
-        )
-        enter = enter * enter * (3.0 - 2.0 * enter)
-        leave = leave * leave * (3.0 - 2.0 * leave)
-        return enter * leave
-
     def build(
         self,
         width,
@@ -388,51 +491,151 @@ class AnimaTwoCharacterMasks:
         bottom_pct,
         feather_pct,
     ):
-        import torch
-
-        width = int(width)
-        height = int(height)
-        x = torch.linspace(0.0, 100.0, width)
-        y = torch.linspace(0.0, 100.0, height)
         top, bottom = sorted((float(top_pct), float(bottom_pct)))
-        feather = max(0.0, float(feather_pct))
-        half_width = max(0.0, float(region_width_pct)) / 2.0
+        center_y = (top + bottom) / 2.0
+        region_height = bottom - top
+        return build_soft_box_masks(
+            width,
+            height,
+            (
+                left_center_pct,
+                center_y,
+                region_width_pct,
+                region_height,
+            ),
+            (
+                right_center_pct,
+                center_y,
+                region_width_pct,
+                region_height,
+            ),
+            feather_pct,
+        )
 
-        vertical = self._soft_interval(y, top, bottom, feather).unsqueeze(1)
 
-        def person_mask(center):
-            horizontal = self._soft_interval(
-                x,
-                float(center) - half_width,
-                float(center) + half_width,
-                feather,
-            ).unsqueeze(0)
-            return (vertical * horizontal).clamp(0.0, 1.0)
+class AnimaTwoCharacterFreeMasks:
+    @classmethod
+    def INPUT_TYPES(cls):
+        position = {
+            "default": 50.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 1.0,
+        }
+        region_size = {
+            "default": 48.0,
+            "min": 10.0,
+            "max": 100.0,
+            "step": 1.0,
+        }
+        return {
+            "required": {
+                "width": (
+                    "INT",
+                    {
+                        "default": 832,
+                        "min": 256,
+                        "max": 4096,
+                        "step": 8,
+                    },
+                ),
+                "height": (
+                    "INT",
+                    {
+                        "default": 1216,
+                        "min": 256,
+                        "max": 4096,
+                        "step": 8,
+                    },
+                ),
+                "character_a_x_pct": (
+                    "FLOAT",
+                    {**position, "default": 26.0},
+                ),
+                "character_a_y_pct": ("FLOAT", {**position}),
+                "character_a_width_pct": ("FLOAT", {**region_size}),
+                "character_a_height_pct": (
+                    "FLOAT",
+                    {**region_size, "default": 96.0},
+                ),
+                "character_b_x_pct": (
+                    "FLOAT",
+                    {**position, "default": 74.0},
+                ),
+                "character_b_y_pct": ("FLOAT", {**position}),
+                "character_b_width_pct": ("FLOAT", {**region_size}),
+                "character_b_height_pct": (
+                    "FLOAT",
+                    {**region_size, "default": 96.0},
+                ),
+                "feather_pct": (
+                    "FLOAT",
+                    {
+                        "default": 6.0,
+                        "min": 0.0,
+                        "max": 25.0,
+                        "step": 0.5,
+                    },
+                ),
+            }
+        }
 
-        mask_a = person_mask(left_center_pct)
-        mask_b = person_mask(right_center_pct)
+    RETURN_TYPES = ("MASK", "MASK", "IMAGE", "STRING", "STRING")
+    RETURN_NAMES = (
+        "character_a_mask",
+        "character_b_mask",
+        "layout_preview",
+        "character_a_position",
+        "character_b_position",
+    )
+    FUNCTION = "build"
+    CATEGORY = "Anima/Regional"
 
-        base = torch.tensor([0.045, 0.055, 0.075]).view(1, 1, 3)
-        color_a = torch.tensor([0.72, 0.22, 0.12]).view(1, 1, 3)
-        color_b = torch.tensor([0.08, 0.48, 0.72]).view(1, 1, 3)
-        preview = (
-            base
-            + mask_a.unsqueeze(-1) * color_a
-            + mask_b.unsqueeze(-1) * color_b
-        ).clamp(0.0, 1.0)
-
+    def build(
+        self,
+        width,
+        height,
+        character_a_x_pct,
+        character_a_y_pct,
+        character_a_width_pct,
+        character_a_height_pct,
+        character_b_x_pct,
+        character_b_y_pct,
+        character_b_width_pct,
+        character_b_height_pct,
+        feather_pct,
+    ):
+        masks = build_soft_box_masks(
+            width,
+            height,
+            (
+                character_a_x_pct,
+                character_a_y_pct,
+                character_a_width_pct,
+                character_a_height_pct,
+            ),
+            (
+                character_b_x_pct,
+                character_b_y_pct,
+                character_b_width_pct,
+                character_b_height_pct,
+            ),
+            feather_pct,
+        )
         return (
-            mask_a.unsqueeze(0),
-            mask_b.unsqueeze(0),
-            preview.unsqueeze(0),
+            *masks,
+            describe_position(character_a_x_pct, character_a_y_pct),
+            describe_position(character_b_x_pct, character_b_y_pct),
         )
 
 
 NODE_CLASS_MAPPINGS = {
     "AnimaCharacterPairPrompt": AnimaCharacterPairPrompt,
     "AnimaTwoCharacterMasks": AnimaTwoCharacterMasks,
+    "AnimaTwoCharacterFreeMasks": AnimaTwoCharacterFreeMasks,
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AnimaCharacterPairPrompt": "Anima Two-Character Prompt + LoRAs",
-    "AnimaTwoCharacterMasks": "Anima Two-Character Regional Masks",
+    "AnimaTwoCharacterMasks": "Anima Two-Character Regional Masks (Legacy)",
+    "AnimaTwoCharacterFreeMasks": "Anima Two-Character Free Regional Masks",
 }

@@ -49,7 +49,8 @@ Both characters are solved in the same diffusion trajectory. The LoRAs are
 attached to their masked conditioning with ComfyUI's model-only hook system,
 instead of loading both LoRAs globally. This reduces identity and clothing
 bleed while retaining shared lighting, eye contact, body spacing, and contact
-between the characters.
+between the characters. The masks are soft influence maps inside one latent,
+not separately rendered images or a cut-and-paste composite.
 
 The green pair node lists readable character names from
 `config/anima-loras.json` and injects each selected LoRA's trigger
@@ -60,10 +61,16 @@ This follows the
 [official Anima multiple-character prompting guidance](https://huggingface.co/circlestone-labs/Anima#natural-language-prompting-tips),
 which recommends describing each named character's appearance.
 
-`Anima Two-Character Regional Masks` displays the A/B layout live inside the
-node and also outputs the exact mask preview. Defaults cover the left and right
-halves with a feathered center overlap. Keep the overlap around touching hands
-or bodies; reduce it if identities begin to mix.
+`Anima Two-Character Free Regional Masks` displays the A/B layout live inside
+the node and also outputs the exact mask preview. Each character has independent
+X, Y, width, and height controls. Its derived position description is connected
+back to the character prompt automatically, so moving A or B vertically does
+not leave a stale left/right prompt behind. Defaults cover the left and right
+halves with a feathered center overlap. Move and overlap the regions around
+touching hands or bodies; reduce the overlap if identities begin to mix.
+Any area left outside both masks is filled by an unhooked shared-scene default
+conditioning, keeping the background coherent without leaking either character
+LoRA across the whole image.
 
 The regional nodes default to `default`, so each character sees the complete
 image context and only its denoised prediction is masked. Switching both to

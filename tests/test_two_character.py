@@ -2,9 +2,12 @@ import unittest
 
 from two_character import (
     AnimaCharacterPairPrompt,
+    NODE_CLASS_MAPPINGS,
     character_entries,
     character_options,
+    describe_position,
     resolve_character,
+    soft_box_bounds,
     soft_region_bounds,
 )
 
@@ -43,15 +46,36 @@ class TwoCharacterTests(unittest.TestCase):
             output[0],
         )
         self.assertIn("r4pi", output[0])
-        self.assertIn("left side", output[0])
+        self.assertIn("left-side region", output[0])
         self.assertIn("Character B", output[0])
         self.assertIn("an1s", output[1])
-        self.assertIn("right side", output[1])
+        self.assertIn("right-side region", output[1])
         self.assertIn("Character A", output[1])
         self.assertEqual(output[2], entries["rapi"]["lora_name"])
         self.assertEqual(output[3], 0.75)
         self.assertEqual(output[4], entries["anis"]["lora_name"])
         self.assertEqual(output[5], 0.85)
+        self.assertEqual(
+            output[6],
+            "masterpiece, best quality, 2girls in a shared scene",
+        )
+
+    def test_pair_prompt_accepts_positions_derived_from_free_masks(self):
+        entries = {entry["id"]: entry for entry in character_entries()}
+        output = AnimaCharacterPairPrompt().build(
+            "two characters share one scene",
+            entries["rapi"]["label"],
+            "reaching toward Character B",
+            0.8,
+            entries["anis"]["label"],
+            "reaching toward Character A",
+            0.8,
+            describe_position(50, 25),
+            describe_position(70, 75),
+        )
+
+        self.assertIn("upper-center region", output[0])
+        self.assertIn("lower-right region", output[1])
 
     def test_soft_region_bounds_include_feather_outside_hard_region(self):
         self.assertEqual(
@@ -62,6 +86,17 @@ class TwoCharacterTests(unittest.TestCase):
             soft_region_bounds(74, 48, 6),
             (44.0, 50.0, 98.0, 104.0),
         )
+
+    def test_soft_box_bounds_support_independent_xy_placement(self):
+        self.assertEqual(
+            soft_box_bounds(42, 30, 54, 50, 8),
+            {
+                "x": (7.0, 15.0, 69.0, 77.0),
+                "y": (-3.0, 5.0, 55.0, 63.0),
+            },
+        )
+        self.assertIn("AnimaTwoCharacterMasks", NODE_CLASS_MAPPINGS)
+        self.assertIn("AnimaTwoCharacterFreeMasks", NODE_CLASS_MAPPINGS)
 
 
 if __name__ == "__main__":

@@ -220,10 +220,12 @@ class WorkflowTests(unittest.TestCase):
         node_types = [node["type"] for node in self.two_character["nodes"]]
 
         self.assertEqual(node_types.count("AnimaCharacterPairPrompt"), 1)
-        self.assertEqual(node_types.count("AnimaTwoCharacterMasks"), 1)
+        self.assertEqual(node_types.count("AnimaTwoCharacterFreeMasks"), 1)
+        self.assertNotIn("AnimaTwoCharacterMasks", node_types)
         self.assertEqual(node_types.count("CreateHookLoraModelOnly"), 2)
         self.assertEqual(node_types.count("ConditioningSetProperties"), 2)
         self.assertEqual(node_types.count("ConditioningCombine"), 1)
+        self.assertEqual(node_types.count("ConditioningSetDefaultCombine"), 1)
         self.assertEqual(node_types.count("KSampler"), 2)
         self.assertNotIn("LoraLoaderModelOnly", node_types)
         self.assertNotIn("VAEEncodeForInpaint", node_types)
@@ -234,12 +236,17 @@ class WorkflowTests(unittest.TestCase):
         hook_b = nodes[10]
         regional_a = nodes[11]
         regional_b = nodes[12]
+        shared_prompt = nodes[27]
+        default_combine = nodes[28]
         first_sampler = nodes[16]
         second_sampler = nodes[23]
 
         self.assertIn("trigger:", selector["widgets_values"][1])
         self.assertIn("trigger:", selector["widgets_values"][4])
-        self.assertEqual(masks["widgets_values"], [832, 1216, 26, 74, 48, 2, 98, 6])
+        self.assertEqual(
+            masks["widgets_values"],
+            [832, 1216, 26, 50, 48, 96, 74, 50, 48, 96, 6],
+        )
         self.assertEqual(regional_a["widgets_values"], [1, "default"])
         self.assertEqual(regional_b["widgets_values"], [1, "default"])
         self.assertEqual(first_sampler["widgets_values"][-1], 1)
@@ -257,6 +264,8 @@ class WorkflowTests(unittest.TestCase):
                 link_type,
             ) in self.two_character["links"]
         }
+        self.assertEqual(sources[(4, 0)], (5, 3, "STRING"))
+        self.assertEqual(sources[(4, 1)], (5, 4, "STRING"))
         self.assertEqual(sources[(6, 1)], (4, 0, "STRING"))
         self.assertEqual(sources[(7, 1)], (4, 1, "STRING"))
         self.assertEqual(sources[(hook_a["id"], 0)], (4, 2, "*"))
@@ -271,10 +280,20 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(sources[(regional_b["id"], 2)], (10, 0, "HOOKS"))
         self.assertEqual(sources[(13, 0)], (11, 0, "CONDITIONING"))
         self.assertEqual(sources[(13, 1)], (12, 0, "CONDITIONING"))
+        self.assertEqual(sources[(shared_prompt["id"], 0)], (2, 0, "CLIP"))
+        self.assertEqual(sources[(shared_prompt["id"], 1)], (4, 6, "STRING"))
+        self.assertEqual(
+            sources[(default_combine["id"], 0)],
+            (13, 0, "CONDITIONING"),
+        )
+        self.assertEqual(
+            sources[(default_combine["id"], 1)],
+            (27, 0, "CONDITIONING"),
+        )
 
         for sampler_id in (first_sampler["id"], second_sampler["id"]):
             self.assertEqual(sources[(sampler_id, 0)], (1, 0, "MODEL"))
-            self.assertEqual(sources[(sampler_id, 1)], (13, 0, "CONDITIONING"))
+            self.assertEqual(sources[(sampler_id, 1)], (28, 0, "CONDITIONING"))
             self.assertEqual(sources[(sampler_id, 2)], (8, 0, "CONDITIONING"))
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):

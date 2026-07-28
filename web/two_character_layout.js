@@ -12,6 +12,10 @@ function clipped(value, low, high) {
     return Math.max(low, Math.min(high, value));
 }
 
+function hasWidget(node, name) {
+    return Boolean(node.widgets?.some((item) => item.name === name));
+}
+
 class TwoCharacterLayoutWidget {
     constructor() {
         this.type = "custom";
@@ -48,26 +52,90 @@ class TwoCharacterLayoutWidget {
         const x = (width - previewWidth) / 2;
         const y = posY + (height - previewHeight) / 2;
 
-        const leftCenter = numberWidgetValue(
-            node,
-            "left_center_pct",
-            26
-        );
-        const rightCenter = numberWidgetValue(
-            node,
-            "right_center_pct",
-            74
-        );
-        const regionWidth = numberWidgetValue(
-            node,
-            "region_width_pct",
-            48
-        );
         const feather = numberWidgetValue(node, "feather_pct", 6);
-        const topValue = numberWidgetValue(node, "top_pct", 2);
-        const bottomValue = numberWidgetValue(node, "bottom_pct", 98);
-        const top = Math.min(topValue, bottomValue);
-        const bottom = Math.max(topValue, bottomValue);
+        let regions;
+        if (hasWidget(node, "character_a_x_pct")) {
+            regions = [
+                {
+                    centerX: numberWidgetValue(
+                        node,
+                        "character_a_x_pct",
+                        26
+                    ),
+                    centerY: numberWidgetValue(
+                        node,
+                        "character_a_y_pct",
+                        50
+                    ),
+                    width: numberWidgetValue(
+                        node,
+                        "character_a_width_pct",
+                        48
+                    ),
+                    height: numberWidgetValue(
+                        node,
+                        "character_a_height_pct",
+                        96
+                    ),
+                },
+                {
+                    centerX: numberWidgetValue(
+                        node,
+                        "character_b_x_pct",
+                        74
+                    ),
+                    centerY: numberWidgetValue(
+                        node,
+                        "character_b_y_pct",
+                        50
+                    ),
+                    width: numberWidgetValue(
+                        node,
+                        "character_b_width_pct",
+                        48
+                    ),
+                    height: numberWidgetValue(
+                        node,
+                        "character_b_height_pct",
+                        96
+                    ),
+                },
+            ];
+        } else {
+            const topValue = numberWidgetValue(node, "top_pct", 2);
+            const bottomValue = numberWidgetValue(node, "bottom_pct", 98);
+            const top = Math.min(topValue, bottomValue);
+            const bottom = Math.max(topValue, bottomValue);
+            const centerY = (top + bottom) / 2;
+            const regionHeight = bottom - top;
+            const regionWidth = numberWidgetValue(
+                node,
+                "region_width_pct",
+                48
+            );
+            regions = [
+                {
+                    centerX: numberWidgetValue(
+                        node,
+                        "left_center_pct",
+                        26
+                    ),
+                    centerY,
+                    width: regionWidth,
+                    height: regionHeight,
+                },
+                {
+                    centerX: numberWidgetValue(
+                        node,
+                        "right_center_pct",
+                        74
+                    ),
+                    centerY,
+                    width: regionWidth,
+                    height: regionHeight,
+                },
+            ];
+        }
 
         ctx.save();
         ctx.fillStyle = "#111820";
@@ -79,20 +147,23 @@ class TwoCharacterLayoutWidget {
         ctx.stroke();
         ctx.clip();
 
-        const drawRegion = (center, color, label) => {
-            const hardLeft = center - regionWidth / 2;
-            const hardRight = center + regionWidth / 2;
+        const drawRegion = (region, color, label) => {
+            const hardLeft = region.centerX - region.width / 2;
+            const hardRight = region.centerX + region.width / 2;
+            const hardTop = region.centerY - region.height / 2;
+            const hardBottom = region.centerY + region.height / 2;
             const outerLeft = hardLeft - feather;
             const outerRight = hardRight + feather;
+            const outerTop = hardTop - feather;
+            const outerBottom = hardBottom + feather;
             const outerX = x + (outerLeft / 100) * previewWidth;
-            const outerY = y + ((top - feather) / 100) * previewHeight;
+            const outerY = y + (outerTop / 100) * previewHeight;
             const outerW = ((outerRight - outerLeft) / 100) * previewWidth;
-            const outerH =
-                ((bottom - top + feather * 2) / 100) * previewHeight;
+            const outerH = ((outerBottom - outerTop) / 100) * previewHeight;
             const hardX = x + (hardLeft / 100) * previewWidth;
-            const hardY = y + (top / 100) * previewHeight;
+            const hardY = y + (hardTop / 100) * previewHeight;
             const hardW = ((hardRight - hardLeft) / 100) * previewWidth;
-            const hardH = ((bottom - top) / 100) * previewHeight;
+            const hardH = ((hardBottom - hardTop) / 100) * previewHeight;
 
             ctx.fillStyle = `${color}24`;
             ctx.fillRect(outerX, outerY, outerW, outerH);
@@ -103,12 +174,12 @@ class TwoCharacterLayoutWidget {
             ctx.strokeRect(hardX, hardY, hardW, hardH);
 
             const labelX = clipped(
-                x + (center / 100) * previewWidth,
+                x + (region.centerX / 100) * previewWidth,
                 x + 18,
                 x + previewWidth - 18
             );
             const labelY = clipped(
-                y + (((top + bottom) / 2) / 100) * previewHeight,
+                y + (region.centerY / 100) * previewHeight,
                 y + 18,
                 y + previewHeight - 18
             );
@@ -128,8 +199,8 @@ class TwoCharacterLayoutWidget {
             ctx.fillText(label, labelX, labelY);
         };
 
-        drawRegion(leftCenter, "#f27052", "A");
-        drawRegion(rightCenter, "#42a9dc", "B");
+        drawRegion(regions[0], "#f27052", "A");
+        drawRegion(regions[1], "#42a9dc", "B");
 
         ctx.restore();
     }
@@ -138,7 +209,10 @@ class TwoCharacterLayoutWidget {
 app.registerExtension({
     name: "AnimaVariationBatch.TwoCharacterLayout",
     async beforeRegisterNodeDef(nodeType, nodeData) {
-        if (nodeData.name !== "AnimaTwoCharacterMasks") {
+        if (
+            nodeData.name !== "AnimaTwoCharacterMasks"
+            && nodeData.name !== "AnimaTwoCharacterFreeMasks"
+        ) {
             return;
         }
 

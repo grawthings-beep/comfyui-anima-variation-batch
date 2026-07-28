@@ -1,8 +1,8 @@
 {
   "id": null,
   "revision": 0,
-  "last_node_id": 26,
-  "last_link_id": 37,
+  "last_node_id": 28,
+  "last_link_id": 43,
   "nodes": [
     {
       "id": 1,
@@ -59,7 +59,8 @@
           "links": [
             1,
             3,
-            5
+            5,
+            43
           ]
         }
       ],
@@ -122,8 +123,19 @@
         560,
         720
       ],
-      "order": 3,
-      "inputs": [],
+      "order": 4,
+      "inputs": [
+        {
+          "name": "character_a_position",
+          "type": "STRING",
+          "link": 38
+        },
+        {
+          "name": "character_b_position",
+          "type": "STRING",
+          "link": 39
+        }
+      ],
       "outputs": [
         {
           "name": "character_a_prompt",
@@ -166,6 +178,13 @@
           "links": [
             9
           ]
+        },
+        {
+          "name": "shared_prompt",
+          "type": "STRING",
+          "links": [
+            42
+          ]
         }
       ],
       "properties": {
@@ -189,16 +208,16 @@
     },
     {
       "id": 5,
-      "type": "AnimaTwoCharacterMasks",
+      "type": "AnimaTwoCharacterFreeMasks",
       "pos": [
         -520,
         800
       ],
       "size": [
         430,
-        570
+        660
       ],
-      "order": 4,
+      "order": 3,
       "inputs": [],
       "outputs": [
         {
@@ -221,23 +240,40 @@
           "links": [
             18
           ]
+        },
+        {
+          "name": "character_a_position",
+          "type": "STRING",
+          "links": [
+            38
+          ]
+        },
+        {
+          "name": "character_b_position",
+          "type": "STRING",
+          "links": [
+            39
+          ]
         }
       ],
       "properties": {
         "cnr_id": "ComfyUI-AnimaVariationBatch",
-        "Node name for S&R": "AnimaTwoCharacterMasks"
+        "Node name for S&R": "AnimaTwoCharacterFreeMasks"
       },
       "widgets_values": [
         832,
         1216,
         26,
-        74,
+        50,
         48,
-        2,
-        98,
+        96,
+        74,
+        50,
+        48,
+        96,
         6
       ],
-      "title": "Live two-character regional layout",
+      "title": "Live free A/B regional layout",
       "color": "#26333d",
       "bgcolor": "#31434f",
       "flags": {},
@@ -622,8 +658,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            20,
-            32
+            40
           ]
         }
       ],
@@ -633,6 +668,100 @@
       },
       "widgets_values": [],
       "title": "Combine regional characters",
+      "flags": {},
+      "mode": 0
+    },
+    {
+      "id": 27,
+      "type": "CLIPTextEncode",
+      "pos": [
+        760,
+        570
+      ],
+      "size": [
+        500,
+        180
+      ],
+      "order": 13,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 43
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            41
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, score_7, safe, 2girls. Two adult women share one coherent full-body anime scene with consistent lighting, perspective, background, and natural physical interaction."
+      ],
+      "title": "Shared scene fallback (no character LoRA)",
+      "color": "#26333d",
+      "bgcolor": "#31434f",
+      "flags": {},
+      "mode": 0
+    },
+    {
+      "id": 28,
+      "type": "ConditioningSetDefaultCombine",
+      "pos": [
+        1640,
+        430
+      ],
+      "size": [
+        360,
+        82
+      ],
+      "order": 14,
+      "inputs": [
+        {
+          "name": "cond",
+          "type": "CONDITIONING",
+          "link": 40
+        },
+        {
+          "name": "cond_DEFAULT",
+          "type": "CONDITIONING",
+          "link": 41
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            20,
+            32
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "ConditioningSetDefaultCombine"
+      },
+      "widgets_values": [],
+      "title": "Fill uncovered background with shared scene",
+      "color": "#26333d",
+      "bgcolor": "#31434f",
       "flags": {},
       "mode": 0
     },
@@ -647,7 +776,7 @@
         310,
         106
       ],
-      "order": 13,
+      "order": 15,
       "inputs": [],
       "outputs": [
         {
@@ -682,7 +811,7 @@
         360,
         500
       ],
-      "order": 14,
+      "order": 16,
       "inputs": [
         {
           "name": "images",
@@ -711,7 +840,7 @@
         310,
         262
       ],
-      "order": 15,
+      "order": 17,
       "inputs": [
         {
           "name": "model",
@@ -771,7 +900,7 @@
         200,
         46
       ],
-      "order": 16,
+      "order": 18,
       "inputs": [
         {
           "name": "samples",
@@ -814,7 +943,7 @@
         340,
         420
       ],
-      "order": 17,
+      "order": 19,
       "inputs": [
         {
           "name": "images",
@@ -843,7 +972,7 @@
         320,
         58
       ],
-      "order": 18,
+      "order": 20,
       "inputs": [],
       "outputs": [
         {
@@ -883,7 +1012,7 @@
         250,
         46
       ],
-      "order": 19,
+      "order": 21,
       "inputs": [
         {
           "name": "upscale_model",
@@ -925,7 +1054,7 @@
         250,
         82
       ],
-      "order": 20,
+      "order": 22,
       "inputs": [
         {
           "name": "image",
@@ -965,7 +1094,7 @@
         200,
         46
       ],
-      "order": 21,
+      "order": 23,
       "inputs": [
         {
           "name": "pixels",
@@ -1007,7 +1136,7 @@
         310,
         262
       ],
-      "order": 22,
+      "order": 24,
       "inputs": [
         {
           "name": "model",
@@ -1067,7 +1196,7 @@
         200,
         46
       ],
-      "order": 23,
+      "order": 25,
       "inputs": [
         {
           "name": "samples",
@@ -1109,7 +1238,7 @@
         430,
         500
       ],
-      "order": 24,
+      "order": 26,
       "inputs": [
         {
           "name": "images",
@@ -1140,12 +1269,12 @@
         560,
         720
       ],
-      "order": 25,
+      "order": 27,
       "inputs": [],
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# Anima Two-Character Regional Hires-Fix\n\nThis graph generates both characters in the same diffusion trajectory. Each side receives its own complete prompt and model-only character LoRA through a soft regional mask. This avoids the identity bleeding caused by loading both character LoRAs globally, while preserving shared pose, lighting, eye contact, and contact between the characters better than sequential replacement inpaint.\n\n## Use\n1. Describe the complete shared scene and interaction in the green node.\n2. Select Character A and B. Their manifest triggers are injected automatically. Add visible hair, eyes, clothes, expression, and body direction in each details field.\n3. Adjust the live A/B layout. Keep a small feathered overlap where hands or bodies interact.\n4. Queue once. The same regional conditioning is used in both passes.\n\n## Quality defaults\n- Regional mode: `default` gives each character full-image context, then blends only its masked prediction. `mask bounds` is faster but can weaken interaction continuity.\n- Character LoRA: start at 0.80; tune roughly 0.65-0.95.\n- Feather: 4-10 percent. Increase for soft interaction; reduce if identities mix.\n- First pass: 832x1216, 30 steps, CFG 4, er_sde/simple.\n- Hires-fix: AnimeSharp 4x, Lanczos to effective 1.5x, then denoise 0.38. Tune 0.32-0.42.\n\n## Requirements\n- Current ComfyUI core with CreateHookLoraModelOnly and ConditioningSetProperties.\n- WAI-ANIMA or Anima Base, qwen_3_06b_base, qwen_image_vae.\n- 4x-AnimeSharp.pth or another anime ESRGAN model.\n- Two installed character LoRAs listed in config/anima-loras.json.\n\nDo not place both character LoRAs in a global LoraLoader before the KSamplers; that defeats the regional identity separation."
+        "# Anima Two-Character Regional Hires-Fix\n\nThis graph generates both characters in the same diffusion trajectory. Each character receives its own complete prompt and model-only character LoRA through a freely positioned soft regional mask. These masks are influence maps inside one latent, not separately rendered images. Any area outside both masks uses the unhooked shared-scene default conditioning. This reduces the identity bleeding caused by loading both character LoRAs globally, while preserving shared pose, lighting, eye contact, and contact between the characters better than sequential replacement inpaint.\n\n## Use\n1. Describe the complete shared scene and interaction in the green node.\n2. Select Character A and B. Their manifest triggers are injected automatically. Add visible hair, eyes, clothes, expression, and body direction in each details field.\n3. Move each live A/B center and adjust its width and height. Keep a feathered overlap where hands or bodies interact.\n4. Queue once. Mask positions automatically feed matching location text to both prompts, and the same regional conditioning is used in both passes.\n\n## Quality defaults\n- Regional mode: `default` gives each character full-image context, then blends only its masked prediction. `mask bounds` is faster but can weaken interaction continuity.\n- Character LoRA: start at 0.80; tune roughly 0.65-0.95.\n- Feather: 4-10 percent. Increase for soft interaction; reduce if identities mix.\n- First pass: 832x1216, 30 steps, CFG 4, er_sde/simple.\n- Hires-fix: AnimeSharp 4x, Lanczos to effective 1.5x, then denoise 0.38. Tune 0.32-0.42.\n\n## Requirements\n- Current ComfyUI core with CreateHookLoraModelOnly and ConditioningSetProperties.\n- WAI-ANIMA or Anima Base, qwen_3_06b_base, qwen_image_vae.\n- 4x-AnimeSharp.pth or another anime ESRGAN model.\n- Two installed character LoRAs listed in config/anima-loras.json.\n\nDo not place both character LoRAs in a global LoraLoader before the KSamplers; that defeats the regional identity separation."
       ],
       "title": "Read first",
       "flags": {},
@@ -1307,7 +1436,7 @@
     ],
     [
       20,
-      13,
+      28,
       0,
       16,
       1,
@@ -1403,7 +1532,7 @@
     ],
     [
       32,
-      13,
+      28,
       0,
       23,
       1,
@@ -1448,6 +1577,54 @@
       25,
       0,
       "IMAGE"
+    ],
+    [
+      38,
+      5,
+      3,
+      4,
+      0,
+      "STRING"
+    ],
+    [
+      39,
+      5,
+      4,
+      4,
+      1,
+      "STRING"
+    ],
+    [
+      40,
+      13,
+      0,
+      28,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      41,
+      27,
+      0,
+      28,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      42,
+      4,
+      6,
+      27,
+      1,
+      "STRING"
+    ],
+    [
+      43,
+      2,
+      0,
+      27,
+      0,
+      "CLIP"
     ]
   ],
   "groups": [
@@ -1458,7 +1635,7 @@
         -550,
         -10,
         930,
-        1410
+        1500
       ],
       "color": "#3f789e",
       "font_size": 24,
@@ -1470,7 +1647,7 @@
       "bounding": [
         150,
         -10,
-        1800,
+        1900,
         800
       ],
       "color": "#8b6f47",
