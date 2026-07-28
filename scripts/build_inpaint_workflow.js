@@ -79,7 +79,7 @@ const samplerInputs = [
 ];
 
 const basePrompt = [
-    "masterpiece, best quality, score_7, safe, 2girls, full body, two adult women in a close affectionate hug, natural intertwined pose, close body contact, both faces visible, coherent arms and hands, both standing on the same ground level, detailed school courtyard, anime illustration, anime coloring.",
+    "masterpiece, best quality, score_7, safe, 2girls, exactly two adult women, no other people, full body, two adult women in a close affectionate hug, natural intertwined pose, close body contact, both faces visible, coherent arms and hands, both standing on the same ground level, detailed school courtyard, anime illustration, anime coloring.",
     "Character A is the taller girl on the left: k0t0h1s4k0, braid, side ponytail, school uniform, serafuku, sailor collar, white shirt, blue neckerchief, black pleated skirt, white kneehighs, brown loafers, arms around Character B's shoulders and upper back.",
     "Character B is the noticeably shorter petite girl on the right: m1ch1n0kuk0m4r0, bags under eyes, ahoge, messy hair, hair between eyes, school uniform, serafuku, green sailor collar, white shirt, long sleeves, green pleated skirt, black pantyhose, brown loafers, arms around Character A's waist.",
 ].join("\n");
@@ -91,7 +91,7 @@ const inpaintPrompt = [
 ].join("\n");
 
 const negativePrompt = [
-    "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, bad anatomy, bad hands, standing apart, separate portraits, gap between characters, stiff pose, arms at sides, fused bodies, merged faces, shared limbs, duplicate person, identical faces, extra arms, extra legs, missing limbs, malformed hands, mixed clothing, color bleeding, text, watermark, signature, logo",
+    "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, bad anatomy, bad hands, standing apart, separate portraits, gap between characters, stiff pose, arms at sides, fused bodies, merged faces, shared limbs, duplicate person, identical faces, ghost, afterimage, transparent person, translucent person, silhouette, third girl, 3girls, extra arms, extra legs, missing limbs, malformed hands, mixed clothing, color bleeding, text, watermark, signature, logo",
 ].join("");
 
 addNode({
@@ -115,15 +115,15 @@ addNode({
             "1. Right-click the base Save node and choose Copy (Clipspace).",
             "2. Right-click Load Base + B Mask and choose Paste (Clipspace).",
             "3. Open that Load Image node in Mask Editor.",
-            "4. Paint all of Character B, including B's hair, clothes, limbs, and the hands/arms that belong to B. Leave Character A's face and hair unpainted. Give the mask a small margin.",
+            "4. Paint the entire old Character B silhouette, including B's hair, clothes, limbs, shoes, shadow, and the hands/arms that belong to B. Leave Character A's face and hair unpainted.",
             "5. Save the mask, select the red final Save node, and press Ctrl+M once to enable it.",
             "6. Queue again.",
             "",
             "## Defaults",
             "- Base: 768x1024, Turbo 12 steps, CFG 1.5.",
             "- Inpaint: denoise 0.82. Use 0.70-0.78 to preserve more pose, or 0.88-1.00 for a stronger replacement.",
-            "- Mask grow: 8 px, plus 12 px latent grow.",
-            "- Hires-fix: AnimeSharp 4x, Lanczos to exact 1160x1536, denoise 0.32.",
+            "- Mask cleanup: threshold 0.05, grow 24 px, blur the outer 12 px, plus 12 px latent grow.",
+            "- Hires-fix: AnimeSharp 4x, Lanczos to exact 1160x1536, denoise 0.20.",
             "- Character A LoRA affects only Stage 1. Character B LoRA affects only the masked inpaint sampler. The final low-denoise pass uses Turbo only.",
         ].join("\n"),
     ],
@@ -404,12 +404,24 @@ addNode({
 addNode({
     id: 18,
     type: "GrowMask",
-    pos: [2540, 420],
+    pos: [2860, 420],
     size: [280, 90],
-    title: "Small seam margin",
+    title: "Cover the old B silhouette + 24px",
     inputs: [{ name: "mask", type: "MASK" }],
     outputs: [{ name: "MASK", type: "MASK" }],
-    widgets: [8, true],
+    widgets: [24, true],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 30,
+    type: "ThresholdMask",
+    pos: [2540, 420],
+    size: [280, 90],
+    title: "Make painted mask fully opaque",
+    inputs: [{ name: "mask", type: "MASK" }],
+    outputs: [{ name: "MASK", type: "MASK" }],
+    widgets: [0.05],
     properties: { cnr_id: "comfy-core" },
 });
 
@@ -426,6 +438,41 @@ addNode({
     ],
     outputs: [{ name: "LATENT", type: "LATENT" }],
     widgets: [12],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 31,
+    type: "MaskToImage",
+    pos: [3180, 440],
+    size: [220, 58],
+    title: "Mask to image for edge blur",
+    inputs: [{ name: "mask", type: "MASK" }],
+    outputs: [{ name: "IMAGE", type: "IMAGE" }],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 32,
+    type: "ImageBlur",
+    pos: [3440, 410],
+    size: [260, 110],
+    title: "Blur only the expanded outer edge",
+    inputs: [{ name: "image", type: "IMAGE" }],
+    outputs: [{ name: "IMAGE", type: "IMAGE" }],
+    widgets: [12, 4.0],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 33,
+    type: "ImageToMask",
+    pos: [3740, 430],
+    size: [220, 80],
+    title: "Clean composite mask",
+    inputs: [{ name: "image", type: "IMAGE" }],
+    outputs: [{ name: "MASK", type: "MASK" }],
+    widgets: ["red"],
     properties: { cnr_id: "comfy-core" },
 });
 
@@ -561,7 +608,7 @@ addNode({
     type: "KSampler",
     pos: [6060, -10],
     size: [320, 330],
-    title: "Stage 3: Turbo Hires-fix, denoise 0.32",
+    title: "Stage 3: Turbo Hires-fix, denoise 0.20",
     inputs: samplerInputs,
     outputs: [{ name: "LATENT", type: "LATENT" }],
     widgets: [
@@ -571,7 +618,7 @@ addNode({
         1.5,
         "euler",
         "simple",
-        0.32,
+        0.20,
     ],
     properties: { cnr_id: "comfy-core" },
     color: "#26343a",
@@ -624,10 +671,14 @@ connect(13, 0, 14, 3, "LATENT");
 connect(14, 0, 15, 0, "LATENT");
 connect(4, 0, 15, 1, "VAE");
 connect(15, 0, 16, 0, "IMAGE");
-connect(17, 1, 18, 0, "MASK");
+connect(17, 1, 30, 0, "MASK");
+connect(30, 0, 18, 0, "MASK");
 connect(17, 0, 19, 0, "IMAGE");
 connect(4, 0, 19, 1, "VAE");
 connect(18, 0, 19, 2, "MASK");
+connect(18, 0, 31, 0, "MASK");
+connect(31, 0, 32, 0, "IMAGE");
+connect(32, 0, 33, 0, "IMAGE");
 connect(9, 0, 20, 0, "MODEL");
 connect(11, 0, 20, 1, "CONDITIONING");
 connect(12, 0, 20, 2, "CONDITIONING");
@@ -636,7 +687,7 @@ connect(20, 0, 21, 0, "LATENT");
 connect(4, 0, 21, 1, "VAE");
 connect(17, 0, 22, 0, "IMAGE");
 connect(21, 0, 22, 1, "IMAGE");
-connect(18, 0, 22, 5, "MASK");
+connect(33, 0, 22, 5, "MASK");
 connect(23, 0, 24, 0, "UPSCALE_MODEL");
 connect(22, 0, 24, 1, "IMAGE");
 connect(24, 0, 25, 0, "IMAGE");
@@ -717,7 +768,7 @@ const workflow = {
         {
             id: 3,
             title: "3. Paint B in Mask Editor, then replace with Character B LoRA",
-            bounding: [2490, -80, 1940, 650],
+            bounding: [2490, -80, 1940, 730],
             color: "#a45d62",
             font_size: 24,
             flags: {},

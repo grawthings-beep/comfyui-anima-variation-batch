@@ -1,8 +1,8 @@
 {
   "id": "b78c3d95-ea63-4ce1-aeb8-6a78f209e46d",
   "revision": 0,
-  "last_node_id": 29,
-  "last_link_id": 42,
+  "last_node_id": 33,
+  "last_link_id": 46,
   "nodes": [
     {
       "id": 1,
@@ -24,7 +24,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Two-Character Inpaint + Exact 1160x1536 Hires-Fix\n\nThis replaces the retired regional workflow. Character LoRAs are never loaded together.\n\n## Stage 1: make the interaction\n1. Select Character A and Character B by readable name.\n2. Put the exact trigger and appearance for both people in the Base Composition prompt.\n3. Queue once. Only the purple Base Composition Save node is active.\n\n## Stage 2: replace Character B\n1. Right-click the base Save node and choose Copy (Clipspace).\n2. Right-click Load Base + B Mask and choose Paste (Clipspace).\n3. Open that Load Image node in Mask Editor.\n4. Paint all of Character B, including B's hair, clothes, limbs, and the hands/arms that belong to B. Leave Character A's face and hair unpainted. Give the mask a small margin.\n5. Save the mask, select the red final Save node, and press Ctrl+M once to enable it.\n6. Queue again.\n\n## Defaults\n- Base: 768x1024, Turbo 12 steps, CFG 1.5.\n- Inpaint: denoise 0.82. Use 0.70-0.78 to preserve more pose, or 0.88-1.00 for a stronger replacement.\n- Mask grow: 8 px, plus 12 px latent grow.\n- Hires-fix: AnimeSharp 4x, Lanczos to exact 1160x1536, denoise 0.32.\n- Character A LoRA affects only Stage 1. Character B LoRA affects only the masked inpaint sampler. The final low-denoise pass uses Turbo only."
+        "# Two-Character Inpaint + Exact 1160x1536 Hires-Fix\n\nThis replaces the retired regional workflow. Character LoRAs are never loaded together.\n\n## Stage 1: make the interaction\n1. Select Character A and Character B by readable name.\n2. Put the exact trigger and appearance for both people in the Base Composition prompt.\n3. Queue once. Only the purple Base Composition Save node is active.\n\n## Stage 2: replace Character B\n1. Right-click the base Save node and choose Copy (Clipspace).\n2. Right-click Load Base + B Mask and choose Paste (Clipspace).\n3. Open that Load Image node in Mask Editor.\n4. Paint the entire old Character B silhouette, including B's hair, clothes, limbs, shoes, shadow, and the hands/arms that belong to B. Leave Character A's face and hair unpainted.\n5. Save the mask, select the red final Save node, and press Ctrl+M once to enable it.\n6. Queue again.\n\n## Defaults\n- Base: 768x1024, Turbo 12 steps, CFG 1.5.\n- Inpaint: denoise 0.82. Use 0.70-0.78 to preserve more pose, or 0.88-1.00 for a stronger replacement.\n- Mask cleanup: threshold 0.05, grow 24 px, blur the outer 12 px, plus 12 px latent grow.\n- Hires-fix: AnimeSharp 4x, Lanczos to exact 1160x1536, denoise 0.20.\n- Character A LoRA affects only Stage 1. Character B LoRA affects only the masked inpaint sampler. The final low-denoise pass uses Turbo only."
       ],
       "title": "Read first",
       "color": "#222222",
@@ -129,10 +129,10 @@
           "type": "VAE",
           "links": [
             16,
-            20,
-            27,
-            35,
-            41
+            21,
+            31,
+            39,
+            45
           ]
         }
       ],
@@ -196,7 +196,7 @@
           "links": [
             2,
             3,
-            36
+            40
           ]
         }
       ],
@@ -403,7 +403,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            22
+            26
           ]
         }
       ],
@@ -444,7 +444,7 @@
           "type": "CONDITIONING",
           "links": [
             12,
-            37
+            41
           ]
         }
       ],
@@ -453,7 +453,7 @@
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        "masterpiece, best quality, score_7, safe, 2girls, full body, two adult women in a close affectionate hug, natural intertwined pose, close body contact, both faces visible, coherent arms and hands, both standing on the same ground level, detailed school courtyard, anime illustration, anime coloring.\nCharacter A is the taller girl on the left: k0t0h1s4k0, braid, side ponytail, school uniform, serafuku, sailor collar, white shirt, blue neckerchief, black pleated skirt, white kneehighs, brown loafers, arms around Character B's shoulders and upper back.\nCharacter B is the noticeably shorter petite girl on the right: m1ch1n0kuk0m4r0, bags under eyes, ahoge, messy hair, hair between eyes, school uniform, serafuku, green sailor collar, white shirt, long sleeves, green pleated skirt, black pantyhose, brown loafers, arms around Character A's waist."
+        "masterpiece, best quality, score_7, safe, 2girls, exactly two adult women, no other people, full body, two adult women in a close affectionate hug, natural intertwined pose, close body contact, both faces visible, coherent arms and hands, both standing on the same ground level, detailed school courtyard, anime illustration, anime coloring.\nCharacter A is the taller girl on the left: k0t0h1s4k0, braid, side ponytail, school uniform, serafuku, sailor collar, white shirt, blue neckerchief, black pleated skirt, white kneehighs, brown loafers, arms around Character B's shoulders and upper back.\nCharacter B is the noticeably shorter petite girl on the right: m1ch1n0kuk0m4r0, bags under eyes, ahoge, messy hair, hair between eyes, school uniform, serafuku, green sailor collar, white shirt, long sleeves, green pleated skirt, black pantyhose, brown loafers, arms around Character A's waist."
       ],
       "title": "Base composition: both characters and interaction",
       "color": "#233326",
@@ -485,7 +485,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            23
+            27
           ]
         }
       ],
@@ -494,7 +494,7 @@
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        "Redraw Character B inside the painted mask while preserving the existing pose, contact points, Character A, camera, lighting, and background outside the mask.\nmasterpiece, best quality, score_7, safe, 2girls, full body, two adult women in a close affectionate hug, natural intertwined pose, close body contact, both faces visible, coherent arms and hands, both standing on the same ground level, detailed school courtyard, anime illustration, anime coloring.\nCharacter A is the taller girl on the left: k0t0h1s4k0, braid, side ponytail, school uniform, serafuku, sailor collar, white shirt, blue neckerchief, black pleated skirt, white kneehighs, brown loafers, arms around Character B's shoulders and upper back.\nCharacter B is the noticeably shorter petite girl on the right: m1ch1n0kuk0m4r0, bags under eyes, ahoge, messy hair, hair between eyes, school uniform, serafuku, green sailor collar, white shirt, long sleeves, green pleated skirt, black pantyhose, brown loafers, arms around Character A's waist.\nCharacter B must keep a distinct face, hair, green uniform details, shorter height, and naturally connected arms and hands where she touches Character A."
+        "Redraw Character B inside the painted mask while preserving the existing pose, contact points, Character A, camera, lighting, and background outside the mask.\nmasterpiece, best quality, score_7, safe, 2girls, exactly two adult women, no other people, full body, two adult women in a close affectionate hug, natural intertwined pose, close body contact, both faces visible, coherent arms and hands, both standing on the same ground level, detailed school courtyard, anime illustration, anime coloring.\nCharacter A is the taller girl on the left: k0t0h1s4k0, braid, side ponytail, school uniform, serafuku, sailor collar, white shirt, blue neckerchief, black pleated skirt, white kneehighs, brown loafers, arms around Character B's shoulders and upper back.\nCharacter B is the noticeably shorter petite girl on the right: m1ch1n0kuk0m4r0, bags under eyes, ahoge, messy hair, hair between eyes, school uniform, serafuku, green sailor collar, white shirt, long sleeves, green pleated skirt, black pantyhose, brown loafers, arms around Character A's waist.\nCharacter B must keep a distinct face, hair, green uniform details, shorter height, and naturally connected arms and hands where she touches Character A."
       ],
       "title": "Inpaint B: complete scene and B identity",
       "color": "#33263a",
@@ -527,8 +527,8 @@
           "type": "CONDITIONING",
           "links": [
             13,
-            24,
-            38
+            28,
+            42
           ]
         }
       ],
@@ -537,7 +537,7 @@
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, bad anatomy, bad hands, standing apart, separate portraits, gap between characters, stiff pose, arms at sides, fused bodies, merged faces, shared limbs, duplicate person, identical faces, extra arms, extra legs, missing limbs, malformed hands, mixed clothing, color bleeding, text, watermark, signature, logo"
+        "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, bad anatomy, bad hands, standing apart, separate portraits, gap between characters, stiff pose, arms at sides, fused bodies, merged faces, shared limbs, duplicate person, identical faces, ghost, afterimage, transparent person, translucent person, silhouette, third girl, 3girls, extra arms, extra legs, missing limbs, malformed hands, mixed clothing, color bleeding, text, watermark, signature, logo"
       ],
       "title": "Shared negative prompt"
     },
@@ -733,8 +733,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            19,
-            28
+            20,
+            32
           ]
         },
         {
@@ -761,6 +761,47 @@
       "id": 18,
       "type": "GrowMask",
       "pos": [
+        2860,
+        420
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            22,
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GrowMask",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        24,
+        true
+      ],
+      "title": "Cover the old B silhouette + 24px"
+    },
+    {
+      "id": 30,
+      "type": "ThresholdMask",
+      "pos": [
         2540,
         420
       ],
@@ -769,7 +810,7 @@
         90
       ],
       "flags": {},
-      "order": 17,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
@@ -783,20 +824,18 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            21,
-            30
+            19
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "GrowMask",
+        "Node name for S&R": "ThresholdMask",
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        8,
-        true
+        0.05
       ],
-      "title": "Small seam margin"
+      "title": "Make painted mask fully opaque"
     },
     {
       "id": 19,
@@ -810,23 +849,23 @@
         110
       ],
       "flags": {},
-      "order": 18,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
           "name": "pixels",
           "type": "IMAGE",
-          "link": 19
+          "link": 20
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 20
+          "link": 21
         },
         {
           "name": "mask",
           "type": "MASK",
-          "link": 21
+          "link": 22
         }
       ],
       "outputs": [
@@ -834,7 +873,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            25
+            29
           ]
         }
       ],
@@ -848,6 +887,122 @@
       "title": "Encode masked B area"
     },
     {
+      "id": 31,
+      "type": "MaskToImage",
+      "pos": [
+        3180,
+        440
+      ],
+      "size": [
+        220,
+        58
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [],
+      "title": "Mask to image for edge blur"
+    },
+    {
+      "id": 32,
+      "type": "ImageBlur",
+      "pos": [
+        3440,
+        410
+      ],
+      "size": [
+        260,
+        110
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageBlur",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        12,
+        4
+      ],
+      "title": "Blur only the expanded outer edge"
+    },
+    {
+      "id": 33,
+      "type": "ImageToMask",
+      "pos": [
+        3740,
+        430
+      ],
+      "size": [
+        220,
+        80
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            34
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageToMask",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        "red"
+      ],
+      "title": "Clean composite mask"
+    },
+    {
       "id": 20,
       "type": "KSampler",
       "pos": [
@@ -859,28 +1014,28 @@
         330
       ],
       "flags": {},
-      "order": 19,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 22
+          "link": 26
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 23
+          "link": 27
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 24
+          "link": 28
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 25
+          "link": 29
         }
       ],
       "outputs": [
@@ -888,7 +1043,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            26
+            30
           ]
         }
       ],
@@ -921,18 +1076,18 @@
         58
       ],
       "flags": {},
-      "order": 20,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 26
+          "link": 30
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 27
+          "link": 31
         }
       ],
       "outputs": [
@@ -940,7 +1095,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            29
+            33
           ]
         }
       ],
@@ -963,18 +1118,18 @@
         170
       ],
       "flags": {},
-      "order": 21,
+      "order": 26,
       "mode": 0,
       "inputs": [
         {
           "name": "destination",
           "type": "IMAGE",
-          "link": 28
+          "link": 32
         },
         {
           "name": "source",
           "type": "IMAGE",
-          "link": 29
+          "link": 33
         },
         {
           "name": "x",
@@ -1003,7 +1158,7 @@
         {
           "name": "mask",
           "type": "MASK",
-          "link": 30
+          "link": 34
         }
       ],
       "outputs": [
@@ -1011,7 +1166,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            32
+            36
           ]
         }
       ],
@@ -1038,7 +1193,7 @@
         58
       ],
       "flags": {},
-      "order": 22,
+      "order": 17,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -1046,7 +1201,7 @@
           "name": "UPSCALE_MODEL",
           "type": "UPSCALE_MODEL",
           "links": [
-            31
+            35
           ]
         }
       ],
@@ -1078,18 +1233,18 @@
         72
       ],
       "flags": {},
-      "order": 23,
+      "order": 27,
       "mode": 0,
       "inputs": [
         {
           "name": "upscale_model",
           "type": "UPSCALE_MODEL",
-          "link": 31
+          "link": 35
         },
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 32
+          "link": 36
         }
       ],
       "outputs": [
@@ -1097,7 +1252,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            33
+            37
           ]
         }
       ],
@@ -1120,13 +1275,13 @@
         170
       ],
       "flags": {},
-      "order": 24,
+      "order": 28,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 33
+          "link": 37
         }
       ],
       "outputs": [
@@ -1134,7 +1289,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            34
+            38
           ]
         }
       ],
@@ -1162,18 +1317,18 @@
         58
       ],
       "flags": {},
-      "order": 25,
+      "order": 29,
       "mode": 0,
       "inputs": [
         {
           "name": "pixels",
           "type": "IMAGE",
-          "link": 34
+          "link": 38
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 35
+          "link": 39
         }
       ],
       "outputs": [
@@ -1181,7 +1336,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            39
+            43
           ]
         }
       ],
@@ -1204,28 +1359,28 @@
         330
       ],
       "flags": {},
-      "order": 26,
+      "order": 30,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 36
+          "link": 40
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 37
+          "link": 41
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 38
+          "link": 42
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 39
+          "link": 43
         }
       ],
       "outputs": [
@@ -1233,7 +1388,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            40
+            44
           ]
         }
       ],
@@ -1248,9 +1403,9 @@
         1.5,
         "euler",
         "simple",
-        0.32
+        0.2
       ],
-      "title": "Stage 3: Turbo Hires-fix, denoise 0.32",
+      "title": "Stage 3: Turbo Hires-fix, denoise 0.20",
       "color": "#26343a",
       "bgcolor": "#374e57"
     },
@@ -1266,18 +1421,18 @@
         58
       ],
       "flags": {},
-      "order": 27,
+      "order": 31,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 40
+          "link": 44
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 41
+          "link": 45
         }
       ],
       "outputs": [
@@ -1285,7 +1440,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            42
+            46
           ]
         }
       ],
@@ -1308,13 +1463,13 @@
         540
       ],
       "flags": {},
-      "order": 28,
+      "order": 32,
       "mode": 2,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 42
+          "link": 46
         }
       ],
       "outputs": [],
@@ -1471,12 +1626,20 @@
       18,
       17,
       1,
-      18,
+      30,
       0,
       "MASK"
     ],
     [
       19,
+      30,
+      0,
+      18,
+      0,
+      "MASK"
+    ],
+    [
+      20,
       17,
       0,
       19,
@@ -1484,7 +1647,7 @@
       "IMAGE"
     ],
     [
-      20,
+      21,
       4,
       0,
       19,
@@ -1492,7 +1655,7 @@
       "VAE"
     ],
     [
-      21,
+      22,
       18,
       0,
       19,
@@ -1500,7 +1663,31 @@
       "MASK"
     ],
     [
-      22,
+      23,
+      18,
+      0,
+      31,
+      0,
+      "MASK"
+    ],
+    [
+      24,
+      31,
+      0,
+      32,
+      0,
+      "IMAGE"
+    ],
+    [
+      25,
+      32,
+      0,
+      33,
+      0,
+      "IMAGE"
+    ],
+    [
+      26,
       9,
       0,
       20,
@@ -1508,7 +1695,7 @@
       "MODEL"
     ],
     [
-      23,
+      27,
       11,
       0,
       20,
@@ -1516,7 +1703,7 @@
       "CONDITIONING"
     ],
     [
-      24,
+      28,
       12,
       0,
       20,
@@ -1524,7 +1711,7 @@
       "CONDITIONING"
     ],
     [
-      25,
+      29,
       19,
       0,
       20,
@@ -1532,7 +1719,7 @@
       "LATENT"
     ],
     [
-      26,
+      30,
       20,
       0,
       21,
@@ -1540,7 +1727,7 @@
       "LATENT"
     ],
     [
-      27,
+      31,
       4,
       0,
       21,
@@ -1548,7 +1735,7 @@
       "VAE"
     ],
     [
-      28,
+      32,
       17,
       0,
       22,
@@ -1556,7 +1743,7 @@
       "IMAGE"
     ],
     [
-      29,
+      33,
       21,
       0,
       22,
@@ -1564,15 +1751,15 @@
       "IMAGE"
     ],
     [
-      30,
-      18,
+      34,
+      33,
       0,
       22,
       5,
       "MASK"
     ],
     [
-      31,
+      35,
       23,
       0,
       24,
@@ -1580,7 +1767,7 @@
       "UPSCALE_MODEL"
     ],
     [
-      32,
+      36,
       22,
       0,
       24,
@@ -1588,7 +1775,7 @@
       "IMAGE"
     ],
     [
-      33,
+      37,
       24,
       0,
       25,
@@ -1596,7 +1783,7 @@
       "IMAGE"
     ],
     [
-      34,
+      38,
       25,
       0,
       26,
@@ -1604,7 +1791,7 @@
       "IMAGE"
     ],
     [
-      35,
+      39,
       4,
       0,
       26,
@@ -1612,7 +1799,7 @@
       "VAE"
     ],
     [
-      36,
+      40,
       5,
       0,
       27,
@@ -1620,7 +1807,7 @@
       "MODEL"
     ],
     [
-      37,
+      41,
       10,
       0,
       27,
@@ -1628,7 +1815,7 @@
       "CONDITIONING"
     ],
     [
-      38,
+      42,
       12,
       0,
       27,
@@ -1636,7 +1823,7 @@
       "CONDITIONING"
     ],
     [
-      39,
+      43,
       26,
       0,
       27,
@@ -1644,7 +1831,7 @@
       "LATENT"
     ],
     [
-      40,
+      44,
       27,
       0,
       28,
@@ -1652,7 +1839,7 @@
       "LATENT"
     ],
     [
-      41,
+      45,
       4,
       0,
       28,
@@ -1660,7 +1847,7 @@
       "VAE"
     ],
     [
-      42,
+      46,
       28,
       0,
       29,
@@ -1702,7 +1889,7 @@
         2490,
         -80,
         1940,
-        650
+        730
       ],
       "color": "#a45d62",
       "font_size": 24,

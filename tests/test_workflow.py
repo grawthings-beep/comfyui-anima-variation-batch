@@ -174,7 +174,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(node_types.count("LoraLoaderModelOnly"), 3)
         self.assertEqual(node_types.count("KSampler"), 3)
         self.assertEqual(node_types.count("LoadImage"), 1)
+        self.assertEqual(node_types.count("ThresholdMask"), 1)
         self.assertEqual(node_types.count("GrowMask"), 1)
+        self.assertEqual(node_types.count("MaskToImage"), 1)
+        self.assertEqual(node_types.count("ImageBlur"), 1)
+        self.assertEqual(node_types.count("ImageToMask"), 1)
         self.assertEqual(node_types.count("VAEEncodeForInpaint"), 1)
         self.assertEqual(node_types.count("ImageCompositeMasked"), 1)
         self.assertEqual(node_types.count("ImageScale"), 1)
@@ -210,6 +214,7 @@ class WorkflowTests(unittest.TestCase):
             "Redraw Character B inside the painted mask",
             nodes[11]["widgets_values"][0],
         )
+        self.assertIn("ghost", nodes[12]["widgets_values"][0])
         self.assertEqual(
             turbo["widgets_values"],
             ["anima-turbo-lora-v0.2.safetensors", 1.0],
@@ -224,7 +229,7 @@ class WorkflowTests(unittest.TestCase):
         )
         self.assertEqual(
             hires_sampler["widgets_values"][2:],
-            [12, 1.5, "euler", "simple", 0.32],
+            [12, 1.5, "euler", "simple", 0.20],
         )
         self.assertEqual(
             nodes[25]["widgets_values"],
@@ -271,12 +276,19 @@ class WorkflowTests(unittest.TestCase):
             (10, 0, "CONDITIONING"),
         )
 
-        self.assertEqual(sources[(18, 0)], (17, 1, "MASK"))
+        self.assertEqual(nodes[30]["widgets_values"], [0.05])
+        self.assertEqual(nodes[18]["widgets_values"], [24, True])
+        self.assertEqual(nodes[32]["widgets_values"], [12, 4.0])
+        self.assertEqual(sources[(30, 0)], (17, 1, "MASK"))
+        self.assertEqual(sources[(18, 0)], (30, 0, "MASK"))
         self.assertEqual(sources[(19, 0)], (17, 0, "IMAGE"))
         self.assertEqual(sources[(19, 2)], (18, 0, "MASK"))
+        self.assertEqual(sources[(31, 0)], (18, 0, "MASK"))
+        self.assertEqual(sources[(32, 0)], (31, 0, "IMAGE"))
+        self.assertEqual(sources[(33, 0)], (32, 0, "IMAGE"))
         self.assertEqual(sources[(22, 0)], (17, 0, "IMAGE"))
         self.assertEqual(sources[(22, 1)], (21, 0, "IMAGE"))
-        self.assertEqual(sources[(22, 5)], (18, 0, "MASK"))
+        self.assertEqual(sources[(22, 5)], (33, 0, "MASK"))
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}

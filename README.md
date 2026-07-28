@@ -55,15 +55,18 @@ Character A LoRA strength:  0.80, base sampler only
 Character B LoRA strength:  0.90, masked inpaint sampler only
 Base sampler:               12 steps, CFG 1.5, Euler/simple, denoise 1.00
 Inpaint sampler:            12 steps, CFG 1.5, Euler/simple, denoise 0.82
-Mask expansion:             8 px plus 12 px latent grow
-Final Hires-fix:            12 steps, CFG 1.5, denoise 0.32, Turbo only
+Mask cleanup:               threshold 0.05, grow 24 px, edge blur 12 px
+Latent mask expansion:      12 px
+Final Hires-fix:            12 steps, CFG 1.5, denoise 0.20, Turbo only
 ```
 
 Use inpaint denoise `0.70-0.78` when the pose should barely move, `0.80-0.88`
 for a normal character replacement, or `0.90-1.00` when B's identity is not
-appearing strongly enough. The final `ImageCompositeMasked` restores original
-pixels outside the expanded mask before upscaling, preventing whole-image VAE
-drift.
+appearing strongly enough. The painted mask is thresholded to full opacity
+before it is expanded. Only the expanded outer edge is blurred for compositing,
+so a partially transparent Mask Editor brush cannot leave the old placeholder
+character as a ghost. The final `ImageCompositeMasked` restores original pixels
+outside that clean mask before upscaling, preventing whole-image VAE drift.
 
 The workflow uses only current ComfyUI core inpaint nodes plus this repository's
 lightweight readable LoRA selector. It follows ComfyUI's official
