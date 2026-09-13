@@ -20,53 +20,57 @@ example_workflows/anima_two_character_inpaint_hiresfix.json
 
 ### Two-character Mask Editor inpaint + Hires-fix
 
-`anima_two_character_inpaint_hiresfix.json` separates composition from
-identity replacement:
+`anima_two_character_inpaint_hiresfix.json` separates composition from both
+identity replacements:
 
 ```text
-checkpoint -> global Anima Turbo -> Character A LoRA -> base interaction
-base image + hand-painted B mask -> Character B LoRA -> masked inpaint
-original base + masked inpaint result -> exact pixel composite
-composite -> AnimeSharp 4x -> Lanczos 1160x1536 -> low-denoise Hires-fix
+checkpoint -> global Anima Turbo -> base interaction without character LoRAs
+base image + hand-painted A mask -> Character A LoRA -> masked A inpaint
+original base + A inpaint -> exact pixel composite -> intermediate A save
+finished A image + hand-painted B mask -> Character B LoRA -> masked B inpaint
+finished A image + B inpaint -> exact pixel composite
+finished characters -> AnimeSharp 4x -> Lanczos 1160x1536 -> low-denoise Hires-fix
 ```
 
-The first stage generates the complete physical interaction with Character A's
-LoRA and a temporary Character B. This establishes crossing arms, hands, gaze,
-height difference, lighting, and shadows before any identity replacement.
-After the base image is generated, copy it from the purple Save node into
-`Load Base + Paint Character B Mask`, open ComfyUI's Mask Editor, and paint
-Character B. Include B's hair, clothing, limbs, and contact limbs belonging to
-B, while leaving A's face and hair outside the mask.
+The first stage uses only Turbo to establish the complete physical interaction:
+crossing arms, hands, gaze, height difference, lighting, and shadows. Copy the
+purple base Save result into `Load Base + Paint Character A Mask`, then paint
+A's entire old silhouette in ComfyUI's Mask Editor. Include A's hair, clothing,
+limbs, shoes, shadow, and contact limbs owned by A. Disable the purple Save,
+enable the orange Character A Save with `Ctrl+M`, and queue the second stage.
 
-The red final Save node is disabled when the workflow opens, so the missing
-input image cannot block the base pass. After saving the mask, select that node
-and press `Ctrl+M` once to enable it, then queue again.
+Copy the orange result into `Load Finished A + Paint Character B Mask`. Paint
+B's complete old silhouette while keeping the finished A face and hair outside
+the mask. Disable the orange Save, enable the red final Save, and queue the
+third stage. Stage 3 replaces B, composites untouched pixels back from the
+finished A image, and runs Hires-fix. Only one Save output should be enabled for
+each queue submission; disabled branches do not require loaded mask images.
 
 `Anima Character LoRA Select` reads `config/anima-loras.json` and shows short
 character names instead of long `anima/...safetensors` filenames. It selects
 the model file only and never edits prompts. Enter the exact trigger yourself
-in both prompt boxes.
+in all three positive prompt boxes.
 
-The Character A and B LoRAs are applied to different samplers:
+The Character A and B LoRAs are applied only to their own masked samplers:
 
 ```text
 Turbo LoRA strength:        1.00
-Character A LoRA strength:  0.80, base sampler only
-Character B LoRA strength:  0.90, masked inpaint sampler only
-Base sampler:               12 steps, CFG 1.5, Euler/simple, denoise 1.00
-Inpaint sampler:            12 steps, CFG 1.5, Euler/simple, denoise 0.82
-Mask cleanup:               threshold 0.05, grow 24 px, edge blur 12 px
-Latent mask expansion:      12 px
+Character A LoRA strength:  0.80, A inpaint sampler only
+Character B LoRA strength:  0.90, B inpaint sampler only
+Base sampler:               12 steps, CFG 1.5, Euler/simple, denoise 1.00, Turbo only
+A/B inpaint samplers:       12 steps, CFG 1.5, Euler/simple, denoise 0.82
+Mask cleanup per character: threshold 0.05, grow 32 px, edge blur 12 px
+Latent mask expansion:      16 px
 Final Hires-fix:            12 steps, CFG 1.5, denoise 0.20, Turbo only
 ```
 
 Use inpaint denoise `0.70-0.78` when the pose should barely move, `0.80-0.88`
-for a normal character replacement, or `0.90-1.00` when B's identity is not
-appearing strongly enough. The painted mask is thresholded to full opacity
+for a normal character replacement, or `0.90-1.00` when an identity is not
+appearing strongly enough. Each painted mask is thresholded to full opacity
 before it is expanded. Only the expanded outer edge is blurred for compositing,
 so a partially transparent Mask Editor brush cannot leave the old placeholder
-character as a ghost. The final `ImageCompositeMasked` restores original pixels
-outside that clean mask before upscaling, preventing whole-image VAE drift.
+character as a ghost. Each `ImageCompositeMasked` restores original pixels
+outside that character's clean mask, preventing whole-image VAE drift.
 
 The workflow uses only current ComfyUI core inpaint nodes plus this repository's
 lightweight readable LoRA selector. It follows ComfyUI's official

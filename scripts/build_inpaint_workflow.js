@@ -84,8 +84,14 @@ const basePrompt = [
     "Character B is the noticeably shorter petite girl on the right: m1ch1n0kuk0m4r0, bags under eyes, ahoge, messy hair, hair between eyes, school uniform, serafuku, green sailor collar, white shirt, long sleeves, green pleated skirt, black pantyhose, brown loafers, arms around Character A's waist.",
 ].join("\n");
 
-const inpaintPrompt = [
-    "Redraw Character B inside the painted mask while preserving the existing pose, contact points, Character A, camera, lighting, and background outside the mask.",
+const inpaintAPrompt = [
+    "Redraw only Character A inside the painted mask while preserving the interaction, contact points, Character B placeholder, camera, lighting, and background outside the mask.",
+    basePrompt,
+    "Character A must keep a distinct face, braid, side ponytail, blue uniform details, taller height, and naturally connected arms and hands where she touches Character B.",
+].join("\n");
+
+const inpaintBPrompt = [
+    "Redraw only Character B inside the painted mask while preserving the finished Character A, existing interaction, contact points, camera, lighting, and background outside the mask.",
     basePrompt,
     "Character B must keep a distinct face, hair, green uniform details, shorter height, and naturally connected arms and hands where she touches Character A.",
 ].join("\n");
@@ -98,33 +104,37 @@ addNode({
     id: 1,
     type: "MarkdownNote",
     pos: [-1640, -80],
-    size: [620, 980],
+    size: [620, 1160],
     title: "Read first",
     widgets: [
         [
             "# Two-Character Inpaint + Exact 1160x1536 Hires-Fix",
             "",
-            "This replaces the retired regional workflow. Character LoRAs are never loaded together.",
+            "This replaces the retired regional workflow. The base composition and both character identities are generated in separate passes, so Character LoRAs are never loaded together.",
             "",
-            "## Stage 1: make the interaction",
-            "1. Select Character A and Character B by readable name.",
-            "2. Put the exact trigger and appearance for both people in the Base Composition prompt.",
-            "3. Queue once. Only the purple Base Composition Save node is active.",
+            "## Stage 1: make the interaction with Turbo only",
+            "1. Select Character A and Character B by readable name and edit all three positive prompts.",
+            "2. Put the exact trigger and appearance for both people in every positive prompt.",
+            "3. Queue once. Only the purple Base Composition Save node is enabled.",
             "",
-            "## Stage 2: replace Character B",
+            "## Stage 2: replace Character A",
             "1. Right-click the base Save node and choose Copy (Clipspace).",
-            "2. Right-click Load Base + B Mask and choose Paste (Clipspace).",
-            "3. Open that Load Image node in Mask Editor.",
-            "4. Paint the entire old Character B silhouette, including B's hair, clothes, limbs, shoes, shadow, and the hands/arms that belong to B. Leave Character A's face and hair unpainted.",
-            "5. Save the mask, select the red final Save node, and press Ctrl+M once to enable it.",
-            "6. Queue again.",
+            "2. Paste into Load Base + A Mask, open Mask Editor, and paint A's complete old silhouette.",
+            "3. Include A's hair, clothes, limbs, shoes, shadow, and A-owned hands/arms at contact points. Leave B's face and hair unpainted.",
+            "4. Disable the purple base Save, enable the orange Character A Save, and queue again.",
+            "",
+            "## Stage 3: replace Character B and finish",
+            "1. Copy the Character A Save result and paste it into Load Finished A + B Mask.",
+            "2. Open that Load Image node in Mask Editor.",
+            "3. Paint B's complete old silhouette, including hair, clothes, limbs, shoes, shadow, and B-owned hands/arms. Leave the finished A face and hair unpainted.",
+            "4. Disable the orange Character A Save, enable the red final Save, and queue again.",
             "",
             "## Defaults",
             "- Base: 768x1024, Turbo 12 steps, CFG 1.5.",
-            "- Inpaint: denoise 0.82. Use 0.70-0.78 to preserve more pose, or 0.88-1.00 for a stronger replacement.",
-            "- Mask cleanup: threshold 0.05, grow 24 px, blur the outer 12 px, plus 12 px latent grow.",
+            "- A/B inpaint: denoise 0.82. Use 0.70-0.78 to preserve more pose, or 0.88-1.00 for a stronger replacement.",
+            "- Mask cleanup: threshold 0.05, grow 32 px, blur the outer 12 px, plus 16 px latent grow.",
             "- Hires-fix: AnimeSharp 4x, Lanczos to exact 1160x1536, denoise 0.20.",
-            "- Character A LoRA affects only Stage 1. Character B LoRA affects only the masked inpaint sampler. The final low-denoise pass uses Turbo only.",
+            "- The base and final passes use Turbo only. Each character LoRA affects only its own masked inpaint sampler.",
         ].join("\n"),
     ],
     properties: {},
@@ -223,7 +233,7 @@ addNode({
 });
 
 for (const [id, y, title, character, strength] of [
-    [6, 0, "Character A for base composition", "Kotobuki Hisako", 0.8],
+    [6, 0, "Character A for masked replacement", "Kotobuki Hisako", 0.8],
     [7, 180, "Character B for masked replacement", "Michinoku Komaro", 0.9],
 ]) {
     addNode({
@@ -247,7 +257,7 @@ for (const [id, y, title, loraName, strength] of [
     [
         8,
         0,
-        "A LoRA: base composition only",
+        "A LoRA: A masked inpaint only",
         "anima/Kotobuki Hisako - Anima.safetensors",
         0.8,
     ],
@@ -303,19 +313,33 @@ addNode({
     type: "CLIPTextEncode",
     pos: [340, 360],
     size: [520, 390],
-    title: "Inpaint B: complete scene and B identity",
+    title: "Inpaint A: complete scene and A identity",
     inputs: clipTextInputs,
     outputs: [{ name: "CONDITIONING", type: "CONDITIONING" }],
-    widgets: [inpaintPrompt],
+    widgets: [inpaintAPrompt],
     properties: { cnr_id: "comfy-core" },
     color: "#33263a",
     bgcolor: "#50385c",
 });
 
 addNode({
-    id: 12,
+    id: 34,
     type: "CLIPTextEncode",
     pos: [340, 790],
+    size: [520, 390],
+    title: "Inpaint B: complete scene and B identity",
+    inputs: clipTextInputs,
+    outputs: [{ name: "CONDITIONING", type: "CONDITIONING" }],
+    widgets: [inpaintBPrompt],
+    properties: { cnr_id: "comfy-core" },
+    color: "#3a2b26",
+    bgcolor: "#5a4238",
+});
+
+addNode({
+    id: 12,
+    type: "CLIPTextEncode",
+    pos: [340, 1220],
     size: [520, 240],
     title: "Shared negative prompt",
     inputs: clipTextInputs,
@@ -390,7 +414,7 @@ addNode({
     type: "LoadImage",
     pos: [2540, -40],
     size: [360, 410],
-    title: "Load Base + Paint Character B Mask",
+    title: "Load Base + Paint Character A Mask",
     outputs: [
         { name: "IMAGE", type: "IMAGE" },
         { name: "MASK", type: "MASK" },
@@ -406,10 +430,10 @@ addNode({
     type: "GrowMask",
     pos: [2860, 420],
     size: [280, 90],
-    title: "Cover the old B silhouette + 24px",
+    title: "Cover the old A silhouette + 32px",
     inputs: [{ name: "mask", type: "MASK" }],
     outputs: [{ name: "MASK", type: "MASK" }],
-    widgets: [24, true],
+    widgets: [32, true],
     properties: { cnr_id: "comfy-core" },
 });
 
@@ -418,7 +442,7 @@ addNode({
     type: "ThresholdMask",
     pos: [2540, 420],
     size: [280, 90],
-    title: "Make painted mask fully opaque",
+    title: "Make painted A mask fully opaque",
     inputs: [{ name: "mask", type: "MASK" }],
     outputs: [{ name: "MASK", type: "MASK" }],
     widgets: [0.05],
@@ -430,14 +454,14 @@ addNode({
     type: "VAEEncodeForInpaint",
     pos: [2970, 300],
     size: [330, 110],
-    title: "Encode masked B area",
+    title: "Encode masked A area",
     inputs: [
         { name: "pixels", type: "IMAGE" },
         { name: "vae", type: "VAE" },
         { name: "mask", type: "MASK" },
     ],
     outputs: [{ name: "LATENT", type: "LATENT" }],
-    widgets: [12],
+    widgets: [16],
     properties: { cnr_id: "comfy-core" },
 });
 
@@ -446,7 +470,7 @@ addNode({
     type: "MaskToImage",
     pos: [3180, 440],
     size: [220, 58],
-    title: "Mask to image for edge blur",
+    title: "A mask to image for edge blur",
     inputs: [{ name: "mask", type: "MASK" }],
     outputs: [{ name: "IMAGE", type: "IMAGE" }],
     properties: { cnr_id: "comfy-core" },
@@ -457,7 +481,7 @@ addNode({
     type: "ImageBlur",
     pos: [3440, 410],
     size: [260, 110],
-    title: "Blur only the expanded outer edge",
+    title: "Blur only the expanded A outer edge",
     inputs: [{ name: "image", type: "IMAGE" }],
     outputs: [{ name: "IMAGE", type: "IMAGE" }],
     widgets: [12, 4.0],
@@ -469,7 +493,7 @@ addNode({
     type: "ImageToMask",
     pos: [3740, 430],
     size: [220, 80],
-    title: "Clean composite mask",
+    title: "Clean A composite mask",
     inputs: [{ name: "image", type: "IMAGE" }],
     outputs: [{ name: "MASK", type: "MASK" }],
     widgets: ["red"],
@@ -481,7 +505,7 @@ addNode({
     type: "KSampler",
     pos: [3370, -10],
     size: [320, 330],
-    title: "Stage 2: B-only masked inpaint",
+    title: "Stage 2: A-only masked inpaint",
     inputs: samplerInputs,
     outputs: [{ name: "LATENT", type: "LATENT" }],
     widgets: [
@@ -503,7 +527,7 @@ addNode({
     type: "VAEDecode",
     pos: [3750, 20],
     size: [240, 58],
-    title: "Decode inpaint",
+    title: "Decode Character A inpaint",
     inputs: [
         { name: "samples", type: "LATENT" },
         { name: "vae", type: "VAE" },
@@ -517,7 +541,180 @@ addNode({
     type: "ImageCompositeMasked",
     pos: [4050, -10],
     size: [330, 170],
-    title: "Restore untouched original pixels",
+    title: "Restore untouched pixels around Character A",
+    inputs: [
+        { name: "destination", type: "IMAGE" },
+        { name: "source", type: "IMAGE" },
+        {
+            name: "x",
+            type: "INT",
+            widget: { name: "x" },
+        },
+        {
+            name: "y",
+            type: "INT",
+            widget: { name: "y" },
+        },
+        {
+            name: "resize_source",
+            type: "BOOLEAN",
+            widget: { name: "resize_source" },
+        },
+        { name: "mask", type: "MASK" },
+    ],
+    outputs: [{ name: "IMAGE", type: "IMAGE" }],
+    widgets: [0, 0, false],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 35,
+    type: "SaveImage",
+    pos: [4500, -40],
+    size: [430, 500],
+    title: "ENABLE STAGE 2: Save finished Character A",
+    inputs: [{ name: "images", type: "IMAGE" }],
+    outputs: [],
+    widgets: ["Anima_two_character_inpaint_A"],
+    properties: { cnr_id: "comfy-core" },
+    mode: 2,
+    color: "#4b3121",
+    bgcolor: "#70492f",
+});
+
+addNode({
+    id: 36,
+    type: "LoadImage",
+    pos: [5100, -40],
+    size: [360, 410],
+    title: "Load Finished A + Paint Character B Mask",
+    outputs: [
+        { name: "IMAGE", type: "IMAGE" },
+        { name: "MASK", type: "MASK" },
+    ],
+    widgets: ["paste_finished_A_here.png", "image"],
+    properties: { cnr_id: "comfy-core" },
+    color: "#3a2c25",
+    bgcolor: "#594137",
+});
+
+addNode({
+    id: 37,
+    type: "ThresholdMask",
+    pos: [5100, 420],
+    size: [280, 90],
+    title: "Make painted B mask fully opaque",
+    inputs: [{ name: "mask", type: "MASK" }],
+    outputs: [{ name: "MASK", type: "MASK" }],
+    widgets: [0.05],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 38,
+    type: "GrowMask",
+    pos: [5420, 420],
+    size: [280, 90],
+    title: "Cover the old B silhouette + 32px",
+    inputs: [{ name: "mask", type: "MASK" }],
+    outputs: [{ name: "MASK", type: "MASK" }],
+    widgets: [32, true],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 39,
+    type: "VAEEncodeForInpaint",
+    pos: [5530, 300],
+    size: [330, 110],
+    title: "Encode masked B area",
+    inputs: [
+        { name: "pixels", type: "IMAGE" },
+        { name: "vae", type: "VAE" },
+        { name: "mask", type: "MASK" },
+    ],
+    outputs: [{ name: "LATENT", type: "LATENT" }],
+    widgets: [16],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 40,
+    type: "MaskToImage",
+    pos: [5740, 440],
+    size: [220, 58],
+    title: "B mask to image for edge blur",
+    inputs: [{ name: "mask", type: "MASK" }],
+    outputs: [{ name: "IMAGE", type: "IMAGE" }],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 41,
+    type: "ImageBlur",
+    pos: [6000, 410],
+    size: [260, 110],
+    title: "Blur only the expanded B outer edge",
+    inputs: [{ name: "image", type: "IMAGE" }],
+    outputs: [{ name: "IMAGE", type: "IMAGE" }],
+    widgets: [12, 4.0],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 42,
+    type: "ImageToMask",
+    pos: [6300, 430],
+    size: [220, 80],
+    title: "Clean B composite mask",
+    inputs: [{ name: "image", type: "IMAGE" }],
+    outputs: [{ name: "MASK", type: "MASK" }],
+    widgets: ["red"],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 43,
+    type: "KSampler",
+    pos: [5930, -10],
+    size: [320, 330],
+    title: "Stage 3: B-only masked inpaint",
+    inputs: samplerInputs,
+    outputs: [{ name: "LATENT", type: "LATENT" }],
+    widgets: [
+        566871253377102,
+        "randomize",
+        12,
+        1.5,
+        "euler",
+        "simple",
+        0.82,
+    ],
+    properties: { cnr_id: "comfy-core" },
+    color: "#3a262f",
+    bgcolor: "#573743",
+});
+
+addNode({
+    id: 44,
+    type: "VAEDecode",
+    pos: [6310, 20],
+    size: [240, 58],
+    title: "Decode Character B inpaint",
+    inputs: [
+        { name: "samples", type: "LATENT" },
+        { name: "vae", type: "VAE" },
+    ],
+    outputs: [{ name: "IMAGE", type: "IMAGE" }],
+    properties: { cnr_id: "comfy-core" },
+});
+
+addNode({
+    id: 45,
+    type: "ImageCompositeMasked",
+    pos: [6610, -10],
+    size: [330, 170],
+    title: "Restore untouched pixels around Character B",
     inputs: [
         { name: "destination", type: "IMAGE" },
         { name: "source", type: "IMAGE" },
@@ -546,7 +743,7 @@ addNode({
 addNode({
     id: 23,
     type: "UpscaleModelLoader",
-    pos: [4560, 0],
+    pos: [7300, 0],
     size: [330, 58],
     title: "Load anime ESRGAN",
     outputs: [{ name: "UPSCALE_MODEL", type: "UPSCALE_MODEL" }],
@@ -566,7 +763,7 @@ addNode({
 addNode({
     id: 24,
     type: "ImageUpscaleWithModel",
-    pos: [4970, 0],
+    pos: [7710, 0],
     size: [280, 72],
     title: "AnimeSharp 4x",
     inputs: [
@@ -580,7 +777,7 @@ addNode({
 addNode({
     id: 25,
     type: "ImageScale",
-    pos: [5330, -10],
+    pos: [8070, -10],
     size: [320, 170],
     title: "Exact output size: 1160x1536",
     inputs: [{ name: "image", type: "IMAGE" }],
@@ -592,7 +789,7 @@ addNode({
 addNode({
     id: 26,
     type: "VAEEncode",
-    pos: [5730, 10],
+    pos: [8470, 10],
     size: [250, 58],
     title: "Re-encode exact size",
     inputs: [
@@ -606,9 +803,9 @@ addNode({
 addNode({
     id: 27,
     type: "KSampler",
-    pos: [6060, -10],
+    pos: [8800, -10],
     size: [320, 330],
-    title: "Stage 3: Turbo Hires-fix, denoise 0.20",
+    title: "Stage 4: Turbo Hires-fix, denoise 0.20",
     inputs: samplerInputs,
     outputs: [{ name: "LATENT", type: "LATENT" }],
     widgets: [
@@ -628,7 +825,7 @@ addNode({
 addNode({
     id: 28,
     type: "VAEDecode",
-    pos: [6440, 20],
+    pos: [9180, 20],
     size: [240, 58],
     title: "Decode final",
     inputs: [
@@ -642,9 +839,9 @@ addNode({
 addNode({
     id: 29,
     type: "SaveImage",
-    pos: [6760, -40],
+    pos: [9500, -40],
     size: [460, 540],
-    title: "ENABLE AFTER MASK: Save final 1160x1536",
+    title: "ENABLE STAGE 3: Save final 1160x1536",
     inputs: [{ name: "images", type: "IMAGE" }],
     outputs: [],
     widgets: ["Anima_two_character_inpaint_hiresfix"],
@@ -664,7 +861,8 @@ connect(7, 1, 9, 2, "FLOAT");
 connect(3, 0, 10, 0, "CLIP");
 connect(3, 0, 11, 0, "CLIP");
 connect(3, 0, 12, 0, "CLIP");
-connect(8, 0, 14, 0, "MODEL");
+connect(3, 0, 34, 0, "CLIP");
+connect(5, 0, 14, 0, "MODEL");
 connect(10, 0, 14, 1, "CONDITIONING");
 connect(12, 0, 14, 2, "CONDITIONING");
 connect(13, 0, 14, 3, "LATENT");
@@ -679,7 +877,7 @@ connect(18, 0, 19, 2, "MASK");
 connect(18, 0, 31, 0, "MASK");
 connect(31, 0, 32, 0, "IMAGE");
 connect(32, 0, 33, 0, "IMAGE");
-connect(9, 0, 20, 0, "MODEL");
+connect(8, 0, 20, 0, "MODEL");
 connect(11, 0, 20, 1, "CONDITIONING");
 connect(12, 0, 20, 2, "CONDITIONING");
 connect(19, 0, 20, 3, "LATENT");
@@ -688,8 +886,26 @@ connect(4, 0, 21, 1, "VAE");
 connect(17, 0, 22, 0, "IMAGE");
 connect(21, 0, 22, 1, "IMAGE");
 connect(33, 0, 22, 5, "MASK");
+connect(22, 0, 35, 0, "IMAGE");
+connect(36, 1, 37, 0, "MASK");
+connect(37, 0, 38, 0, "MASK");
+connect(36, 0, 39, 0, "IMAGE");
+connect(4, 0, 39, 1, "VAE");
+connect(38, 0, 39, 2, "MASK");
+connect(38, 0, 40, 0, "MASK");
+connect(40, 0, 41, 0, "IMAGE");
+connect(41, 0, 42, 0, "IMAGE");
+connect(9, 0, 43, 0, "MODEL");
+connect(34, 0, 43, 1, "CONDITIONING");
+connect(12, 0, 43, 2, "CONDITIONING");
+connect(39, 0, 43, 3, "LATENT");
+connect(43, 0, 44, 0, "LATENT");
+connect(4, 0, 44, 1, "VAE");
+connect(36, 0, 45, 0, "IMAGE");
+connect(44, 0, 45, 1, "IMAGE");
+connect(42, 0, 45, 5, "MASK");
 connect(23, 0, 24, 0, "UPSCALE_MODEL");
-connect(22, 0, 24, 1, "IMAGE");
+connect(45, 0, 24, 1, "IMAGE");
 connect(24, 0, 25, 0, "IMAGE");
 connect(25, 0, 26, 0, "IMAGE");
 connect(4, 0, 26, 1, "VAE");
@@ -752,14 +968,14 @@ const workflow = {
         {
             id: 1,
             title: "1. Models, readable LoRA selectors, and prompts",
-            bounding: [-980, -80, 1880, 1140],
+            bounding: [-980, -80, 1880, 1660],
             color: "#3f789e",
             font_size: 24,
             flags: {},
         },
         {
             id: 2,
-            title: "2. Build the interaction with Character A LoRA",
+            title: "2. Build the interaction with Turbo only",
             bounding: [940, -80, 1510, 600],
             color: "#7b65a8",
             font_size: 24,
@@ -767,16 +983,24 @@ const workflow = {
         },
         {
             id: 3,
-            title: "3. Paint B in Mask Editor, then replace with Character B LoRA",
-            bounding: [2490, -80, 1940, 730],
+            title: "3. Paint A in Mask Editor, then apply only Character A LoRA",
+            bounding: [2490, -80, 2500, 730],
             color: "#a45d62",
             font_size: 24,
             flags: {},
         },
         {
             id: 4,
-            title: "4. AnimeSharp and exact 1160x1536 Hires-fix",
-            bounding: [4510, -80, 2750, 650],
+            title: "4. Paint B in Mask Editor, then apply only Character B LoRA",
+            bounding: [5050, -80, 1940, 730],
+            color: "#a46f4f",
+            font_size: 24,
+            flags: {},
+        },
+        {
+            id: 5,
+            title: "5. AnimeSharp and exact 1160x1536 Hires-fix",
+            bounding: [7250, -80, 2750, 650],
             color: "#4f7f86",
             font_size: 24,
             flags: {},

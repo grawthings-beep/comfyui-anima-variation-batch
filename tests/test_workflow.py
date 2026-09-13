@@ -172,15 +172,15 @@ class WorkflowTests(unittest.TestCase):
 
         self.assertEqual(node_types.count("AnimaCharacterLoRASelect"), 2)
         self.assertEqual(node_types.count("LoraLoaderModelOnly"), 3)
-        self.assertEqual(node_types.count("KSampler"), 3)
-        self.assertEqual(node_types.count("LoadImage"), 1)
-        self.assertEqual(node_types.count("ThresholdMask"), 1)
-        self.assertEqual(node_types.count("GrowMask"), 1)
-        self.assertEqual(node_types.count("MaskToImage"), 1)
-        self.assertEqual(node_types.count("ImageBlur"), 1)
-        self.assertEqual(node_types.count("ImageToMask"), 1)
-        self.assertEqual(node_types.count("VAEEncodeForInpaint"), 1)
-        self.assertEqual(node_types.count("ImageCompositeMasked"), 1)
+        self.assertEqual(node_types.count("KSampler"), 4)
+        self.assertEqual(node_types.count("LoadImage"), 2)
+        self.assertEqual(node_types.count("ThresholdMask"), 2)
+        self.assertEqual(node_types.count("GrowMask"), 2)
+        self.assertEqual(node_types.count("MaskToImage"), 2)
+        self.assertEqual(node_types.count("ImageBlur"), 2)
+        self.assertEqual(node_types.count("ImageToMask"), 2)
+        self.assertEqual(node_types.count("VAEEncodeForInpaint"), 2)
+        self.assertEqual(node_types.count("ImageCompositeMasked"), 2)
         self.assertEqual(node_types.count("ImageScale"), 1)
 
         retired_types = {
@@ -199,7 +199,8 @@ class WorkflowTests(unittest.TestCase):
         loader_a = nodes[8]
         loader_b = nodes[9]
         base_sampler = nodes[14]
-        inpaint_sampler = nodes[20]
+        inpaint_a_sampler = nodes[20]
+        inpaint_b_sampler = nodes[43]
         hires_sampler = nodes[27]
 
         self.assertEqual(selector_a["widgets_values"], ["Kotobuki Hisako", 0.8])
@@ -211,8 +212,12 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("k0t0h1s4k0", nodes[10]["widgets_values"][0])
         self.assertIn("m1ch1n0kuk0m4r0", nodes[10]["widgets_values"][0])
         self.assertIn(
-            "Redraw Character B inside the painted mask",
+            "Redraw only Character A inside the painted mask",
             nodes[11]["widgets_values"][0],
+        )
+        self.assertIn(
+            "Redraw only Character B inside the painted mask",
+            nodes[34]["widgets_values"][0],
         )
         self.assertIn("ghost", nodes[12]["widgets_values"][0])
         self.assertEqual(
@@ -224,7 +229,11 @@ class WorkflowTests(unittest.TestCase):
             [12, 1.5, "euler", "simple", 1.0],
         )
         self.assertEqual(
-            inpaint_sampler["widgets_values"][2:],
+            inpaint_a_sampler["widgets_values"][2:],
+            [12, 1.5, "euler", "simple", 0.82],
+        )
+        self.assertEqual(
+            inpaint_b_sampler["widgets_values"][2:],
             [12, 1.5, "euler", "simple", 0.82],
         )
         self.assertEqual(
@@ -236,6 +245,7 @@ class WorkflowTests(unittest.TestCase):
             ["lanczos", 1160, 1536, "disabled"],
         )
         self.assertEqual(nodes[16]["mode"], 0)
+        self.assertEqual(nodes[35]["mode"], 2)
         self.assertEqual(nodes[29]["mode"], 2)
 
         sources = {
@@ -262,9 +272,16 @@ class WorkflowTests(unittest.TestCase):
                 (selector["id"], 1, "FLOAT"),
             )
 
-        self.assertEqual(sources[(base_sampler["id"], 0)], (loader_a["id"], 0, "MODEL"))
         self.assertEqual(
-            sources[(inpaint_sampler["id"], 0)],
+            sources[(base_sampler["id"], 0)],
+            (turbo["id"], 0, "MODEL"),
+        )
+        self.assertEqual(
+            sources[(inpaint_a_sampler["id"], 0)],
+            (loader_a["id"], 0, "MODEL"),
+        )
+        self.assertEqual(
+            sources[(inpaint_b_sampler["id"], 0)],
             (loader_b["id"], 0, "MODEL"),
         )
         self.assertEqual(
@@ -277,7 +294,8 @@ class WorkflowTests(unittest.TestCase):
         )
 
         self.assertEqual(nodes[30]["widgets_values"], [0.05])
-        self.assertEqual(nodes[18]["widgets_values"], [24, True])
+        self.assertEqual(nodes[18]["widgets_values"], [32, True])
+        self.assertEqual(nodes[19]["widgets_values"], [16])
         self.assertEqual(nodes[32]["widgets_values"], [12, 4.0])
         self.assertEqual(sources[(30, 0)], (17, 1, "MASK"))
         self.assertEqual(sources[(18, 0)], (30, 0, "MASK"))
@@ -289,6 +307,23 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(sources[(22, 0)], (17, 0, "IMAGE"))
         self.assertEqual(sources[(22, 1)], (21, 0, "IMAGE"))
         self.assertEqual(sources[(22, 5)], (33, 0, "MASK"))
+        self.assertEqual(sources[(35, 0)], (22, 0, "IMAGE"))
+
+        self.assertEqual(nodes[37]["widgets_values"], [0.05])
+        self.assertEqual(nodes[38]["widgets_values"], [32, True])
+        self.assertEqual(nodes[39]["widgets_values"], [16])
+        self.assertEqual(nodes[41]["widgets_values"], [12, 4.0])
+        self.assertEqual(sources[(37, 0)], (36, 1, "MASK"))
+        self.assertEqual(sources[(38, 0)], (37, 0, "MASK"))
+        self.assertEqual(sources[(39, 0)], (36, 0, "IMAGE"))
+        self.assertEqual(sources[(39, 2)], (38, 0, "MASK"))
+        self.assertEqual(sources[(40, 0)], (38, 0, "MASK"))
+        self.assertEqual(sources[(41, 0)], (40, 0, "IMAGE"))
+        self.assertEqual(sources[(42, 0)], (41, 0, "IMAGE"))
+        self.assertEqual(sources[(45, 0)], (36, 0, "IMAGE"))
+        self.assertEqual(sources[(45, 1)], (44, 0, "IMAGE"))
+        self.assertEqual(sources[(45, 5)], (42, 0, "MASK"))
+        self.assertEqual(sources[(24, 1)], (45, 0, "IMAGE"))
 
     def assert_links_reference_existing_nodes_and_sockets(self, workflow):
         nodes = {node["id"]: node for node in workflow["nodes"]}
