@@ -46,10 +46,12 @@ third stage. Stage 3 replaces B, composites untouched pixels back from the
 finished A image, and runs Hires-fix. Only one Save output should be enabled for
 each queue submission; disabled branches do not require loaded mask images.
 
-`Anima Character LoRA Select` reads `config/anima-loras.json` and shows short
-character names instead of long `anima/...safetensors` filenames. It selects
-the model file only and never edits prompts. Enter the exact trigger yourself
-in all three positive prompt boxes.
+Each green `Anima Character LoRA Loader` reads `config/anima-loras.json` and
+shows a visible character-name dropdown instead of a long
+`anima/...safetensors` filename. It resolves and loads that character LoRA
+internally, without a hidden standard-loader combo retaining a stale filename.
+It never edits prompts; enter the exact trigger yourself in all three positive
+prompt boxes.
 
 The Character A and B LoRAs are applied only to their own masked samplers:
 
@@ -219,9 +221,9 @@ names. The latent batch workflow's `Anima Pose LoRA Select` node reads that
 manifest and sends the selected LoRA name to both Hires-fix passes.
 
 The two-character workflow reads the normal character manifest directly.
-Selecting Character A or B by its readable short name sends only the
-corresponding `anima/...safetensors` path to that character's sampler. Prompt
-triggers stay fully manual.
+Selecting Character A or B in its green loader applies only the corresponding
+`anima/...safetensors` file to that character's sampler. Prompt triggers stay
+fully manual.
 
 ## License
 

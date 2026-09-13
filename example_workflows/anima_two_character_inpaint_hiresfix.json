@@ -2,7 +2,7 @@
   "id": "b78c3d95-ea63-4ce1-aeb8-6a78f209e46d",
   "revision": 0,
   "last_node_id": 45,
-  "last_link_id": 65,
+  "last_link_id": 61,
   "nodes": [
     {
       "id": 1,
@@ -84,10 +84,10 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            8,
-            9,
-            10,
-            11
+            4,
+            5,
+            6,
+            7
           ]
         }
       ],
@@ -129,13 +129,13 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            17,
-            22,
-            32,
-            40,
-            50,
-            58,
-            64
+            13,
+            18,
+            28,
+            36,
+            46,
+            54,
+            60
           ]
         }
       ],
@@ -199,8 +199,8 @@
           "links": [
             2,
             3,
-            12,
-            59
+            8,
+            55
           ]
         }
       ],
@@ -225,103 +225,17 @@
     },
     {
       "id": 6,
-      "type": "AnimaCharacterLoRASelect",
+      "type": "AnimaCharacterLoRALoader",
       "pos": [
         -520,
         0
       ],
       "size": [
-        350,
-        110
+        420,
+        140
       ],
       "flags": {},
       "order": 5,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "lora_name",
-          "type": "*",
-          "links": [
-            4
-          ]
-        },
-        {
-          "name": "strength",
-          "type": "FLOAT",
-          "links": [
-            5
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaCharacterLoRASelect",
-        "cnr_id": "ComfyUI-AnimaVariationBatch"
-      },
-      "widgets_values": [
-        "Kotobuki Hisako",
-        0.8
-      ],
-      "title": "Character A for masked replacement",
-      "color": "#233333",
-      "bgcolor": "#355555"
-    },
-    {
-      "id": 7,
-      "type": "AnimaCharacterLoRASelect",
-      "pos": [
-        -520,
-        180
-      ],
-      "size": [
-        350,
-        110
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "lora_name",
-          "type": "*",
-          "links": [
-            6
-          ]
-        },
-        {
-          "name": "strength",
-          "type": "FLOAT",
-          "links": [
-            7
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AnimaCharacterLoRASelect",
-        "cnr_id": "ComfyUI-AnimaVariationBatch"
-      },
-      "widgets_values": [
-        "Michinoku Komaro",
-        0.9
-      ],
-      "title": "Character B for masked replacement",
-      "color": "#233333",
-      "bgcolor": "#355555"
-    },
-    {
-      "id": 8,
-      "type": "LoraLoaderModelOnly",
-      "pos": [
-        -100,
-        0
-      ],
-      "size": [
-        370,
-        98
-      ],
-      "flags": {},
-      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -330,20 +244,20 @@
           "link": 2
         },
         {
-          "name": "lora_name",
+          "name": "character",
           "type": "COMBO",
           "widget": {
-            "name": "lora_name"
+            "name": "character"
           },
-          "link": 4
+          "link": null
         },
         {
-          "name": "strength_model",
+          "name": "strength",
           "type": "FLOAT",
           "widget": {
-            "name": "strength_model"
+            "name": "strength"
           },
-          "link": 5
+          "link": null
         }
       ],
       "outputs": [
@@ -351,33 +265,35 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            27
+            23
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "LoraLoaderModelOnly",
-        "cnr_id": "comfy-core"
+        "Node name for S&R": "AnimaCharacterLoRALoader",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
       },
       "widgets_values": [
-        "anima/Kotobuki Hisako - Anima.safetensors",
+        "Kotobuki Hisako",
         0.8
       ],
-      "title": "A LoRA: A masked inpaint only"
+      "title": "Character A LoRA: A masked inpaint only",
+      "color": "#233333",
+      "bgcolor": "#355555"
     },
     {
-      "id": 9,
-      "type": "LoraLoaderModelOnly",
+      "id": 7,
+      "type": "AnimaCharacterLoRALoader",
       "pos": [
-        -100,
-        180
+        -520,
+        200
       ],
       "size": [
-        370,
-        98
+        420,
+        140
       ],
       "flags": {},
-      "order": 8,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
@@ -386,20 +302,20 @@
           "link": 3
         },
         {
-          "name": "lora_name",
+          "name": "character",
           "type": "COMBO",
           "widget": {
-            "name": "lora_name"
+            "name": "character"
           },
-          "link": 6
+          "link": null
         },
         {
-          "name": "strength_model",
+          "name": "strength",
           "type": "FLOAT",
           "widget": {
-            "name": "strength_model"
+            "name": "strength"
           },
-          "link": 7
+          "link": null
         }
       ],
       "outputs": [
@@ -407,19 +323,21 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            45
+            41
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "LoraLoaderModelOnly",
-        "cnr_id": "comfy-core"
+        "Node name for S&R": "AnimaCharacterLoRALoader",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
       },
       "widgets_values": [
-        "anima/Michinoku Komaro - Anima.safetensors",
+        "Michinoku Komaro",
         0.9
       ],
-      "title": "B LoRA: masked inpaint only"
+      "title": "Character B LoRA: B masked inpaint only",
+      "color": "#233333",
+      "bgcolor": "#355555"
     },
     {
       "id": 10,
@@ -433,13 +351,13 @@
         340
       ],
       "flags": {},
-      "order": 9,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 8
+          "link": 4
         }
       ],
       "outputs": [
@@ -447,8 +365,8 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            13,
-            60
+            9,
+            56
           ]
         }
       ],
@@ -475,13 +393,13 @@
         390
       ],
       "flags": {},
-      "order": 10,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 9
+          "link": 5
         }
       ],
       "outputs": [
@@ -489,7 +407,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            28
+            24
           ]
         }
       ],
@@ -516,13 +434,13 @@
         390
       ],
       "flags": {},
-      "order": 27,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 11
+          "link": 7
         }
       ],
       "outputs": [
@@ -530,7 +448,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            46
+            42
           ]
         }
       ],
@@ -557,13 +475,13 @@
         240
       ],
       "flags": {},
-      "order": 11,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 10
+          "link": 6
         }
       ],
       "outputs": [
@@ -571,10 +489,10 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            14,
-            29,
-            47,
-            61
+            10,
+            25,
+            43,
+            57
           ]
         }
       ],
@@ -599,7 +517,7 @@
         108
       ],
       "flags": {},
-      "order": 12,
+      "order": 10,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -607,7 +525,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            15
+            11
           ]
         }
       ],
@@ -634,28 +552,28 @@
         330
       ],
       "flags": {},
-      "order": 13,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 12
+          "link": 8
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 13
+          "link": 9
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 14
+          "link": 10
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 15
+          "link": 11
         }
       ],
       "outputs": [
@@ -663,7 +581,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            16
+            12
           ]
         }
       ],
@@ -696,18 +614,18 @@
         58
       ],
       "flags": {},
-      "order": 14,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 16
+          "link": 12
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 17
+          "link": 13
         }
       ],
       "outputs": [
@@ -715,7 +633,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            18
+            14
           ]
         }
       ],
@@ -738,13 +656,13 @@
         500
       ],
       "flags": {},
-      "order": 15,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 18
+          "link": 14
         }
       ],
       "outputs": [],
@@ -771,7 +689,7 @@
         410
       ],
       "flags": {},
-      "order": 16,
+      "order": 14,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -779,15 +697,15 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            21,
-            33
+            17,
+            29
           ]
         },
         {
           "name": "MASK",
           "type": "MASK",
           "links": [
-            19
+            15
           ]
         }
       ],
@@ -815,13 +733,13 @@
         90
       ],
       "flags": {},
-      "order": 19,
+      "order": 17,
       "mode": 0,
       "inputs": [
         {
           "name": "mask",
           "type": "MASK",
-          "link": 20
+          "link": 16
         }
       ],
       "outputs": [
@@ -829,8 +747,8 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            23,
-            24
+            19,
+            20
           ]
         }
       ],
@@ -856,13 +774,13 @@
         90
       ],
       "flags": {},
-      "order": 18,
+      "order": 16,
       "mode": 0,
       "inputs": [
         {
           "name": "mask",
           "type": "MASK",
-          "link": 19
+          "link": 15
         }
       ],
       "outputs": [
@@ -870,7 +788,7 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            20
+            16
           ]
         }
       ],
@@ -895,23 +813,23 @@
         110
       ],
       "flags": {},
-      "order": 20,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
           "name": "pixels",
           "type": "IMAGE",
-          "link": 21
+          "link": 17
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 22
+          "link": 18
         },
         {
           "name": "mask",
           "type": "MASK",
-          "link": 23
+          "link": 19
         }
       ],
       "outputs": [
@@ -919,7 +837,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            30
+            26
           ]
         }
       ],
@@ -944,13 +862,13 @@
         58
       ],
       "flags": {},
-      "order": 23,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
           "name": "mask",
           "type": "MASK",
-          "link": 24
+          "link": 20
         }
       ],
       "outputs": [
@@ -958,7 +876,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            25
+            21
           ]
         }
       ],
@@ -981,13 +899,13 @@
         110
       ],
       "flags": {},
-      "order": 24,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 25
+          "link": 21
         }
       ],
       "outputs": [
@@ -995,7 +913,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            26
+            22
           ]
         }
       ],
@@ -1021,13 +939,13 @@
         80
       ],
       "flags": {},
-      "order": 25,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 26
+          "link": 22
         }
       ],
       "outputs": [
@@ -1035,7 +953,7 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            35
+            31
           ]
         }
       ],
@@ -1060,28 +978,28 @@
         330
       ],
       "flags": {},
-      "order": 21,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 27
+          "link": 23
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 28
+          "link": 24
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 29
+          "link": 25
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 30
+          "link": 26
         }
       ],
       "outputs": [
@@ -1089,7 +1007,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            31
+            27
           ]
         }
       ],
@@ -1122,18 +1040,18 @@
         58
       ],
       "flags": {},
-      "order": 22,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 31
+          "link": 27
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 32
+          "link": 28
         }
       ],
       "outputs": [
@@ -1141,7 +1059,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            34
+            30
           ]
         }
       ],
@@ -1164,18 +1082,18 @@
         170
       ],
       "flags": {},
-      "order": 26,
+      "order": 24,
       "mode": 0,
       "inputs": [
         {
           "name": "destination",
           "type": "IMAGE",
-          "link": 33
+          "link": 29
         },
         {
           "name": "source",
           "type": "IMAGE",
-          "link": 34
+          "link": 30
         },
         {
           "name": "x",
@@ -1204,7 +1122,7 @@
         {
           "name": "mask",
           "type": "MASK",
-          "link": 35
+          "link": 31
         }
       ],
       "outputs": [
@@ -1212,7 +1130,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            36
+            32
           ]
         }
       ],
@@ -1239,13 +1157,13 @@
         500
       ],
       "flags": {},
-      "order": 28,
+      "order": 26,
       "mode": 2,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 36
+          "link": 32
         }
       ],
       "outputs": [],
@@ -1272,7 +1190,7 @@
         410
       ],
       "flags": {},
-      "order": 29,
+      "order": 27,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -1280,15 +1198,15 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            39,
-            51
+            35,
+            47
           ]
         },
         {
           "name": "MASK",
           "type": "MASK",
           "links": [
-            37
+            33
           ]
         }
       ],
@@ -1316,13 +1234,13 @@
         90
       ],
       "flags": {},
-      "order": 30,
+      "order": 28,
       "mode": 0,
       "inputs": [
         {
           "name": "mask",
           "type": "MASK",
-          "link": 37
+          "link": 33
         }
       ],
       "outputs": [
@@ -1330,7 +1248,7 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            38
+            34
           ]
         }
       ],
@@ -1355,13 +1273,13 @@
         90
       ],
       "flags": {},
-      "order": 31,
+      "order": 29,
       "mode": 0,
       "inputs": [
         {
           "name": "mask",
           "type": "MASK",
-          "link": 38
+          "link": 34
         }
       ],
       "outputs": [
@@ -1369,8 +1287,8 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            41,
-            42
+            37,
+            38
           ]
         }
       ],
@@ -1396,23 +1314,23 @@
         110
       ],
       "flags": {},
-      "order": 32,
+      "order": 30,
       "mode": 0,
       "inputs": [
         {
           "name": "pixels",
           "type": "IMAGE",
-          "link": 39
+          "link": 35
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 40
+          "link": 36
         },
         {
           "name": "mask",
           "type": "MASK",
-          "link": 41
+          "link": 37
         }
       ],
       "outputs": [
@@ -1420,7 +1338,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            48
+            44
           ]
         }
       ],
@@ -1445,13 +1363,13 @@
         58
       ],
       "flags": {},
-      "order": 33,
+      "order": 31,
       "mode": 0,
       "inputs": [
         {
           "name": "mask",
           "type": "MASK",
-          "link": 42
+          "link": 38
         }
       ],
       "outputs": [
@@ -1459,7 +1377,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            43
+            39
           ]
         }
       ],
@@ -1482,13 +1400,13 @@
         110
       ],
       "flags": {},
-      "order": 34,
+      "order": 32,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 43
+          "link": 39
         }
       ],
       "outputs": [
@@ -1496,7 +1414,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            44
+            40
           ]
         }
       ],
@@ -1522,13 +1440,13 @@
         80
       ],
       "flags": {},
-      "order": 35,
+      "order": 33,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 44
+          "link": 40
         }
       ],
       "outputs": [
@@ -1536,7 +1454,7 @@
           "name": "MASK",
           "type": "MASK",
           "links": [
-            53
+            49
           ]
         }
       ],
@@ -1561,28 +1479,28 @@
         330
       ],
       "flags": {},
-      "order": 36,
+      "order": 34,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 45
+          "link": 41
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 46
+          "link": 42
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 47
+          "link": 43
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 48
+          "link": 44
         }
       ],
       "outputs": [
@@ -1590,7 +1508,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            49
+            45
           ]
         }
       ],
@@ -1623,18 +1541,18 @@
         58
       ],
       "flags": {},
-      "order": 37,
+      "order": 35,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 49
+          "link": 45
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 50
+          "link": 46
         }
       ],
       "outputs": [
@@ -1642,7 +1560,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            52
+            48
           ]
         }
       ],
@@ -1665,18 +1583,18 @@
         170
       ],
       "flags": {},
-      "order": 38,
+      "order": 36,
       "mode": 0,
       "inputs": [
         {
           "name": "destination",
           "type": "IMAGE",
-          "link": 51
+          "link": 47
         },
         {
           "name": "source",
           "type": "IMAGE",
-          "link": 52
+          "link": 48
         },
         {
           "name": "x",
@@ -1705,7 +1623,7 @@
         {
           "name": "mask",
           "type": "MASK",
-          "link": 53
+          "link": 49
         }
       ],
       "outputs": [
@@ -1713,7 +1631,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            55
+            51
           ]
         }
       ],
@@ -1740,7 +1658,7 @@
         58
       ],
       "flags": {},
-      "order": 17,
+      "order": 15,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -1748,7 +1666,7 @@
           "name": "UPSCALE_MODEL",
           "type": "UPSCALE_MODEL",
           "links": [
-            54
+            50
           ]
         }
       ],
@@ -1780,18 +1698,18 @@
         72
       ],
       "flags": {},
-      "order": 39,
+      "order": 37,
       "mode": 0,
       "inputs": [
         {
           "name": "upscale_model",
           "type": "UPSCALE_MODEL",
-          "link": 54
+          "link": 50
         },
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 55
+          "link": 51
         }
       ],
       "outputs": [
@@ -1799,7 +1717,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            56
+            52
           ]
         }
       ],
@@ -1822,13 +1740,13 @@
         170
       ],
       "flags": {},
-      "order": 40,
+      "order": 38,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 56
+          "link": 52
         }
       ],
       "outputs": [
@@ -1836,7 +1754,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            57
+            53
           ]
         }
       ],
@@ -1864,18 +1782,18 @@
         58
       ],
       "flags": {},
-      "order": 41,
+      "order": 39,
       "mode": 0,
       "inputs": [
         {
           "name": "pixels",
           "type": "IMAGE",
-          "link": 57
+          "link": 53
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 58
+          "link": 54
         }
       ],
       "outputs": [
@@ -1883,7 +1801,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            62
+            58
           ]
         }
       ],
@@ -1906,28 +1824,28 @@
         330
       ],
       "flags": {},
-      "order": 42,
+      "order": 40,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 59
+          "link": 55
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 60
+          "link": 56
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 61
+          "link": 57
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 62
+          "link": 58
         }
       ],
       "outputs": [
@@ -1935,7 +1853,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            63
+            59
           ]
         }
       ],
@@ -1968,18 +1886,18 @@
         58
       ],
       "flags": {},
-      "order": 43,
+      "order": 41,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 63
+          "link": 59
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 64
+          "link": 60
         }
       ],
       "outputs": [
@@ -1987,7 +1905,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            65
+            61
           ]
         }
       ],
@@ -2010,13 +1928,13 @@
         540
       ],
       "flags": {},
-      "order": 44,
+      "order": 42,
       "mode": 2,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 65
+          "link": 61
         }
       ],
       "outputs": [],
@@ -2045,7 +1963,7 @@
       2,
       5,
       0,
-      8,
+      6,
       0,
       "MODEL"
     ],
@@ -2053,44 +1971,12 @@
       3,
       5,
       0,
-      9,
+      7,
       0,
       "MODEL"
     ],
     [
       4,
-      6,
-      0,
-      8,
-      1,
-      "*"
-    ],
-    [
-      5,
-      6,
-      1,
-      8,
-      2,
-      "FLOAT"
-    ],
-    [
-      6,
-      7,
-      0,
-      9,
-      1,
-      "*"
-    ],
-    [
-      7,
-      7,
-      1,
-      9,
-      2,
-      "FLOAT"
-    ],
-    [
-      8,
       3,
       0,
       10,
@@ -2098,7 +1984,7 @@
       "CLIP"
     ],
     [
-      9,
+      5,
       3,
       0,
       11,
@@ -2106,7 +1992,7 @@
       "CLIP"
     ],
     [
-      10,
+      6,
       3,
       0,
       12,
@@ -2114,7 +2000,7 @@
       "CLIP"
     ],
     [
-      11,
+      7,
       3,
       0,
       34,
@@ -2122,7 +2008,7 @@
       "CLIP"
     ],
     [
-      12,
+      8,
       5,
       0,
       14,
@@ -2130,7 +2016,7 @@
       "MODEL"
     ],
     [
-      13,
+      9,
       10,
       0,
       14,
@@ -2138,7 +2024,7 @@
       "CONDITIONING"
     ],
     [
-      14,
+      10,
       12,
       0,
       14,
@@ -2146,7 +2032,7 @@
       "CONDITIONING"
     ],
     [
-      15,
+      11,
       13,
       0,
       14,
@@ -2154,7 +2040,7 @@
       "LATENT"
     ],
     [
-      16,
+      12,
       14,
       0,
       15,
@@ -2162,7 +2048,7 @@
       "LATENT"
     ],
     [
-      17,
+      13,
       4,
       0,
       15,
@@ -2170,7 +2056,7 @@
       "VAE"
     ],
     [
-      18,
+      14,
       15,
       0,
       16,
@@ -2178,7 +2064,7 @@
       "IMAGE"
     ],
     [
-      19,
+      15,
       17,
       1,
       30,
@@ -2186,7 +2072,7 @@
       "MASK"
     ],
     [
-      20,
+      16,
       30,
       0,
       18,
@@ -2194,7 +2080,7 @@
       "MASK"
     ],
     [
-      21,
+      17,
       17,
       0,
       19,
@@ -2202,55 +2088,55 @@
       "IMAGE"
     ],
     [
-      22,
+      18,
       4,
       0,
       19,
       1,
       "VAE"
+    ],
+    [
+      19,
+      18,
+      0,
+      19,
+      2,
+      "MASK"
+    ],
+    [
+      20,
+      18,
+      0,
+      31,
+      0,
+      "MASK"
+    ],
+    [
+      21,
+      31,
+      0,
+      32,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      32,
+      0,
+      33,
+      0,
+      "IMAGE"
     ],
     [
       23,
-      18,
-      0,
-      19,
-      2,
-      "MASK"
-    ],
-    [
-      24,
-      18,
-      0,
-      31,
-      0,
-      "MASK"
-    ],
-    [
-      25,
-      31,
-      0,
-      32,
-      0,
-      "IMAGE"
-    ],
-    [
-      26,
-      32,
-      0,
-      33,
-      0,
-      "IMAGE"
-    ],
-    [
-      27,
-      8,
+      6,
       0,
       20,
       0,
       "MODEL"
     ],
     [
-      28,
+      24,
       11,
       0,
       20,
@@ -2258,7 +2144,7 @@
       "CONDITIONING"
     ],
     [
-      29,
+      25,
       12,
       0,
       20,
@@ -2266,7 +2152,7 @@
       "CONDITIONING"
     ],
     [
-      30,
+      26,
       19,
       0,
       20,
@@ -2274,7 +2160,7 @@
       "LATENT"
     ],
     [
-      31,
+      27,
       20,
       0,
       21,
@@ -2282,7 +2168,7 @@
       "LATENT"
     ],
     [
-      32,
+      28,
       4,
       0,
       21,
@@ -2290,7 +2176,7 @@
       "VAE"
     ],
     [
-      33,
+      29,
       17,
       0,
       22,
@@ -2298,7 +2184,7 @@
       "IMAGE"
     ],
     [
-      34,
+      30,
       21,
       0,
       22,
@@ -2306,7 +2192,7 @@
       "IMAGE"
     ],
     [
-      35,
+      31,
       33,
       0,
       22,
@@ -2314,7 +2200,7 @@
       "MASK"
     ],
     [
-      36,
+      32,
       22,
       0,
       35,
@@ -2322,7 +2208,7 @@
       "IMAGE"
     ],
     [
-      37,
+      33,
       36,
       1,
       37,
@@ -2330,7 +2216,7 @@
       "MASK"
     ],
     [
-      38,
+      34,
       37,
       0,
       38,
@@ -2338,7 +2224,7 @@
       "MASK"
     ],
     [
-      39,
+      35,
       36,
       0,
       39,
@@ -2346,7 +2232,7 @@
       "IMAGE"
     ],
     [
-      40,
+      36,
       4,
       0,
       39,
@@ -2354,7 +2240,7 @@
       "VAE"
     ],
     [
-      41,
+      37,
       38,
       0,
       39,
@@ -2362,7 +2248,7 @@
       "MASK"
     ],
     [
-      42,
+      38,
       38,
       0,
       40,
@@ -2370,7 +2256,7 @@
       "MASK"
     ],
     [
-      43,
+      39,
       40,
       0,
       41,
@@ -2378,7 +2264,7 @@
       "IMAGE"
     ],
     [
-      44,
+      40,
       41,
       0,
       42,
@@ -2386,15 +2272,15 @@
       "IMAGE"
     ],
     [
-      45,
-      9,
+      41,
+      7,
       0,
       43,
       0,
       "MODEL"
     ],
     [
-      46,
+      42,
       34,
       0,
       43,
@@ -2402,7 +2288,7 @@
       "CONDITIONING"
     ],
     [
-      47,
+      43,
       12,
       0,
       43,
@@ -2410,7 +2296,7 @@
       "CONDITIONING"
     ],
     [
-      48,
+      44,
       39,
       0,
       43,
@@ -2418,7 +2304,7 @@
       "LATENT"
     ],
     [
-      49,
+      45,
       43,
       0,
       44,
@@ -2426,7 +2312,7 @@
       "LATENT"
     ],
     [
-      50,
+      46,
       4,
       0,
       44,
@@ -2434,7 +2320,7 @@
       "VAE"
     ],
     [
-      51,
+      47,
       36,
       0,
       45,
@@ -2442,7 +2328,7 @@
       "IMAGE"
     ],
     [
-      52,
+      48,
       44,
       0,
       45,
@@ -2450,7 +2336,7 @@
       "IMAGE"
     ],
     [
-      53,
+      49,
       42,
       0,
       45,
@@ -2458,7 +2344,7 @@
       "MASK"
     ],
     [
-      54,
+      50,
       23,
       0,
       24,
@@ -2466,7 +2352,7 @@
       "UPSCALE_MODEL"
     ],
     [
-      55,
+      51,
       45,
       0,
       24,
@@ -2474,7 +2360,7 @@
       "IMAGE"
     ],
     [
-      56,
+      52,
       24,
       0,
       25,
@@ -2482,7 +2368,7 @@
       "IMAGE"
     ],
     [
-      57,
+      53,
       25,
       0,
       26,
@@ -2490,7 +2376,7 @@
       "IMAGE"
     ],
     [
-      58,
+      54,
       4,
       0,
       26,
@@ -2498,7 +2384,7 @@
       "VAE"
     ],
     [
-      59,
+      55,
       5,
       0,
       27,
@@ -2506,7 +2392,7 @@
       "MODEL"
     ],
     [
-      60,
+      56,
       10,
       0,
       27,
@@ -2514,7 +2400,7 @@
       "CONDITIONING"
     ],
     [
-      61,
+      57,
       12,
       0,
       27,
@@ -2522,7 +2408,7 @@
       "CONDITIONING"
     ],
     [
-      62,
+      58,
       26,
       0,
       27,
@@ -2530,7 +2416,7 @@
       "LATENT"
     ],
     [
-      63,
+      59,
       27,
       0,
       28,
@@ -2538,7 +2424,7 @@
       "LATENT"
     ],
     [
-      64,
+      60,
       4,
       0,
       28,
@@ -2546,7 +2432,7 @@
       "VAE"
     ],
     [
-      65,
+      61,
       28,
       0,
       29,

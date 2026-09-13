@@ -233,64 +233,33 @@ addNode({
 });
 
 for (const [id, y, title, character, strength] of [
-    [6, 0, "Character A for masked replacement", "Kotobuki Hisako", 0.8],
-    [7, 180, "Character B for masked replacement", "Michinoku Komaro", 0.9],
+    [6, 0, "Character A LoRA: A masked inpaint only", "Kotobuki Hisako", 0.8],
+    [7, 200, "Character B LoRA: B masked inpaint only", "Michinoku Komaro", 0.9],
 ]) {
     addNode({
         id,
-        type: "AnimaCharacterLoRASelect",
+        type: "AnimaCharacterLoRALoader",
         pos: [-520, y],
-        size: [350, 110],
-        title,
-        outputs: [
-            { name: "lora_name", type: "*" },
-            { name: "strength", type: "FLOAT" },
-        ],
-        widgets: [character, strength],
-        properties: { cnr_id: "ComfyUI-AnimaVariationBatch" },
-        color: "#233333",
-        bgcolor: "#355555",
-    });
-}
-
-for (const [id, y, title, loraName, strength] of [
-    [
-        8,
-        0,
-        "A LoRA: A masked inpaint only",
-        "anima/Kotobuki Hisako - Anima.safetensors",
-        0.8,
-    ],
-    [
-        9,
-        180,
-        "B LoRA: masked inpaint only",
-        "anima/Michinoku Komaro - Anima.safetensors",
-        0.9,
-    ],
-]) {
-    addNode({
-        id,
-        type: "LoraLoaderModelOnly",
-        pos: [-100, y],
-        size: [370, 98],
+        size: [420, 140],
         title,
         inputs: [
             modelInput(),
             {
-                name: "lora_name",
+                name: "character",
                 type: "COMBO",
-                widget: { name: "lora_name" },
+                widget: { name: "character" },
             },
             {
-                name: "strength_model",
+                name: "strength",
                 type: "FLOAT",
-                widget: { name: "strength_model" },
+                widget: { name: "strength" },
             },
         ],
         outputs: [{ name: "MODEL", type: "MODEL" }],
-        widgets: [loraName, strength],
-        properties: { cnr_id: "comfy-core" },
+        widgets: [character, strength],
+        properties: { cnr_id: "ComfyUI-AnimaVariationBatch" },
+        color: "#233333",
+        bgcolor: "#355555",
     });
 }
 
@@ -852,12 +821,8 @@ addNode({
 });
 
 connect(2, 0, 5, 0, "MODEL");
-connect(5, 0, 8, 0, "MODEL");
-connect(5, 0, 9, 0, "MODEL");
-connect(6, 0, 8, 1, "*");
-connect(6, 1, 8, 2, "FLOAT");
-connect(7, 0, 9, 1, "*");
-connect(7, 1, 9, 2, "FLOAT");
+connect(5, 0, 6, 0, "MODEL");
+connect(5, 0, 7, 0, "MODEL");
 connect(3, 0, 10, 0, "CLIP");
 connect(3, 0, 11, 0, "CLIP");
 connect(3, 0, 12, 0, "CLIP");
@@ -877,7 +842,7 @@ connect(18, 0, 19, 2, "MASK");
 connect(18, 0, 31, 0, "MASK");
 connect(31, 0, 32, 0, "IMAGE");
 connect(32, 0, 33, 0, "IMAGE");
-connect(8, 0, 20, 0, "MODEL");
+connect(6, 0, 20, 0, "MODEL");
 connect(11, 0, 20, 1, "CONDITIONING");
 connect(12, 0, 20, 2, "CONDITIONING");
 connect(19, 0, 20, 3, "LATENT");
@@ -895,7 +860,7 @@ connect(38, 0, 39, 2, "MASK");
 connect(38, 0, 40, 0, "MASK");
 connect(40, 0, 41, 0, "IMAGE");
 connect(41, 0, 42, 0, "IMAGE");
-connect(9, 0, 43, 0, "MODEL");
+connect(7, 0, 43, 0, "MODEL");
 connect(34, 0, 43, 1, "CONDITIONING");
 connect(12, 0, 43, 2, "CONDITIONING");
 connect(39, 0, 43, 3, "LATENT");

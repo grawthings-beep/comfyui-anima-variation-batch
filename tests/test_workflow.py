@@ -170,8 +170,9 @@ class WorkflowTests(unittest.TestCase):
         nodes = {node["id"]: node for node in self.inpaint["nodes"]}
         node_types = [node["type"] for node in self.inpaint["nodes"]]
 
-        self.assertEqual(node_types.count("AnimaCharacterLoRASelect"), 2)
-        self.assertEqual(node_types.count("LoraLoaderModelOnly"), 3)
+        self.assertEqual(node_types.count("AnimaCharacterLoRASelect"), 0)
+        self.assertEqual(node_types.count("AnimaCharacterLoRALoader"), 2)
+        self.assertEqual(node_types.count("LoraLoaderModelOnly"), 1)
         self.assertEqual(node_types.count("KSampler"), 4)
         self.assertEqual(node_types.count("LoadImage"), 2)
         self.assertEqual(node_types.count("ThresholdMask"), 2)
@@ -194,18 +195,16 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(set(node_types).isdisjoint(retired_types))
 
         turbo = nodes[5]
-        selector_a = nodes[6]
-        selector_b = nodes[7]
-        loader_a = nodes[8]
-        loader_b = nodes[9]
+        loader_a = nodes[6]
+        loader_b = nodes[7]
         base_sampler = nodes[14]
         inpaint_a_sampler = nodes[20]
         inpaint_b_sampler = nodes[43]
         hires_sampler = nodes[27]
 
-        self.assertEqual(selector_a["widgets_values"], ["Kotobuki Hisako", 0.8])
+        self.assertEqual(loader_a["widgets_values"], ["Kotobuki Hisako", 0.8])
         self.assertEqual(
-            selector_b["widgets_values"],
+            loader_b["widgets_values"],
             ["Michinoku Komaro", 0.9],
         )
         self.assertEqual(nodes[13]["widgets_values"], [768, 1024, 1])
@@ -261,15 +260,11 @@ class WorkflowTests(unittest.TestCase):
         }
 
         self.assertEqual(sources[(turbo["id"], 0)], (2, 0, "MODEL"))
-        for loader, selector in ((loader_a, selector_a), (loader_b, selector_b)):
+        for loader in (loader_a, loader_b):
             self.assertEqual(sources[(loader["id"], 0)], (turbo["id"], 0, "MODEL"))
             self.assertEqual(
-                sources[(loader["id"], 1)],
-                (selector["id"], 0, "*"),
-            )
-            self.assertEqual(
-                sources[(loader["id"], 2)],
-                (selector["id"], 1, "FLOAT"),
+                [item["name"] for item in loader["inputs"]],
+                ["model", "character", "strength"],
             )
 
         self.assertEqual(

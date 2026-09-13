@@ -150,9 +150,54 @@ class AnimaCharacterLoRASelect:
         return (entry["lora_name"], float(strength))
 
 
+class AnimaCharacterLoRALoader:
+    def __init__(self):
+        self._core_loader = None
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "character": (
+                    character_options(),
+                    {"default": default_character_label()},
+                ),
+                "strength": (
+                    "FLOAT",
+                    {
+                        "default": 0.8,
+                        "min": 0.0,
+                        "max": 2.0,
+                        "step": 0.05,
+                    },
+                ),
+            }
+        }
+
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "load_character_lora"
+    CATEGORY = "Anima/Inpaint"
+
+    def load_character_lora(self, model, character, strength):
+        # Import lazily so manifest and selector tests do not require ComfyUI.
+        from nodes import LoraLoaderModelOnly
+
+        if self._core_loader is None:
+            self._core_loader = LoraLoaderModelOnly()
+        entry = resolve_character(character)
+        return self._core_loader.load_lora_model_only(
+            model,
+            entry["lora_name"],
+            float(strength),
+        )
+
+
 NODE_CLASS_MAPPINGS = {
     "AnimaCharacterLoRASelect": AnimaCharacterLoRASelect,
+    "AnimaCharacterLoRALoader": AnimaCharacterLoRALoader,
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AnimaCharacterLoRASelect": "Anima Character LoRA Select",
+    "AnimaCharacterLoRALoader": "Anima Character LoRA Loader",
 }
