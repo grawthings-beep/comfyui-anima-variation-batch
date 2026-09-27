@@ -23,6 +23,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
       - name: Check Python and workflow JSON
         run: |
           python -m py_compile \
@@ -31,11 +36,13 @@ jobs:
             inpaint_lora_select.py \
             pose_lora_select.py \
             prompt_queue.py \
+            region_layout.py \
             zip_output.py \
             scripts/download_loras.py \
             tests/test_batch_archive.py \
             tests/test_inpaint_lora_select.py \
             tests/test_hooks_workflow.py \
+            tests/test_region_layout.py \
             tests/test_lora_manifest.py \
             tests/test_prompt_queue.py \
             tests/test_workflow.py
@@ -43,6 +50,10 @@ jobs:
           node --check web/download_zip.js
           node --check scripts/build_inpaint_workflow.js
           node --check scripts/build_hooks_workflow.js
+          node --check web/region_geometry.js
+          node --check web/region_editor.js
+          node --check web/region_layout.js
+          node --test tests/test_region_geometry.mjs
           node scripts/build_hooks_workflow.js --check
           node scripts/build_inpaint_workflow.js
           git diff --exit-code -- \
@@ -77,7 +88,9 @@ jobs:
           PY
 
       - name: Run unit tests
-        run: PYTHONPATH=. python -m unittest discover -s tests -v
+        run: |
+          python -m pip install numpy
+          PYTHONPATH=. python -m unittest discover -s tests -v
 
       - name: Build source archive
         run: |

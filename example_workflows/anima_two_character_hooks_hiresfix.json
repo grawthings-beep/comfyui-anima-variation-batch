@@ -1,8 +1,8 @@
 {
   "id": "c0e92976-f0ce-4ce5-b21f-a3e01c29e844",
-  "revision": 1,
+  "revision": 2,
   "last_node_id": 63,
-  "last_link_id": 59,
+  "last_link_id": 55,
   "nodes": [
     {
       "id": 1,
@@ -25,7 +25,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            1
+            3
           ]
         }
       ],
@@ -60,11 +60,11 @@
           "type": "CLIP",
           "links": [
             5,
-            7,
-            20,
-            22,
-            33,
-            35
+            9,
+            13,
+            17,
+            21,
+            23
           ]
         }
       ],
@@ -99,8 +99,8 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            50,
-            58
+            46,
+            54
           ]
         }
       ],
@@ -117,11 +117,11 @@
       "type": "PrimitiveStringMultiline",
       "title": "Shared scene / interaction / light",
       "pos": [
-        465,
+        1130,
         0
       ],
       "size": [
-        480,
+        500,
         300
       ],
       "flags": {},
@@ -133,9 +133,11 @@
           "name": "STRING",
           "type": "STRING",
           "links": [
-            3,
-            18,
-            34
+            7,
+            11,
+            15,
+            19,
+            22
           ]
         }
       ],
@@ -144,7 +146,7 @@
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        "masterpiece, best quality, score_8, highres, safe, exactly two adult women, full body, a gentle embrace, both faces visible, natural contact, coherent arms and hands, shared ground plane, a bright seaside terrace, soft daylight, consistent lighting and shadows, one continuous scene"
+        "masterpiece, best quality, score_8, highres, safe, adult women, full body, natural interaction, coherent arms and hands, shared ground plane, a bright seaside terrace, soft daylight, consistent lighting and shadows, one continuous scene"
       ]
     },
     {
@@ -152,11 +154,11 @@
       "type": "PrimitiveStringMultiline",
       "title": "Shared negative",
       "pos": [
-        465,
+        1130,
         355
       ],
       "size": [
-        480,
+        500,
         255
       ],
       "flags": {},
@@ -168,9 +170,11 @@
           "name": "STRING",
           "type": "STRING",
           "links": [
-            4,
-            19,
-            36
+            8,
+            12,
+            16,
+            20,
+            24
           ]
         }
       ],
@@ -184,15 +188,15 @@
     },
     {
       "id": 6,
-      "type": "SolidMask",
-      "title": "Region canvas",
+      "type": "AnimaRegionLayout",
+      "title": "Region layout",
       "pos": [
-        0,
-        920
+        500,
+        0
       ],
       "size": [
-        400,
-        115
+        560,
+        820
       ],
       "flags": {},
       "order": 5,
@@ -200,46 +204,97 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "MASK",
+          "name": "mask_A",
           "type": "MASK",
           "links": [
-            10,
-            25
+            6
+          ]
+        },
+        {
+          "name": "mask_B",
+          "type": "MASK",
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "mask_C",
+          "type": "MASK",
+          "links": [
+            14
+          ]
+        },
+        {
+          "name": "mask_D",
+          "type": "MASK",
+          "links": [
+            18
+          ]
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            2
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "SolidMask",
-        "cnr_id": "comfy-core"
+        "Node name for S&R": "AnimaRegionLayout",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
       },
       "widgets_values": [
-        0,
         1152,
-        1536
+        1536,
+        "{\"version\":1,\"overlap\":0.04,\"feather\":0.04,\"regions\":[{\"id\":\"r1\",\"owner\":\"A\",\"x\":0,\"y\":0,\"w\":0.5,\"h\":1,\"enabled\":true},{\"id\":\"r2\",\"owner\":\"B\",\"x\":0.5,\"y\":0,\"w\":0.5,\"h\":1,\"enabled\":true}]}"
       ]
     },
     {
       "id": 7,
       "type": "EmptyLatentImage",
-      "title": "Base resolution",
+      "title": "Linked base resolution",
       "pos": [
-        0,
-        750
+        1130,
+        1090
       ],
       "size": [
-        400,
-        115
+        500,
+        135
       ],
       "flags": {},
       "order": 6,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 1
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 2
+        }
+      ],
       "outputs": [
         {
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            48
+            44
           ]
         }
       ],
@@ -272,7 +327,7 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 1
+          "link": 3
         }
       ],
       "outputs": [
@@ -280,7 +335,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            2
+            4
           ]
         }
       ],
@@ -312,7 +367,7 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 2
+          "link": 4
         }
       ],
       "outputs": [
@@ -320,8 +375,8 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            45,
-            53
+            41,
+            49
           ]
         }
       ],
@@ -336,153 +391,18 @@
     },
     {
       "id": 10,
-      "type": "CreateHookLora",
-      "title": "A / LoRA",
+      "type": "AnimaRegionalCharacter",
+      "title": "Character A",
       "pos": [
-        1040,
+        1690,
         0
       ],
       "size": [
-        440,
-        145
+        560,
+        650
       ],
       "flags": {},
       "order": 9,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "prev_hooks",
-          "type": "HOOKS",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "HOOKS",
-          "type": "HOOKS",
-          "links": [
-            17
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CreateHookLora",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "anima/Bikini Cinderella - Anima.safetensors",
-        0.8,
-        0
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
-    },
-    {
-      "id": 11,
-      "type": "StringConcatenate",
-      "title": "A / positive",
-      "pos": [
-        1040,
-        205
-      ],
-      "size": [
-        440,
-        310
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "string_a",
-          "type": "STRING",
-          "widget": {
-            "name": "string_a"
-          },
-          "link": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "STRING",
-          "type": "STRING",
-          "links": [
-            6
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "StringConcatenate",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "",
-        "The woman on the left: bikinicinderella, black bikini. She embraces the woman on the right, with naturally connected arms and hands.",
-        "\n\n"
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
-    },
-    {
-      "id": 12,
-      "type": "StringConcatenate",
-      "title": "A / negative",
-      "pos": [
-        1040,
-        575
-      ],
-      "size": [
-        440,
-        230
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "string_a",
-          "type": "STRING",
-          "widget": {
-            "name": "string_a"
-          },
-          "link": 4
-        }
-      ],
-      "outputs": [
-        {
-          "name": "STRING",
-          "type": "STRING",
-          "links": [
-            8
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "StringConcatenate",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "",
-        "white outfit, dress",
-        ", "
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
-    },
-    {
-      "id": 13,
-      "type": "CLIPTextEncode",
-      "title": "A / positive conditioning",
-      "pos": [
-        1540,
-        205
-      ],
-      "size": [
-        300,
-        135
-      ],
-      "flags": {},
-      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -491,43 +411,258 @@
           "link": 5
         },
         {
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
+          "name": "mask",
+          "type": "MASK",
           "link": 6
+        },
+        {
+          "name": "shared_positive",
+          "type": "STRING",
+          "link": 7
+        },
+        {
+          "name": "shared_negative",
+          "type": "STRING",
+          "link": 8
         }
       ],
       "outputs": [
         {
-          "name": "CONDITIONING",
+          "name": "positive",
           "type": "CONDITIONING",
           "links": [
-            14
+            25
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            26
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "CLIPTextEncode",
-        "cnr_id": "comfy-core"
+        "Node name for S&R": "AnimaRegionalCharacter",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
       },
       "widgets_values": [
-        ""
+        "anima/Bikini Cinderella - Anima.safetensors",
+        0.8,
+        "bikinicinderella, black bikini",
+        "white outfit, dress"
       ],
       "color": "#243c3b",
       "bgcolor": "#345451"
     },
     {
-      "id": 14,
-      "type": "CLIPTextEncode",
-      "title": "A / negative conditioning",
+      "id": 30,
+      "type": "AnimaRegionalCharacter",
+      "title": "Character B",
       "pos": [
-        1540,
-        575
+        2310,
+        0
       ],
       "size": [
-        300,
+        560,
+        650
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 9
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 10
+        },
+        {
+          "name": "shared_positive",
+          "type": "STRING",
+          "link": 11
+        },
+        {
+          "name": "shared_negative",
+          "type": "STRING",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            27
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaRegionalCharacter",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
+      },
+      "widgets_values": [
+        "anima/White Cinderella - Anima.safetensors",
+        0.8,
+        "whitecinderella, white outfit",
+        "black bikini, swimsuit"
+      ],
+      "color": "#48313d",
+      "bgcolor": "#654758"
+    },
+    {
+      "id": 40,
+      "type": "AnimaRegionalCharacter",
+      "title": "Character C",
+      "pos": [
+        1690,
+        740
+      ],
+      "size": [
+        560,
+        650
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 13
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 14
+        },
+        {
+          "name": "shared_positive",
+          "type": "STRING",
+          "link": 15
+        },
+        {
+          "name": "shared_negative",
+          "type": "STRING",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            29
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            30
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaRegionalCharacter",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
+      },
+      "widgets_values": [
+        "(none)",
+        0.8,
+        "",
+        ""
+      ],
+      "color": "#433e2a",
+      "bgcolor": "#5f583c"
+    },
+    {
+      "id": 41,
+      "type": "AnimaRegionalCharacter",
+      "title": "Character D",
+      "pos": [
+        2310,
+        740
+      ],
+      "size": [
+        560,
+        650
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 17
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 18
+        },
+        {
+          "name": "shared_positive",
+          "type": "STRING",
+          "link": 19
+        },
+        {
+          "name": "shared_negative",
+          "type": "STRING",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            31
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            32
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaRegionalCharacter",
+        "cnr_id": "ComfyUI-AnimaVariationBatch"
+      },
+      "widgets_values": [
+        "(none)",
+        0.8,
+        "",
+        ""
+      ],
+      "color": "#2d3d4b",
+      "bgcolor": "#40576a"
+    },
+    {
+      "id": 50,
+      "type": "CLIPTextEncode",
+      "title": "Shared fallback / positive",
+      "pos": [
+        1130,
+        680
+      ],
+      "size": [
+        500,
         135
       ],
       "flags": {},
@@ -537,7 +672,7 @@
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 7
+          "link": 21
         },
         {
           "name": "text",
@@ -545,7 +680,7 @@
           "widget": {
             "name": "text"
           },
-          "link": 8
+          "link": 22
         }
       ],
       "outputs": [
@@ -553,7 +688,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            15
+            39
           ]
         }
       ],
@@ -563,250 +698,208 @@
       },
       "widgets_values": [
         ""
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
+      ]
     },
     {
-      "id": 15,
-      "type": "SolidMask",
-      "title": "A / region size",
+      "id": 51,
+      "type": "CLIPTextEncode",
+      "title": "Shared fallback / negative",
       "pos": [
-        1900,
-        0
+        1130,
+        875
       ],
       "size": [
-        310,
-        115
+        500,
+        135
       ],
       "flags": {},
       "order": 14,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 23
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 24
+        }
+      ],
       "outputs": [
         {
-          "name": "MASK",
-          "type": "MASK",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
           "links": [
-            9
+            40
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "SolidMask",
+        "Node name for S&R": "CLIPTextEncode",
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        1,
-        600,
-        1536
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
+        ""
+      ]
     },
     {
-      "id": 16,
-      "type": "FeatherMask",
-      "title": "A / region feather",
+      "id": 52,
+      "type": "PairConditioningCombine",
+      "title": "A + B",
       "pos": [
-        1900,
-        175
+        2950,
+        0
       ],
       "size": [
-        310,
-        145
+        330,
+        150
       ],
       "flags": {},
       "order": 15,
       "mode": 0,
       "inputs": [
         {
-          "name": "mask",
-          "type": "MASK",
-          "link": 9
+          "name": "positive_A",
+          "type": "CONDITIONING",
+          "link": 25
+        },
+        {
+          "name": "negative_A",
+          "type": "CONDITIONING",
+          "link": 26
+        },
+        {
+          "name": "positive_B",
+          "type": "CONDITIONING",
+          "link": 27
+        },
+        {
+          "name": "negative_B",
+          "type": "CONDITIONING",
+          "link": 28
         }
       ],
       "outputs": [
         {
-          "name": "MASK",
-          "type": "MASK",
+          "name": "positive",
+          "type": "CONDITIONING",
           "links": [
-            11
+            33
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            34
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "FeatherMask",
+        "Node name for S&R": "PairConditioningCombine",
         "cnr_id": "comfy-core"
       },
-      "widgets_values": [
-        0,
-        0,
-        48,
-        0
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
+      "widgets_values": []
     },
     {
-      "id": 17,
-      "type": "MaskComposite",
-      "title": "A / region position",
+      "id": 58,
+      "type": "PairConditioningCombine",
+      "title": "C + D",
       "pos": [
-        1900,
-        380
+        2950,
+        220
       ],
       "size": [
-        310,
-        145
+        330,
+        150
       ],
       "flags": {},
       "order": 16,
       "mode": 0,
       "inputs": [
         {
-          "name": "destination",
-          "type": "MASK",
-          "link": 10
+          "name": "positive_A",
+          "type": "CONDITIONING",
+          "link": 29
         },
         {
-          "name": "source",
-          "type": "MASK",
-          "link": 11
+          "name": "negative_A",
+          "type": "CONDITIONING",
+          "link": 30
+        },
+        {
+          "name": "positive_B",
+          "type": "CONDITIONING",
+          "link": 31
+        },
+        {
+          "name": "negative_B",
+          "type": "CONDITIONING",
+          "link": 32
         }
       ],
       "outputs": [
         {
-          "name": "MASK",
-          "type": "MASK",
+          "name": "positive",
+          "type": "CONDITIONING",
           "links": [
-            12,
-            16
+            35
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            36
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "MaskComposite",
+        "Node name for S&R": "PairConditioningCombine",
         "cnr_id": "comfy-core"
       },
-      "widgets_values": [
-        0,
-        0,
-        "add"
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
+      "widgets_values": []
     },
     {
-      "id": 20,
-      "type": "MaskToImage",
-      "title": "A / mask image",
+      "id": 59,
+      "type": "PairConditioningCombine",
+      "title": "A + B + C + D",
       "pos": [
-        1900,
-        590
+        2950,
+        440
       ],
       "size": [
-        310,
-        85
+        330,
+        150
       ],
       "flags": {},
       "order": 17,
       "mode": 0,
       "inputs": [
         {
-          "name": "mask",
-          "type": "MASK",
-          "link": 12
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            13
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "MaskToImage",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
-    },
-    {
-      "id": 18,
-      "type": "PreviewImage",
-      "title": "A / mask",
-      "pos": [
-        2270,
-        290
-      ],
-      "size": [
-        310,
-        510
-      ],
-      "flags": {},
-      "order": 18,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 13
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewImage",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
-    },
-    {
-      "id": 19,
-      "type": "PairConditioningSetProperties",
-      "title": "A / regional LoRA pair",
-      "pos": [
-        2270,
-        0
-      ],
-      "size": [
-        310,
-        220
-      ],
-      "flags": {},
-      "order": 19,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "positive_NEW",
+          "name": "positive_A",
           "type": "CONDITIONING",
-          "link": 14
+          "link": 33
         },
         {
-          "name": "negative_NEW",
+          "name": "negative_A",
           "type": "CONDITIONING",
-          "link": 15
+          "link": 34
         },
         {
-          "name": "mask",
-          "type": "MASK",
-          "link": 16
+          "name": "positive_B",
+          "type": "CONDITIONING",
+          "link": 35
         },
         {
-          "name": "hooks",
-          "type": "HOOKS",
-          "link": 17
-        },
-        {
-          "name": "timesteps",
-          "type": "TIMESTEPS_RANGE",
-          "link": null
+          "name": "negative_B",
+          "type": "CONDITIONING",
+          "link": 36
         }
       ],
       "outputs": [
@@ -826,666 +919,6 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "PairConditioningSetProperties",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        1,
-        "default"
-      ],
-      "color": "#243c3b",
-      "bgcolor": "#345451"
-    },
-    {
-      "id": 30,
-      "type": "CreateHookLora",
-      "title": "B / LoRA",
-      "pos": [
-        1040,
-        940
-      ],
-      "size": [
-        440,
-        145
-      ],
-      "flags": {},
-      "order": 20,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "prev_hooks",
-          "type": "HOOKS",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "HOOKS",
-          "type": "HOOKS",
-          "links": [
-            32
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CreateHookLora",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "anima/White Cinderella - Anima.safetensors",
-        0.8,
-        0
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 31,
-      "type": "StringConcatenate",
-      "title": "B / positive",
-      "pos": [
-        1040,
-        1145
-      ],
-      "size": [
-        440,
-        310
-      ],
-      "flags": {},
-      "order": 21,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "string_a",
-          "type": "STRING",
-          "widget": {
-            "name": "string_a"
-          },
-          "link": 18
-        }
-      ],
-      "outputs": [
-        {
-          "name": "STRING",
-          "type": "STRING",
-          "links": [
-            21
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "StringConcatenate",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "",
-        "The woman on the right: whitecinderella, white outfit. She embraces the woman on the left, with naturally connected arms and hands.",
-        "\n\n"
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 32,
-      "type": "StringConcatenate",
-      "title": "B / negative",
-      "pos": [
-        1040,
-        1515
-      ],
-      "size": [
-        440,
-        230
-      ],
-      "flags": {},
-      "order": 22,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "string_a",
-          "type": "STRING",
-          "widget": {
-            "name": "string_a"
-          },
-          "link": 19
-        }
-      ],
-      "outputs": [
-        {
-          "name": "STRING",
-          "type": "STRING",
-          "links": [
-            23
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "StringConcatenate",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "",
-        "black bikini, swimsuit",
-        ", "
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 33,
-      "type": "CLIPTextEncode",
-      "title": "B / positive conditioning",
-      "pos": [
-        1540,
-        1145
-      ],
-      "size": [
-        300,
-        135
-      ],
-      "flags": {},
-      "order": 23,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 20
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
-          "link": 21
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            29
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        ""
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 34,
-      "type": "CLIPTextEncode",
-      "title": "B / negative conditioning",
-      "pos": [
-        1540,
-        1515
-      ],
-      "size": [
-        300,
-        135
-      ],
-      "flags": {},
-      "order": 24,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 22
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
-          "link": 23
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            30
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        ""
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 35,
-      "type": "SolidMask",
-      "title": "B / region size",
-      "pos": [
-        1900,
-        940
-      ],
-      "size": [
-        310,
-        115
-      ],
-      "flags": {},
-      "order": 25,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": [
-            24
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "SolidMask",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        1,
-        600,
-        1536
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 36,
-      "type": "FeatherMask",
-      "title": "B / region feather",
-      "pos": [
-        1900,
-        1115
-      ],
-      "size": [
-        310,
-        145
-      ],
-      "flags": {},
-      "order": 26,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "mask",
-          "type": "MASK",
-          "link": 24
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": [
-            26
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FeatherMask",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        48,
-        0,
-        0,
-        0
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 37,
-      "type": "MaskComposite",
-      "title": "B / region position",
-      "pos": [
-        1900,
-        1320
-      ],
-      "size": [
-        310,
-        145
-      ],
-      "flags": {},
-      "order": 27,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "destination",
-          "type": "MASK",
-          "link": 25
-        },
-        {
-          "name": "source",
-          "type": "MASK",
-          "link": 26
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": [
-            27,
-            31
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "MaskComposite",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        552,
-        0,
-        "add"
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 40,
-      "type": "MaskToImage",
-      "title": "B / mask image",
-      "pos": [
-        1900,
-        1530
-      ],
-      "size": [
-        310,
-        85
-      ],
-      "flags": {},
-      "order": 28,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "mask",
-          "type": "MASK",
-          "link": 27
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            28
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "MaskToImage",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 38,
-      "type": "PreviewImage",
-      "title": "B / mask",
-      "pos": [
-        2270,
-        1230
-      ],
-      "size": [
-        310,
-        510
-      ],
-      "flags": {},
-      "order": 29,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 28
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewImage",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 39,
-      "type": "PairConditioningSetProperties",
-      "title": "B / regional LoRA pair",
-      "pos": [
-        2270,
-        940
-      ],
-      "size": [
-        310,
-        220
-      ],
-      "flags": {},
-      "order": 30,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "positive_NEW",
-          "type": "CONDITIONING",
-          "link": 29
-        },
-        {
-          "name": "negative_NEW",
-          "type": "CONDITIONING",
-          "link": 30
-        },
-        {
-          "name": "mask",
-          "type": "MASK",
-          "link": 31
-        },
-        {
-          "name": "hooks",
-          "type": "HOOKS",
-          "link": 32
-        },
-        {
-          "name": "timesteps",
-          "type": "TIMESTEPS_RANGE",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "positive",
-          "type": "CONDITIONING",
-          "links": [
-            39
-          ]
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "links": [
-            40
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "PairConditioningSetProperties",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        1,
-        "default"
-      ],
-      "color": "#48313d",
-      "bgcolor": "#654758"
-    },
-    {
-      "id": 50,
-      "type": "CLIPTextEncode",
-      "title": "Shared fallback / positive",
-      "pos": [
-        465,
-        680
-      ],
-      "size": [
-        480,
-        135
-      ],
-      "flags": {},
-      "order": 31,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 33
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
-          "link": 34
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            43
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 51,
-      "type": "CLIPTextEncode",
-      "title": "Shared fallback / negative",
-      "pos": [
-        465,
-        875
-      ],
-      "size": [
-        480,
-        135
-      ],
-      "flags": {},
-      "order": 32,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 35
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
-          "link": 36
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            44
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 52,
-      "type": "PairConditioningCombine",
-      "title": "A + B",
-      "pos": [
-        2690,
-        0
-      ],
-      "size": [
-        330,
-        150
-      ],
-      "flags": {},
-      "order": 33,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "positive_A",
-          "type": "CONDITIONING",
-          "link": 37
-        },
-        {
-          "name": "negative_A",
-          "type": "CONDITIONING",
-          "link": 38
-        },
-        {
-          "name": "positive_B",
-          "type": "CONDITIONING",
-          "link": 39
-        },
-        {
-          "name": "negative_B",
-          "type": "CONDITIONING",
-          "link": 40
-        }
-      ],
-      "outputs": [
-        {
-          "name": "positive",
-          "type": "CONDITIONING",
-          "links": [
-            41
-          ]
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "links": [
-            42
-          ]
-        }
-      ],
-      "properties": {
         "Node name for S&R": "PairConditioningCombine",
         "cnr_id": "comfy-core"
       },
@@ -1494,38 +927,38 @@
     {
       "id": 53,
       "type": "PairConditioningSetDefaultCombine",
-      "title": "A + B + uncovered background",
+      "title": "Regions + uncovered background",
       "pos": [
-        2690,
-        210
+        2950,
+        660
       ],
       "size": [
         330,
         170
       ],
       "flags": {},
-      "order": 34,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 41
+          "link": 37
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 42
+          "link": 38
         },
         {
           "name": "positive_DEFAULT",
           "type": "CONDITIONING",
-          "link": 43
+          "link": 39
         },
         {
           "name": "negative_DEFAULT",
           "type": "CONDITIONING",
-          "link": 44
+          "link": 40
         },
         {
           "name": "hooks",
@@ -1538,16 +971,16 @@
           "name": "positive",
           "type": "CONDITIONING",
           "links": [
-            46,
-            54
+            42,
+            50
           ]
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
           "links": [
-            47,
-            55
+            43,
+            51
           ]
         }
       ],
@@ -1560,9 +993,9 @@
     {
       "id": 54,
       "type": "KSampler",
-      "title": "Joint A/B generation",
+      "title": "Joint generation",
       "pos": [
-        3090,
+        3360,
         0
       ],
       "size": [
@@ -1570,28 +1003,28 @@
         290
       ],
       "flags": {},
-      "order": 35,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 45
+          "link": 41
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 46
+          "link": 42
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 47
+          "link": 43
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 48
+          "link": 44
         }
       ],
       "outputs": [
@@ -1599,8 +1032,8 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            49,
-            52
+            45,
+            48
           ]
         }
       ],
@@ -1623,7 +1056,7 @@
       "type": "VAEDecode",
       "title": "Base decode",
       "pos": [
-        3090,
+        3360,
         355
       ],
       "size": [
@@ -1631,18 +1064,18 @@
         80
       ],
       "flags": {},
-      "order": 36,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 49
+          "link": 45
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 50
+          "link": 46
         }
       ],
       "outputs": [
@@ -1650,7 +1083,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            51
+            47
           ]
         }
       ],
@@ -1665,7 +1098,7 @@
       "type": "PreviewImage",
       "title": "Base image",
       "pos": [
-        3090,
+        3360,
         500
       ],
       "size": [
@@ -1673,13 +1106,13 @@
         510
       ],
       "flags": {},
-      "order": 37,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 51
+          "link": 47
         }
       ],
       "outputs": [],
@@ -1694,7 +1127,7 @@
       "type": "LatentUpscaleBy",
       "title": "Latent upscale 1.5x",
       "pos": [
-        3490,
+        3760,
         0
       ],
       "size": [
@@ -1702,13 +1135,13 @@
         115
       ],
       "flags": {},
-      "order": 38,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 52
+          "link": 48
         }
       ],
       "outputs": [
@@ -1716,7 +1149,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            56
+            52
           ]
         }
       ],
@@ -1732,9 +1165,9 @@
     {
       "id": 61,
       "type": "KSampler",
-      "title": "A/B regional Hires-fix",
+      "title": "Regional Hires-fix",
       "pos": [
-        3910,
+        4180,
         0
       ],
       "size": [
@@ -1742,28 +1175,28 @@
         290
       ],
       "flags": {},
-      "order": 39,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 53
+          "link": 49
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 54
+          "link": 50
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 55
+          "link": 51
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 56
+          "link": 52
         }
       ],
       "outputs": [
@@ -1771,7 +1204,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            57
+            53
           ]
         }
       ],
@@ -1794,7 +1227,7 @@
       "type": "VAEDecode",
       "title": "Final decode",
       "pos": [
-        3910,
+        4180,
         355
       ],
       "size": [
@@ -1802,18 +1235,18 @@
         80
       ],
       "flags": {},
-      "order": 40,
+      "order": 24,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 57
+          "link": 53
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 58
+          "link": 54
         }
       ],
       "outputs": [
@@ -1821,7 +1254,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            59
+            55
           ]
         }
       ],
@@ -1836,7 +1269,7 @@
       "type": "SaveImage",
       "title": "Final image",
       "pos": [
-        3910,
+        4180,
         500
       ],
       "size": [
@@ -1844,13 +1277,13 @@
         540
       ],
       "flags": {},
-      "order": 41,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 59
+          "link": 55
         }
       ],
       "outputs": [],
@@ -1866,6 +1299,22 @@
   "links": [
     [
       1,
+      6,
+      4,
+      7,
+      0,
+      "INT"
+    ],
+    [
+      2,
+      6,
+      5,
+      7,
+      1,
+      "INT"
+    ],
+    [
+      3,
       1,
       0,
       8,
@@ -1873,7 +1322,7 @@
       "MODEL"
     ],
     [
-      2,
+      4,
       8,
       0,
       9,
@@ -1881,247 +1330,135 @@
       "MODEL"
     ],
     [
-      3,
-      4,
-      0,
-      11,
-      0,
-      "STRING"
-    ],
-    [
-      4,
-      5,
-      0,
-      12,
-      0,
-      "STRING"
-    ],
-    [
       5,
       2,
       0,
-      13,
+      10,
       0,
       "CLIP"
     ],
     [
       6,
-      11,
+      6,
       0,
-      13,
+      10,
       1,
-      "STRING"
+      "MASK"
     ],
     [
       7,
+      4,
+      0,
+      10,
       2,
-      0,
-      14,
-      0,
-      "CLIP"
+      "STRING"
     ],
     [
       8,
-      12,
+      5,
       0,
-      14,
-      1,
+      10,
+      3,
       "STRING"
     ],
     [
       9,
-      15,
+      2,
       0,
-      16,
+      30,
       0,
-      "MASK"
+      "CLIP"
     ],
     [
       10,
       6,
-      0,
-      17,
-      0,
+      1,
+      30,
+      1,
       "MASK"
     ],
     [
       11,
-      16,
+      4,
       0,
-      17,
-      1,
-      "MASK"
+      30,
+      2,
+      "STRING"
     ],
     [
       12,
-      17,
+      5,
       0,
-      20,
-      0,
-      "MASK"
+      30,
+      3,
+      "STRING"
     ],
     [
       13,
-      20,
+      2,
       0,
-      18,
+      40,
       0,
-      "IMAGE"
+      "CLIP"
     ],
     [
       14,
-      13,
-      0,
-      19,
-      0,
-      "CONDITIONING"
+      6,
+      2,
+      40,
+      1,
+      "MASK"
     ],
     [
       15,
-      14,
-      0,
-      19,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      16,
-      17,
-      0,
-      19,
-      2,
-      "MASK"
-    ],
-    [
-      17,
-      10,
-      0,
-      19,
-      3,
-      "HOOKS"
-    ],
-    [
-      18,
       4,
       0,
-      31,
-      0,
+      40,
+      2,
       "STRING"
     ],
     [
-      19,
+      16,
       5,
       0,
-      32,
+      40,
+      3,
+      "STRING"
+    ],
+    [
+      17,
+      2,
       0,
+      41,
+      0,
+      "CLIP"
+    ],
+    [
+      18,
+      6,
+      3,
+      41,
+      1,
+      "MASK"
+    ],
+    [
+      19,
+      4,
+      0,
+      41,
+      2,
       "STRING"
     ],
     [
       20,
-      2,
+      5,
       0,
-      33,
-      0,
-      "CLIP"
+      41,
+      3,
+      "STRING"
     ],
     [
       21,
-      31,
-      0,
-      33,
-      1,
-      "STRING"
-    ],
-    [
-      22,
-      2,
-      0,
-      34,
-      0,
-      "CLIP"
-    ],
-    [
-      23,
-      32,
-      0,
-      34,
-      1,
-      "STRING"
-    ],
-    [
-      24,
-      35,
-      0,
-      36,
-      0,
-      "MASK"
-    ],
-    [
-      25,
-      6,
-      0,
-      37,
-      0,
-      "MASK"
-    ],
-    [
-      26,
-      36,
-      0,
-      37,
-      1,
-      "MASK"
-    ],
-    [
-      27,
-      37,
-      0,
-      40,
-      0,
-      "MASK"
-    ],
-    [
-      28,
-      40,
-      0,
-      38,
-      0,
-      "IMAGE"
-    ],
-    [
-      29,
-      33,
-      0,
-      39,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      30,
-      34,
-      0,
-      39,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      31,
-      37,
-      0,
-      39,
-      2,
-      "MASK"
-    ],
-    [
-      32,
-      30,
-      0,
-      39,
-      3,
-      "HOOKS"
-    ],
-    [
-      33,
       2,
       0,
       50,
@@ -2129,7 +1466,7 @@
       "CLIP"
     ],
     [
-      34,
+      22,
       4,
       0,
       50,
@@ -2137,7 +1474,7 @@
       "STRING"
     ],
     [
-      35,
+      23,
       2,
       0,
       51,
@@ -2145,7 +1482,7 @@
       "CLIP"
     ],
     [
-      36,
+      24,
       5,
       0,
       51,
@@ -2153,71 +1490,135 @@
       "STRING"
     ],
     [
-      37,
-      19,
+      25,
+      10,
       0,
       52,
       0,
       "CONDITIONING"
     ],
     [
-      38,
-      19,
+      26,
+      10,
       1,
       52,
       1,
       "CONDITIONING"
     ],
     [
-      39,
-      39,
+      27,
+      30,
       0,
       52,
       2,
       "CONDITIONING"
     ],
     [
-      40,
-      39,
+      28,
+      30,
       1,
       52,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      29,
+      40,
+      0,
+      58,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      30,
+      40,
+      1,
+      58,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      31,
+      41,
+      0,
+      58,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      32,
+      41,
+      1,
+      58,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      33,
+      52,
+      0,
+      59,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      34,
+      52,
+      1,
+      59,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      35,
+      58,
+      0,
+      59,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      36,
+      58,
+      1,
+      59,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      37,
+      59,
+      0,
+      53,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      38,
+      59,
+      1,
+      53,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      39,
+      50,
+      0,
+      53,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      40,
+      51,
+      0,
+      53,
       3,
       "CONDITIONING"
     ],
     [
       41,
-      52,
-      0,
-      53,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      42,
-      52,
-      1,
-      53,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      43,
-      50,
-      0,
-      53,
-      2,
-      "CONDITIONING"
-    ],
-    [
-      44,
-      51,
-      0,
-      53,
-      3,
-      "CONDITIONING"
-    ],
-    [
-      45,
       9,
       0,
       54,
@@ -2225,7 +1626,7 @@
       "MODEL"
     ],
     [
-      46,
+      42,
       53,
       0,
       54,
@@ -2233,7 +1634,7 @@
       "CONDITIONING"
     ],
     [
-      47,
+      43,
       53,
       1,
       54,
@@ -2241,7 +1642,7 @@
       "CONDITIONING"
     ],
     [
-      48,
+      44,
       7,
       0,
       54,
@@ -2249,7 +1650,7 @@
       "LATENT"
     ],
     [
-      49,
+      45,
       54,
       0,
       55,
@@ -2257,7 +1658,7 @@
       "LATENT"
     ],
     [
-      50,
+      46,
       3,
       0,
       55,
@@ -2265,7 +1666,7 @@
       "VAE"
     ],
     [
-      51,
+      47,
       55,
       0,
       56,
@@ -2273,7 +1674,7 @@
       "IMAGE"
     ],
     [
-      52,
+      48,
       54,
       0,
       57,
@@ -2281,7 +1682,7 @@
       "LATENT"
     ],
     [
-      53,
+      49,
       9,
       0,
       61,
@@ -2289,7 +1690,7 @@
       "MODEL"
     ],
     [
-      54,
+      50,
       53,
       0,
       61,
@@ -2297,7 +1698,7 @@
       "CONDITIONING"
     ],
     [
-      55,
+      51,
       53,
       1,
       61,
@@ -2305,7 +1706,7 @@
       "CONDITIONING"
     ],
     [
-      56,
+      52,
       57,
       0,
       61,
@@ -2313,7 +1714,7 @@
       "LATENT"
     ],
     [
-      57,
+      53,
       61,
       0,
       62,
@@ -2321,7 +1722,7 @@
       "LATENT"
     ],
     [
-      58,
+      54,
       3,
       0,
       62,
@@ -2329,7 +1730,7 @@
       "VAE"
     ],
     [
-      59,
+      55,
       62,
       0,
       63,
@@ -2339,34 +1740,45 @@
   ],
   "groups": [
     {
-      "title": "Shared models and scene",
+      "title": "Models",
       "bounding": [
         -30,
         -80,
-        1005,
-        1180
+        460,
+        820
       ],
       "color": "#344b5b",
       "font_size": 24
     },
     {
-      "title": "Character A",
+      "title": "Layout",
       "bounding": [
-        1010,
+        470,
         -80,
-        1600,
-        930
+        620,
+        940
       ],
       "color": "#345451",
       "font_size": 24
     },
     {
-      "title": "Character B",
+      "title": "Shared scene",
       "bounding": [
-        1010,
-        860,
-        1600,
-        930
+        1100,
+        -80,
+        560,
+        1350
+      ],
+      "color": "#43505c",
+      "font_size": 24
+    },
+    {
+      "title": "Characters",
+      "bounding": [
+        1660,
+        -80,
+        1240,
+        1520
       ],
       "color": "#654758",
       "font_size": 24
@@ -2374,9 +1786,9 @@
     {
       "title": "Joint generation",
       "bounding": [
-        2660,
+        2920,
         -80,
-        790,
+        800,
         1140
       ],
       "color": "#43505c",
@@ -2385,7 +1797,7 @@
     {
       "title": "Regional Hires-fix",
       "bounding": [
-        3460,
+        3730,
         -80,
         830,
         1170

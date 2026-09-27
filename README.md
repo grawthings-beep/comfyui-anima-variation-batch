@@ -3,8 +3,8 @@
 [![CI](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml/badge.svg)](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml)
 
 This repository contains Anima-focused 2-pass Hires-fix workflows, a
-two-character Mask Editor inpaint workflow, and an experimental two-character
-regional LoRA hooks workflow. It does not distribute model weights.
+two-character Mask Editor inpaint workflow, and an experimental A-D regional
+LoRA hooks workflow with a live layout editor. It does not distribute model weights.
 
 The latent Hires-fix workflow includes a blank-line Prompt Queue: paste up to
 50 Grok-generated scenes at once and ComfyUI runs the complete two-pass
@@ -19,18 +19,23 @@ example_workflows/anima_two_character_hooks_hiresfix.json
 example_workflows/anima_two_character_inpaint_hiresfix.json
 ```
 
-### Two-character regional LoRA hooks + Hires-fix (experimental)
+### Visual regional LoRA hooks + Hires-fix (experimental)
 
-`anima_two_character_hooks_hiresfix.json` adds simultaneous A/B generation
-without replacing any batch or inpaint workflow. It uses ComfyUI core nodes
-only, with no ControlNet preprocessors or new Python dependencies.
+`anima_two_character_hooks_hiresfix.json` adds simultaneous A-D generation
+without replacing any batch or inpaint workflow. This repository's region
+editor and character nodes wrap ComfyUI's standard LoRA hooks. They use the
+NumPy and PyTorch already included with ComfyUI, with no ControlNet preprocessors.
+
+**Update the custom node repository, restart ComfyUI, reload the browser, and
+load the updated JSON.** Replacing only the JSON is not sufficient for these
+new `AnimaRegionLayout` and `AnimaRegionalCharacter` nodes.
 
 ```text
-shared scene + A prompt -> A positive/negative + A LoRA hook + A soft mask
-shared scene + B prompt -> B positive/negative + B LoRA hook + B soft mask
-A/B pairs + shared fallback for uncovered areas -> one joint KSampler
+live layout -> A/B/C/D masks + linked base width/height
+shared scene + each active character prompt -> positive/negative + hook + mask
+active pairs + shared fallback for uncovered areas -> one joint KSampler
 base latent -> bislerp 1.5x
-same A/B hooked conditioning -> low-denoise Hires-fix -> final image
+same hooked conditioning -> low-denoise Hires-fix -> final image
 ```
 
 The default loaders expect WAI-ANIMA, `qwen_3_06b_base.safetensors`,
@@ -38,62 +43,67 @@ The default loaders expect WAI-ANIMA, `qwen_3_06b_base.safetensors`,
 `anima/Skin Texture Detail.safetensors`. Turbo (0.65) and Skin Texture (0.40)
 are applied globally to BOTH samplers; character LoRAs remain regional hooks.
 No ESRGAN model or decode/re-encode step is used between the sampling passes.
-The two visible
-`CreateHookLora` dropdowns default to the already installed
+The A/B character nodes' visible `lora_name` dropdowns default to the installed
 `anima/Bikini Cinderella - Anima.safetensors` and
 `anima/White Cinderella - Anima.safetensors`. Select other installed LoRAs
 directly in those dropdowns; no character download manifest change is needed.
+C/D initially have no assigned region and select `(none)`. A character with
+no enabled region skips both LoRA loading and text encoding, even if its saved
+LoRA filename is unavailable. An active `(none)` or zero-strength slot uses
+regional prompts without a character LoRA.
 
 The rendering profile follows the supplied `ComfyUI_temp_enxbg_00002_.json`:
 WAI + Turbo 0.65 + Skin Texture 0.40, `res_multistep` / `sgm_uniform`, CFG 1,
 18 base steps, 8 hires steps, latent bislerp 1.5x, and hires denoise 0.55.
 Its Little Mermaid character LoRA is deliberately NOT copied into the global
 model chain, since that would apply one character to both regions. Existing
-A/B selectors and strengths remain independent. The batch Prompt Queue / ZIP
+A-D selectors and strengths remain independent. The batch Prompt Queue / ZIP
 workflow is unchanged; this regional workflow still renders one joint image
 per queue submission and saves a PNG.
 
 **Prompts and controls:**
 
 - Edit `Shared scene / interaction / light` once for the composition, pose,
-  background, and lighting. It is automatically concatenated into BOTH A/B
-  positives and also encodes the uncovered-area fallback.
+  background, and lighting. It is automatically concatenated into every active
+  character's positive and also encodes the uncovered-area fallback.
 - The supplied Prompt Queue was empty, and its linked positive text box is
   overridden by that queue. The actual generation positive cannot be recovered
-  from that export. This workflow therefore keeps an editable two-person sample,
+  from that export. This workflow therefore keeps an editable sample scene,
   not a claimed reconstruction of the original prompt. The earlier extra
   `anime illustration` / `detailed anime shading` style phrases were removed.
-- Edit `string_b` in `A / positive` and `B / positive` for the corresponding
-  character's trigger, appearance, and clothing. Their `string_a` inputs are
-  connected to the shared prompt. Avoid copying both identities into both
-  character boxes. The sample is a gentle embrace between two adult women.
+- Edit each character node's `positive` for its trigger, appearance, and clothing.
+  Avoid copying all identities into every character box. Set explicit person
+  count, embrace/back-to-back pose, and relative positions in the shared scene
+  as needed; changing a layout preset does not rewrite your prompt.
 - `Shared negative` is likewise concatenated into each character's negative.
-  The separate A/B negative `string_b` fields can exclude unwanted clothing.
+  The separate character `negative` fields can exclude unwanted clothing.
 - The sample preserves the supplied `bikinicinderella` and `whitecinderella`
   triggers. Use the exact trained trigger for your installed files; a newer
   download catalog lists `b1k1c1nde` for Bikini, which is not automatically
   substituted here. Change the sample clothing descriptions as needed.
-- Set `strength_model` separately in each LoRA node. Leave `strength_clip=0`.
+- Set `strength` separately in each character node. CLIP strength is fixed at 0.
   The LoRAs attach to BOTH sides of their conditioning pair, not globally to
-  the MODEL. The `prev_hooks` inputs and fallback `hooks` input stay unconnected.
+  the MODEL. No character hook is attached to the shared fallback.
 
-**Automatic regions:**
+**Live visual regions:**
 
-`Region canvas` is a 1152x1536 coordinate plane. For each character, `region
-size` controls width/height, `region position` controls x/y, and `region
-feather` controls its four soft edges. Defaults are A: x=0, width=600;
-B: x=552, width=600; both height=1536, y=0, with a 48-pixel inner feather.
-This gives a small central overlap without an uncovered seam. The core sampler
-resizes both masks to each pass's latent resolution, so their relative
-placement survives Hires-fix. Keep rectangles within the region canvas.
-Regions can be moved vertically as well as horizontally without painting.
+- Choose 2/3/4 columns, 2/3/4 rows, or a 2x2 grid. Drag a rectangle to move it,
+  or its edges/corners to resize it. Matching shared edges resize together.
+- Assign each rectangle to A, B, C, or D. Add/delete rectangles or toggle them
+  off; up to eight rectangles can share four character slots. Four regions
+  do not require four characters: assign several to the same character.
+- Change aspect ratio and long-edge size in the editor, or its width/height
+  widgets. Positions are stored as fractions, so no coordinate arithmetic is
+  needed. The same node drives both masks and the base latent's dimensions.
+- Adjust Overlap and Feather with sliders. Both are percentages of the shorter
+  image side; overlap extends half its amount beyond each rectangle edge.
+  Feather softens only interior edges. Defaults are 4% each, with A/B halves.
+- The colored canvas updates before generation and includes soft boundaries.
+  Undo/redo and workflow save/reload preserve the layout. This previews region
+  influence, not the generated pose or automatic person segmentation.
 
-The separately titled `A / mask` and `B / mask` previews show white where the
-corresponding branch contributes. These are queue-time previews, not a live
-pose preview. To check only masks before expensive sampling, mute both
-`Base image` and `Final image` output nodes with `Ctrl+M`, then queue. Restore
-those outputs afterward. To test base generation without Hires-fix, mute only
-`Final image`. Editing a numeric rectangle is not automatic person segmentation.
+To test base generation without Hires-fix, mute only `Final image` with `Ctrl+M`.
+The core sampler scales the same masks to both passes' latent resolutions.
 
 **Matched single-character rendering settings, not GPU-validated regional results:**
 
@@ -111,9 +121,9 @@ those outputs afterward. To test base generation without Hires-fix, mute only
 | Global Skin Texture | Enabled, 0.40 |
 
 The reference export's real base dimensions are 1152x1536 despite an outdated
-832x1216 node title. For a smaller final 1152x1536 image, set `Base resolution`
-to 768x1024 and keep the 1.5x latent upscale. The region canvas can remain
-1152x1536; the sampler scales its masks to the latent dimensions.
+832x1216 node title. For a smaller final 1152x1536 image, select 3:4 and a long
+edge of 1024 in the region editor, giving a 768x1024 base. Keep the 1.5x latent
+upscale. No separate mask dimensions need to be updated.
 
 CFG 1 normally skips negative evaluation in ComfyUI. The negative prompts and
 their matching hook/mask pairs remain wired, but their exclusions do not affect
@@ -122,8 +132,11 @@ raising CFG above 1 enables negative guidance but also changes the rendering.
 Turbo and Skin Texture can be bypassed independently for diagnosis, but the
 18/8-step CFG 1 defaults are the Turbo profile, not a non-Turbo recommendation.
 
-**Validation and limits:** graph/schema checks do not establish successful
-WAI-ANIMA GPU generation. The hook path was inspected against ComfyUI v0.26.2
+**Validation and limits:** Python mask/character tests, JavaScript geometry
+tests, and a Playwright widget harness cover the editor, serialization, shared
+borders, aspect changes, and desktop/mobile layout. The harness mocks the ComfyUI
+widget host; it does not establish live ComfyUI or WAI-ANIMA GPU generation.
+The hook path was inspected against ComfyUI v0.26.2
 and upstream revision `79be670e2d9be63e238785af307369d2b9039ed1`; actual
 LoRA application and GPU output still require testing on your Pod. Anima
 precomputes embeddings through its model-side `llm_adapter`; LoRAs trained on
@@ -133,8 +146,8 @@ See the [upstream hook report](https://github.com/Comfy-Org/ComfyUI/issues/12853
 
 First compare each LoRA alone using the normal loader versus a full-image
 hook mask with the same seed/settings, including strength-zero controls. For
-an A-only hook test, set A size to 1152x1536, feather to zero, position to 0/0,
-and B region `value` to zero. Check matched LoRA keys as well as image changes:
+an A-only hook test, disable all but one rectangle, assign it to A, expand it to
+the full canvas, and set feather to zero. Check matched LoRA keys as well as image changes:
 hook loading can omit unmatched keys without a warning. Then compare four fixed
 seeds for side-by-side, back-to-back, and hugging, checking clothing, hair,
 arm ownership, hands, and contact shadows. Compare base images before enabling
@@ -154,6 +167,11 @@ Regenerate the JSON with `node scripts/build_hooks_workflow.js`; check it with
 `node scripts/build_hooks_workflow.js --check`. Its new filename deliberately
 avoids the retired `anima_two_character_regional_hiresfix.json` name removed
 by the RunPod startup script.
+
+Local verification: `python -m unittest discover -s tests -v` (NumPy required),
+`node --test tests/test_region_geometry.mjs`, and, with Playwright installed,
+`node tests/test_region_editor.cjs`. Optional `ANIMA_TEST_BROWSER=chrome` uses
+an installed Chrome; `ANIMA_TEST_OUTPUT` selects a screenshot directory.
 
 ### Two-character Mask Editor inpaint + Hires-fix
 

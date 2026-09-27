@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Region layout</title>
+<style>
+body{margin:0;background:#171719;color:#eee;font:14px system-ui;letter-spacing:0}
+main{margin:20px;width:560px;max-width:calc(100vw - 40px);background:#303034;border:1px solid #666;border-radius:6px;overflow:hidden}
+h1{font-size:16px;margin:0;padding:12px}#editor{width:100%}footer{margin:20px;font-size:12px}
+</style><main><h1>Region layout</h1><div id="editor"></div></main>
+<script type="module">
+import { preset } from "/web/region_geometry.js";
+let extension;
+const app = { graph: { _nodes: [] }, registerExtension(value) { extension = value; } };
+window.comfyAPI = { app: { app } };
+await import("/web/region_layout.js");
+const definition = { name: "AnimaRegionLayout", input: { required: { layout: ["STRING", { default: JSON.stringify(preset("2 columns")) }] } } };
+extension.beforeRegisterNodeDef(null, definition);
+let node;
+function create(values = [1152, 1536, JSON.stringify(preset("2 columns"))]) {
+    node?.onRemoved?.(); document.querySelector("#editor").replaceChildren();
+    node = { comfyClass: "AnimaRegionLayout", size: [560,820],
+        widgets: [{name:"width",value:1152},{name:"height",value:1536}],
+        graph: { beforeChange() {}, afterChange() {} }, setDirtyCanvas() {},
+        setSize(size) { this.size = size; },
+        addDOMWidget(name, type, element, options) {
+            const widget = { name, type, options };
+            Object.defineProperty(widget,"value",{ get:options.getValue,set:options.setValue });
+            this.widgets.push(widget); document.querySelector("#editor").appendChild(element); return widget;
+        },
+    };
+    extension.getCustomWidgets().ANIMA_REGION_LAYOUT(node,"layout",definition.input.required.layout);
+    extension.nodeCreated(node);
+    node.widgets.forEach((widget,i) => { widget.value = values[i]; });
+    app.graph._nodes = [node]; extension.afterConfigureGraph();
+    window.testNode = node;
+}
+window.exportState = () => node.widgets.map((w) => w.serializeValue ? w.serializeValue() : w.value);
+window.readState = () => ({width:node.widgets[0].value,height:node.widgets[1].value,layout:JSON.parse(node.widgets[2].value)});
+window.restoreState = create;
+create(); window.ready = true;
+</script></html>

@@ -49,16 +49,26 @@ function buildWorkflow() {
         ["qwen_3_06b_base.safetensors", "stable_diffusion", "default"], [], [socket("CLIP")]);
     add(3, "VAELoader", "Qwen Image VAE", [0, 300], [400, 60],
         ["qwen_image_vae.safetensors"], [], [socket("VAE")]);
-    add(4, "PrimitiveStringMultiline", "Shared scene / interaction / light", [465, 0], [480, 300], [
-        "masterpiece, best quality, score_8, highres, safe, exactly two adult women, full body, a gentle embrace, both faces visible, natural contact, coherent arms and hands, shared ground plane, a bright seaside terrace, soft daylight, consistent lighting and shadows, one continuous scene",
+    add(4, "PrimitiveStringMultiline", "Shared scene / interaction / light", [1130, 0], [500, 300], [
+        "masterpiece, best quality, score_8, highres, safe, adult women, full body, natural interaction, coherent arms and hands, shared ground plane, a bright seaside terrace, soft daylight, consistent lighting and shadows, one continuous scene",
     ], [], [socket("STRING")]);
-    add(5, "PrimitiveStringMultiline", "Shared negative", [465, 355], [480, 255], [
+    add(5, "PrimitiveStringMultiline", "Shared negative", [1130, 355], [500, 255], [
         "worst quality, low quality, early, old, score_1, score_2, score_3, cartoon, graphic, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured, long body, bad anatomy, bad hands, missing fingers, extra fingers, extra digits, fewer digits, cropped, very displeasing, artist name, blurry, jpeg artifacts, lowres, censor",
     ], [], [socket("STRING")]);
-    add(6, "SolidMask", "Region canvas", [0, 920], [400, 115],
-        [0, 1152, 1536], [], [socket("MASK")]);
-    add(7, "EmptyLatentImage", "Base resolution", [0, 750], [400, 115],
-        [1152, 1536, 1], [], [socket("LATENT")]);
+    const layout = { version: 1, overlap: 0.04, feather: 0.04, regions: [
+        { id: "r1", owner: "A", x: 0, y: 0, w: 0.5, h: 1, enabled: true },
+        { id: "r2", owner: "B", x: 0.5, y: 0, w: 0.5, h: 1, enabled: true },
+    ] };
+    const layoutNode = add(6, "AnimaRegionLayout", "Region layout", [500, 0], [560, 820],
+        [1152, 1536, JSON.stringify(layout)], [], [
+            ...["A", "B", "C", "D"].map((label) => socket(`mask_${label}`, "MASK")),
+            socket("width", "INT"), socket("height", "INT"),
+        ]);
+    layoutNode.properties.cnr_id = "ComfyUI-AnimaVariationBatch";
+    add(7, "EmptyLatentImage", "Linked base resolution", [1130, 1090], [500, 135],
+        [1152, 1536, 1], [converted("width", "INT"), converted("height", "INT")], [socket("LATENT")]);
+    connect(6, 4, 7, 0);
+    connect(6, 5, 7, 1);
     add(8, "LoraLoaderModelOnly", "Global Turbo", [0, 410], [400, 115],
         ["anima-turbo-lora-v0.2.safetensors", 0.65],
         [socket("model", "MODEL")], [socket("MODEL")]);
@@ -70,97 +80,72 @@ function buildWorkflow() {
 
     const characters = [
         {
-            id: 10, label: "A", y: 0, x: 0, feather: [0, 0, 48, 0],
+            id: 10, label: "A", x: 1690, y: 0,
             lora: "anima/Bikini Cinderella - Anima.safetensors",
-            positive: "The woman on the left: bikinicinderella, black bikini. She embraces the woman on the right, with naturally connected arms and hands.",
+            positive: "bikinicinderella, black bikini",
             negative: "white outfit, dress",
             color: "#243c3b", bgcolor: "#345451",
         },
         {
-            id: 30, label: "B", y: 940, x: 552, feather: [48, 0, 0, 0],
+            id: 30, label: "B", x: 2310, y: 0,
             lora: "anima/White Cinderella - Anima.safetensors",
-            positive: "The woman on the right: whitecinderella, white outfit. She embraces the woman on the left, with naturally connected arms and hands.",
+            positive: "whitecinderella, white outfit",
             negative: "black bikini, swimsuit",
             color: "#48313d", bgcolor: "#654758",
         },
+        { id: 40, label: "C", x: 1690, y: 740, lora: "(none)", positive: "", negative: "", color: "#433e2a", bgcolor: "#5f583c" },
+        { id: 41, label: "D", x: 2310, y: 740, lora: "(none)", positive: "", negative: "", color: "#2d3d4b", bgcolor: "#40576a" },
     ];
 
-    for (const character of characters) {
-        const { id, label, y, color, bgcolor } = character;
+    for (const [index, character] of characters.entries()) {
+        const { id, label, x, y, color, bgcolor } = character;
         const tint = { color, bgcolor };
-        add(id, "CreateHookLora", `${label} / LoRA`, [1040, y], [440, 145],
-            [character.lora, 0.8, 0.0], [socket("prev_hooks", "HOOKS")], [socket("HOOKS")], tint);
-        add(id + 1, "StringConcatenate", `${label} / positive`, [1040, y + 205], [440, 310],
-            ["", character.positive, "\n\n"], [converted("string_a", "STRING")], [socket("STRING")], tint);
-        add(id + 2, "StringConcatenate", `${label} / negative`, [1040, y + 575], [440, 230],
-            ["", character.negative, ", "], [converted("string_a", "STRING")], [socket("STRING")], tint);
-        add(id + 3, "CLIPTextEncode", `${label} / positive conditioning`, [1540, y + 205], [300, 135],
-            [""], [socket("clip", "CLIP"), converted("text", "STRING")], [socket("CONDITIONING")], tint);
-        add(id + 4, "CLIPTextEncode", `${label} / negative conditioning`, [1540, y + 575], [300, 135],
-            [""], [socket("clip", "CLIP"), converted("text", "STRING")], [socket("CONDITIONING")], tint);
-        add(id + 5, "SolidMask", `${label} / region size`, [1900, y], [310, 115],
-            [1.0, 600, 1536], [], [socket("MASK")], tint);
-        add(id + 6, "FeatherMask", `${label} / region feather`, [1900, y + 175], [310, 145],
-            character.feather, [socket("mask", "MASK")], [socket("MASK")], tint);
-        add(id + 7, "MaskComposite", `${label} / region position`, [1900, y + 380], [310, 145],
-            [character.x, 0, "add"], [socket("destination", "MASK"), socket("source", "MASK")], [socket("MASK")], tint);
-        add(id + 10, "MaskToImage", `${label} / mask image`, [1900, y + 590], [310, 85],
-            [], [socket("mask", "MASK")], [socket("IMAGE")], tint);
-        add(id + 8, "PreviewImage", `${label} / mask`, [2270, y + 290], [310, 510],
-            [], [socket("images", "IMAGE")], [], tint);
-        add(id + 9, "PairConditioningSetProperties", `${label} / regional LoRA pair`, [2270, y], [310, 220],
-            [1.0, "default"], [
-                socket("positive_NEW", "CONDITIONING"), socket("negative_NEW", "CONDITIONING"),
-                socket("mask", "MASK"), socket("hooks", "HOOKS"), socket("timesteps", "TIMESTEPS_RANGE"),
+        const node = add(id, "AnimaRegionalCharacter", `Character ${label}`, [x, y], [560, 650],
+            [character.lora, 0.8, character.positive, character.negative], [
+                socket("clip", "CLIP"), socket("mask", "MASK"),
+                socket("shared_positive", "STRING"), socket("shared_negative", "STRING"),
             ], pairOutputs, tint);
-        connect(4, 0, id + 1, 0);
-        connect(5, 0, id + 2, 0);
-        connect(2, 0, id + 3, 0);
-        connect(id + 1, 0, id + 3, 1);
-        connect(2, 0, id + 4, 0);
-        connect(id + 2, 0, id + 4, 1);
-        connect(id + 5, 0, id + 6, 0);
-        connect(6, 0, id + 7, 0);
-        connect(id + 6, 0, id + 7, 1);
-        connect(id + 7, 0, id + 10, 0);
-        connect(id + 10, 0, id + 8, 0);
-        connect(id + 3, 0, id + 9, 0);
-        connect(id + 4, 0, id + 9, 1);
-        connect(id + 7, 0, id + 9, 2);
-        connect(id, 0, id + 9, 3);
+        node.properties.cnr_id = "ComfyUI-AnimaVariationBatch";
+        connect(2, 0, id, 0); connect(6, index, id, 1);
+        connect(4, 0, id, 2); connect(5, 0, id, 3);
     }
 
-    add(50, "CLIPTextEncode", "Shared fallback / positive", [465, 680], [480, 135],
+    add(50, "CLIPTextEncode", "Shared fallback / positive", [1130, 680], [500, 135],
         [""], [socket("clip", "CLIP"), converted("text", "STRING")], [socket("CONDITIONING")]);
-    add(51, "CLIPTextEncode", "Shared fallback / negative", [465, 875], [480, 135],
+    add(51, "CLIPTextEncode", "Shared fallback / negative", [1130, 875], [500, 135],
         [""], [socket("clip", "CLIP"), converted("text", "STRING")], [socket("CONDITIONING")]);
-    add(52, "PairConditioningCombine", "A + B", [2690, 0], [330, 150], [], [
+    const combineInputs = [
         socket("positive_A", "CONDITIONING"), socket("negative_A", "CONDITIONING"),
         socket("positive_B", "CONDITIONING"), socket("negative_B", "CONDITIONING"),
-    ], pairOutputs);
-    add(53, "PairConditioningSetDefaultCombine", "A + B + uncovered background", [2690, 210], [330, 170], [], [
+    ];
+    add(52, "PairConditioningCombine", "A + B", [2950, 0], [330, 150], [], combineInputs, pairOutputs);
+    add(58, "PairConditioningCombine", "C + D", [2950, 220], [330, 150], [], combineInputs, pairOutputs);
+    add(59, "PairConditioningCombine", "A + B + C + D", [2950, 440], [330, 150], [], combineInputs, pairOutputs);
+    add(53, "PairConditioningSetDefaultCombine", "Regions + uncovered background", [2950, 660], [330, 170], [], [
         socket("positive", "CONDITIONING"), socket("negative", "CONDITIONING"),
         socket("positive_DEFAULT", "CONDITIONING"), socket("negative_DEFAULT", "CONDITIONING"),
         socket("hooks", "HOOKS"),
     ], pairOutputs);
-    add(54, "KSampler", "Joint A/B generation", [3090, 0], [330, 290],
+    add(54, "KSampler", "Joint generation", [3360, 0], [330, 290],
         [2026092701, "fixed", 18, 1.0, "res_multistep", "sgm_uniform", 1.0], samplerInputs, [socket("LATENT")]);
-    add(55, "VAEDecode", "Base decode", [3090, 355], [330, 80], [],
+    add(55, "VAEDecode", "Base decode", [3360, 355], [330, 80], [],
         [socket("samples", "LATENT"), socket("vae", "VAE")], [socket("IMAGE")]);
-    add(56, "PreviewImage", "Base image", [3090, 500], [330, 510], [], [socket("images", "IMAGE")]);
-    add(57, "LatentUpscaleBy", "Latent upscale 1.5x", [3490, 0], [350, 115],
+    add(56, "PreviewImage", "Base image", [3360, 500], [330, 510], [], [socket("images", "IMAGE")]);
+    add(57, "LatentUpscaleBy", "Latent upscale 1.5x", [3760, 0], [350, 115],
         ["bislerp", 1.5], [socket("samples", "LATENT")], [socket("LATENT")]);
-    add(61, "KSampler", "A/B regional Hires-fix", [3910, 0], [350, 290],
+    add(61, "KSampler", "Regional Hires-fix", [4180, 0], [350, 290],
         [2026092702, "fixed", 8, 1.0, "res_multistep", "sgm_uniform", 0.55], samplerInputs, [socket("LATENT")]);
-    add(62, "VAEDecode", "Final decode", [3910, 355], [350, 80], [],
+    add(62, "VAEDecode", "Final decode", [4180, 355], [350, 80], [],
         [socket("samples", "LATENT"), socket("vae", "VAE")], [socket("IMAGE")]);
-    add(63, "SaveImage", "Final image", [3910, 500], [350, 540],
+    add(63, "SaveImage", "Final image", [4180, 500], [350, 540],
         ["Anima_two_character_hooks_hiresfix"], [socket("images", "IMAGE")]);
 
     for (const [source, slot, target, input] of [
         [2, 0, 50, 0], [4, 0, 50, 1], [2, 0, 51, 0], [5, 0, 51, 1],
-        [19, 0, 52, 0], [19, 1, 52, 1], [39, 0, 52, 2], [39, 1, 52, 3],
-        [52, 0, 53, 0], [52, 1, 53, 1], [50, 0, 53, 2], [51, 0, 53, 3],
+        [10, 0, 52, 0], [10, 1, 52, 1], [30, 0, 52, 2], [30, 1, 52, 3],
+        [40, 0, 58, 0], [40, 1, 58, 1], [41, 0, 58, 2], [41, 1, 58, 3],
+        [52, 0, 59, 0], [52, 1, 59, 1], [58, 0, 59, 2], [58, 1, 59, 3],
+        [59, 0, 53, 0], [59, 1, 53, 1], [50, 0, 53, 2], [51, 0, 53, 3],
         [9, 0, 54, 0], [53, 0, 54, 1], [53, 1, 54, 2], [7, 0, 54, 3],
         [54, 0, 55, 0], [3, 0, 55, 1], [55, 0, 56, 0],
         [54, 0, 57, 0],
@@ -180,14 +165,15 @@ function buildWorkflow() {
     }
     return {
         id: "c0e92976-f0ce-4ce5-b21f-a3e01c29e844",
-        revision: 1, last_node_id: 63, last_link_id: links.length,
+        revision: 2, last_node_id: 63, last_link_id: links.length,
         nodes, links,
         groups: [
-            { title: "Shared models and scene", bounding: [-30, -80, 1005, 1180], color: "#344b5b", font_size: 24 },
-            { title: "Character A", bounding: [1010, -80, 1600, 930], color: "#345451", font_size: 24 },
-            { title: "Character B", bounding: [1010, 860, 1600, 930], color: "#654758", font_size: 24 },
-            { title: "Joint generation", bounding: [2660, -80, 790, 1140], color: "#43505c", font_size: 24 },
-            { title: "Regional Hires-fix", bounding: [3460, -80, 830, 1170], color: "#534b38", font_size: 24 },
+            { title: "Models", bounding: [-30, -80, 460, 820], color: "#344b5b", font_size: 24 },
+            { title: "Layout", bounding: [470, -80, 620, 940], color: "#345451", font_size: 24 },
+            { title: "Shared scene", bounding: [1100, -80, 560, 1350], color: "#43505c", font_size: 24 },
+            { title: "Characters", bounding: [1660, -80, 1240, 1520], color: "#654758", font_size: 24 },
+            { title: "Joint generation", bounding: [2920, -80, 800, 1140], color: "#43505c", font_size: 24 },
+            { title: "Regional Hires-fix", bounding: [3730, -80, 830, 1170], color: "#534b38", font_size: 24 },
         ],
         config: {}, extra: { ds: { scale: 0.65, offset: [80, 160] } }, version: 0.4,
     };
