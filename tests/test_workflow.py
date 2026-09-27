@@ -10,6 +10,7 @@ HIRES_LATENT_WORKFLOW_PATH = WORKFLOW_DIR / "anima_hiresfix_latent_2pass.json"
 INPAINT_WORKFLOW_PATH = (
     WORKFLOW_DIR / "anima_two_character_inpaint_hiresfix.json"
 )
+HOOKS_WORKFLOW_PATH = WORKFLOW_DIR / "anima_two_character_hooks_hiresfix.json"
 
 
 class WorkflowTests(unittest.TestCase):
@@ -18,10 +19,12 @@ class WorkflowTests(unittest.TestCase):
         cls.hires_esrgan = cls.load(HIRES_ESRGAN_WORKFLOW_PATH)
         cls.hires_latent = cls.load(HIRES_LATENT_WORKFLOW_PATH)
         cls.inpaint = cls.load(INPAINT_WORKFLOW_PATH)
+        cls.hooks = cls.load(HOOKS_WORKFLOW_PATH)
         cls.workflows = (
             cls.hires_esrgan,
             cls.hires_latent,
             cls.inpaint,
+            cls.hooks,
         )
 
     @staticmethod
@@ -35,6 +38,7 @@ class WorkflowTests(unittest.TestCase):
             [
                 "anima_hiresfix_esrgan_2pass.json",
                 "anima_hiresfix_latent_2pass.json",
+                "anima_two_character_hooks_hiresfix.json",
                 "anima_two_character_inpaint_hiresfix.json",
             ],
         )
@@ -62,6 +66,7 @@ class WorkflowTests(unittest.TestCase):
         for workflow in (
             self.hires_esrgan,
             self.inpaint,
+            self.hooks,
         ):
             with self.subTest(workflow=workflow.get("id")):
                 loader = next(

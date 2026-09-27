@@ -1,10 +1,10 @@
-# ComfyUI Anima Hires-Fix and Inpaint Workflows
+# ComfyUI Anima Hires-Fix and Two-Character Workflows
 
 [![CI](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml/badge.svg)](https://github.com/grawthings-beep/comfyui-anima-variation-batch/actions/workflows/ci.yml)
 
-This repository contains Anima-focused 2-pass Hires-fix workflows and a
-two-character Mask Editor inpaint workflow. It does not distribute model
-weights.
+This repository contains Anima-focused 2-pass Hires-fix workflows, a
+two-character Mask Editor inpaint workflow, and an experimental two-character
+regional LoRA hooks workflow. It does not distribute model weights.
 
 The latent Hires-fix workflow includes a blank-line Prompt Queue: paste up to
 50 Grok-generated scenes at once and ComfyUI runs the complete two-pass
@@ -15,8 +15,118 @@ generation for every scene without manual prompt copying.
 ```text
 example_workflows/anima_hiresfix_esrgan_2pass.json
 example_workflows/anima_hiresfix_latent_2pass.json
+example_workflows/anima_two_character_hooks_hiresfix.json
 example_workflows/anima_two_character_inpaint_hiresfix.json
 ```
+
+### Two-character regional LoRA hooks + Hires-fix (experimental)
+
+`anima_two_character_hooks_hiresfix.json` adds simultaneous A/B generation
+without replacing any batch or inpaint workflow. It uses ComfyUI core nodes
+only, with no ControlNet preprocessors or new Python dependencies.
+
+```text
+shared scene + A prompt -> A positive/negative + A LoRA hook + A soft mask
+shared scene + B prompt -> B positive/negative + B LoRA hook + B soft mask
+A/B pairs + shared fallback for uncovered areas -> one joint KSampler
+base image -> AnimeSharp 4x -> Lanczos 1160x1536 -> VAE encode
+same A/B hooked conditioning -> low-denoise Hires-fix -> final image
+```
+
+The default loaders expect WAI-ANIMA, `qwen_3_06b_base.safetensors`,
+`qwen_image_vae.safetensors`, and `4x-AnimeSharp.pth`. The two visible
+`CreateHookLora` dropdowns default to the already installed
+`anima/Bikini Cinderella - Anima.safetensors` and
+`anima/White Cinderella - Anima.safetensors`. Select other installed LoRAs
+directly in those dropdowns; no character download manifest change is needed.
+
+**Prompts and controls:**
+
+- Edit `Shared scene / interaction / light` once for the composition, pose,
+  background, and lighting. It is automatically concatenated into BOTH A/B
+  positives and also encodes the uncovered-area fallback.
+- Edit `string_b` in `A / positive` and `B / positive` for the corresponding
+  character's trigger, appearance, and clothing. Their `string_a` inputs are
+  connected to the shared prompt. Avoid copying both identities into both
+  character boxes. The sample is a gentle embrace between two adult women.
+- `Shared negative` is likewise concatenated into each character's negative.
+  The separate A/B negative `string_b` fields can exclude unwanted clothing.
+- The sample preserves the supplied `bikinicinderella` and `whitecinderella`
+  triggers. Use the exact trained trigger for your installed files; a newer
+  download catalog lists `b1k1c1nde` for Bikini, which is not automatically
+  substituted here. Change the sample clothing descriptions as needed.
+- Set `strength_model` separately in each LoRA node. Leave `strength_clip=0`.
+  The LoRAs attach to BOTH sides of their conditioning pair, not globally to
+  the MODEL. The `prev_hooks` inputs and fallback `hooks` input stay unconnected.
+
+**Automatic regions:**
+
+`Region canvas` is a 768x1024 coordinate plane. For each character, `region
+size` controls width/height, `region position` controls x/y, and `region
+feather` controls its four soft edges. Defaults are A: x=0, width=400;
+B: x=368, width=400; both height=1024, y=0, with a 32-pixel inner feather.
+This gives a small central overlap without an uncovered seam. The core sampler
+resizes both masks to each pass's latent resolution, so their relative
+placement survives Hires-fix. Keep rectangles within the region canvas.
+Regions can be moved vertically as well as horizontally without painting.
+
+The separately titled `A / mask` and `B / mask` previews show white where the
+corresponding branch contributes. These are queue-time previews, not a live
+pose preview. To check only masks before expensive sampling, mute both
+`Base image` and `Final image` output nodes with `Ctrl+M`, then queue. Restore
+those outputs afterward. To test base generation without Hires-fix, mute only
+`Final image`. Editing a numeric rectangle is not automatic person segmentation.
+
+**Initial test settings, not GPU-validated quality recommendations:**
+
+| Setting | Default |
+| --- | --- |
+| Base resolution | 768x1024, batch 1 |
+| A / B LoRA strengths | 0.80 / 0.80, CLIP 0 |
+| Pair strength / area | 1.0 / `default` (full-image context) |
+| Base sampler | 30 steps, CFG 4, Euler/simple, denoise 1.0 |
+| Hires sampler | 20 steps, CFG 4, Euler/simple, denoise 0.20 |
+| Final resolution | 1160x1536 |
+| Seeds | Fixed, independently editable for each pass |
+| Global Anima Turbo | Bypassed initially |
+
+The optional `Global Turbo (bypassed)` node sits before both samplers. After
+checking ordinary generation, enable it with `Ctrl+B` and change BOTH samplers
+to the existing Turbo test preset: 12 steps, CFG 1.5, Euler/simple, keeping
+denoise 1.0 / 0.20. Disable it again when returning to the non-Turbo settings.
+Do not enable Turbo while leaving the ordinary settings unchanged. CFG 1
+normally skips negative evaluation in ComfyUI, so it is not the default here.
+
+**Validation and limits:** graph/schema checks do not establish successful
+WAI-ANIMA GPU generation. The hook path was inspected against ComfyUI v0.26.2
+and upstream revision `79be670e2d9be63e238785af307369d2b9039ed1`; actual
+LoRA application and GPU output still require testing on your Pod. Anima
+precomputes embeddings through its model-side `llm_adapter`; LoRAs trained on
+that component can differ between standard loading and hooks despite CLIP
+strength being zero. This workflow does not patch or claim to fix that path.
+See the [upstream hook report](https://github.com/Comfy-Org/ComfyUI/issues/12853).
+
+First compare each LoRA alone using the normal loader versus a full-image
+hook mask with the same seed/settings, including strength-zero controls. For
+an A-only hook test, set A size to 768x1024, feather to zero, position to 0/0,
+and B region `value` to zero. Check matched LoRA keys as well as image changes:
+hook loading can omit unmatched keys without a warning. Then compare four fixed
+seeds for side-by-side, back-to-back, and hugging, checking clothing, hair,
+arm ownership, hands, and contact shadows. Compare base images before enabling
+Hires-fix; test hires denoise 0.15-0.25 and Turbo separately.
+
+Each hook branch evaluates the same shared latent; overlapping masks blend
+predictions. This is neither separate-image compositing nor strict regional
+attention isolation. Wide overlaps can mix clothing, and a rectangular mask
+cannot identify whose arm crosses into another region. One KSampler still
+performs multiple hook-dependent model evaluations, so timing and VRAM use
+must be measured. The existing inpaint workflow remains available when exact
+silhouette masks and unmasked-pixel preservation are more important.
+
+Regenerate the JSON with `node scripts/build_hooks_workflow.js`; check it with
+`node scripts/build_hooks_workflow.js --check`. Its new filename deliberately
+avoids the retired `anima_two_character_regional_hiresfix.json` name removed
+by the RunPod startup script.
 
 ### Two-character Mask Editor inpaint + Hires-fix
 
@@ -220,7 +330,7 @@ Those files install under `models/loras/anima_pose/` with numbered readable
 names. The latent batch workflow's `Anima Pose LoRA Select` node reads that
 manifest and sends the selected LoRA name to both Hires-fix passes.
 
-The two-character workflow reads the normal character manifest directly.
+The two-character inpaint workflow reads the normal character manifest directly.
 Selecting Character A or B in its green loader applies only the corresponding
 `anima/...safetensors` file to that character's sampler. Prompt triggers stay
 fully manual.
