@@ -29,22 +29,40 @@ only, with no ControlNet preprocessors or new Python dependencies.
 shared scene + A prompt -> A positive/negative + A LoRA hook + A soft mask
 shared scene + B prompt -> B positive/negative + B LoRA hook + B soft mask
 A/B pairs + shared fallback for uncovered areas -> one joint KSampler
-base image -> AnimeSharp 4x -> Lanczos 1160x1536 -> VAE encode
+base latent -> bislerp 1.5x
 same A/B hooked conditioning -> low-denoise Hires-fix -> final image
 ```
 
 The default loaders expect WAI-ANIMA, `qwen_3_06b_base.safetensors`,
-`qwen_image_vae.safetensors`, and `4x-AnimeSharp.pth`. The two visible
+`qwen_image_vae.safetensors`, `anima-turbo-lora-v0.2.safetensors`, and
+`anima/Skin Texture Detail.safetensors`. Turbo (0.65) and Skin Texture (0.40)
+are applied globally to BOTH samplers; character LoRAs remain regional hooks.
+No ESRGAN model or decode/re-encode step is used between the sampling passes.
+The two visible
 `CreateHookLora` dropdowns default to the already installed
 `anima/Bikini Cinderella - Anima.safetensors` and
 `anima/White Cinderella - Anima.safetensors`. Select other installed LoRAs
 directly in those dropdowns; no character download manifest change is needed.
+
+The rendering profile follows the supplied `ComfyUI_temp_enxbg_00002_.json`:
+WAI + Turbo 0.65 + Skin Texture 0.40, `res_multistep` / `sgm_uniform`, CFG 1,
+18 base steps, 8 hires steps, latent bislerp 1.5x, and hires denoise 0.55.
+Its Little Mermaid character LoRA is deliberately NOT copied into the global
+model chain, since that would apply one character to both regions. Existing
+A/B selectors and strengths remain independent. The batch Prompt Queue / ZIP
+workflow is unchanged; this regional workflow still renders one joint image
+per queue submission and saves a PNG.
 
 **Prompts and controls:**
 
 - Edit `Shared scene / interaction / light` once for the composition, pose,
   background, and lighting. It is automatically concatenated into BOTH A/B
   positives and also encodes the uncovered-area fallback.
+- The supplied Prompt Queue was empty, and its linked positive text box is
+  overridden by that queue. The actual generation positive cannot be recovered
+  from that export. This workflow therefore keeps an editable two-person sample,
+  not a claimed reconstruction of the original prompt. The earlier extra
+  `anime illustration` / `detailed anime shading` style phrases were removed.
 - Edit `string_b` in `A / positive` and `B / positive` for the corresponding
   character's trigger, appearance, and clothing. Their `string_a` inputs are
   connected to the shared prompt. Avoid copying both identities into both
@@ -61,10 +79,10 @@ directly in those dropdowns; no character download manifest change is needed.
 
 **Automatic regions:**
 
-`Region canvas` is a 768x1024 coordinate plane. For each character, `region
+`Region canvas` is a 1152x1536 coordinate plane. For each character, `region
 size` controls width/height, `region position` controls x/y, and `region
-feather` controls its four soft edges. Defaults are A: x=0, width=400;
-B: x=368, width=400; both height=1024, y=0, with a 32-pixel inner feather.
+feather` controls its four soft edges. Defaults are A: x=0, width=600;
+B: x=552, width=600; both height=1536, y=0, with a 48-pixel inner feather.
 This gives a small central overlap without an uncovered seam. The core sampler
 resizes both masks to each pass's latent resolution, so their relative
 placement survives Hires-fix. Keep rectangles within the region canvas.
@@ -77,25 +95,32 @@ pose preview. To check only masks before expensive sampling, mute both
 those outputs afterward. To test base generation without Hires-fix, mute only
 `Final image`. Editing a numeric rectangle is not automatic person segmentation.
 
-**Initial test settings, not GPU-validated quality recommendations:**
+**Matched single-character rendering settings, not GPU-validated regional results:**
 
 | Setting | Default |
 | --- | --- |
-| Base resolution | 768x1024, batch 1 |
+| Base resolution | 1152x1536, batch 1 |
 | A / B LoRA strengths | 0.80 / 0.80, CLIP 0 |
 | Pair strength / area | 1.0 / `default` (full-image context) |
-| Base sampler | 30 steps, CFG 4, Euler/simple, denoise 1.0 |
-| Hires sampler | 20 steps, CFG 4, Euler/simple, denoise 0.20 |
-| Final resolution | 1160x1536 |
+| Base sampler | 18 steps, CFG 1, res_multistep/sgm_uniform, denoise 1.0 |
+| Hires sampler | 8 steps, CFG 1, res_multistep/sgm_uniform, denoise 0.55 |
+| Latent upscale | bislerp, 1.5x |
+| Final resolution | 1728x2304 |
 | Seeds | Fixed, independently editable for each pass |
-| Global Anima Turbo | Bypassed initially |
+| Global Anima Turbo | Enabled, 0.65 |
+| Global Skin Texture | Enabled, 0.40 |
 
-The optional `Global Turbo (bypassed)` node sits before both samplers. After
-checking ordinary generation, enable it with `Ctrl+B` and change BOTH samplers
-to the existing Turbo test preset: 12 steps, CFG 1.5, Euler/simple, keeping
-denoise 1.0 / 0.20. Disable it again when returning to the non-Turbo settings.
-Do not enable Turbo while leaving the ordinary settings unchanged. CFG 1
-normally skips negative evaluation in ComfyUI, so it is not the default here.
+The reference export's real base dimensions are 1152x1536 despite an outdated
+832x1216 node title. For a smaller final 1152x1536 image, set `Base resolution`
+to 768x1024 and keep the 1.5x latent upscale. The region canvas can remain
+1152x1536; the sampler scales its masks to the latent dimensions.
+
+CFG 1 normally skips negative evaluation in ComfyUI. The negative prompts and
+their matching hook/mask pairs remain wired, but their exclusions do not affect
+the default CFG 1 sampling. This intentionally matches the supplied profile;
+raising CFG above 1 enables negative guidance but also changes the rendering.
+Turbo and Skin Texture can be bypassed independently for diagnosis, but the
+18/8-step CFG 1 defaults are the Turbo profile, not a non-Turbo recommendation.
 
 **Validation and limits:** graph/schema checks do not establish successful
 WAI-ANIMA GPU generation. The hook path was inspected against ComfyUI v0.26.2
@@ -108,12 +133,14 @@ See the [upstream hook report](https://github.com/Comfy-Org/ComfyUI/issues/12853
 
 First compare each LoRA alone using the normal loader versus a full-image
 hook mask with the same seed/settings, including strength-zero controls. For
-an A-only hook test, set A size to 768x1024, feather to zero, position to 0/0,
+an A-only hook test, set A size to 1152x1536, feather to zero, position to 0/0,
 and B region `value` to zero. Check matched LoRA keys as well as image changes:
 hook loading can omit unmatched keys without a warning. Then compare four fixed
 seeds for side-by-side, back-to-back, and hugging, checking clothing, hair,
 arm ownership, hands, and contact shadows. Compare base images before enabling
-Hires-fix; test hires denoise 0.15-0.25 and Turbo separately.
+Hires-fix. Keep the matched 0.55 denoise initially; lowering it can preserve
+more first-pass detail but also departs from the reference rendering. Matching
+these settings does not prove identical texture under separate A/B hooks.
 
 Each hook branch evaluates the same shared latent; overlapping masks blend
 predictions. This is neither separate-image compositing nor strict regional

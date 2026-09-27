@@ -50,30 +50,34 @@ function buildWorkflow() {
     add(3, "VAELoader", "Qwen Image VAE", [0, 300], [400, 60],
         ["qwen_image_vae.safetensors"], [], [socket("VAE")]);
     add(4, "PrimitiveStringMultiline", "Shared scene / interaction / light", [465, 0], [480, 300], [
-        "masterpiece, best quality, safe, anime illustration, detailed anime shading, exactly two adult women, full body, a gentle embrace, both faces visible, natural contact, coherent arms and hands, shared ground plane, a bright seaside terrace, soft daylight, consistent lighting and shadows, one continuous scene",
+        "masterpiece, best quality, score_8, highres, safe, exactly two adult women, full body, a gentle embrace, both faces visible, natural contact, coherent arms and hands, shared ground plane, a bright seaside terrace, soft daylight, consistent lighting and shadows, one continuous scene",
     ], [], [socket("STRING")]);
     add(5, "PrimitiveStringMultiline", "Shared negative", [465, 355], [480, 255], [
-        "worst quality, low quality, blurry, bad anatomy, bad hands, fused bodies, merged faces, shared limbs, extra arms, extra legs, missing limbs, third person, duplicate person, ghost, afterimage, mixed clothing, color bleeding, split screen, collage, border, text, watermark",
+        "worst quality, low quality, early, old, score_1, score_2, score_3, cartoon, graphic, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured, long body, bad anatomy, bad hands, missing fingers, extra fingers, extra digits, fewer digits, cropped, very displeasing, artist name, blurry, jpeg artifacts, lowres, censor",
     ], [], [socket("STRING")]);
-    add(6, "SolidMask", "Region canvas", [0, 760], [400, 115],
-        [0, 768, 1024], [], [socket("MASK")]);
-    add(7, "EmptyLatentImage", "Base resolution", [0, 580], [400, 115],
-        [768, 1024, 1], [], [socket("LATENT")]);
-    add(8, "LoraLoaderModelOnly", "Global Turbo (bypassed)", [0, 410], [400, 115],
-        ["anima-turbo-lora-v0.2.safetensors", 1.0],
-        [socket("model", "MODEL")], [socket("MODEL")], { mode: 4 });
+    add(6, "SolidMask", "Region canvas", [0, 920], [400, 115],
+        [0, 1152, 1536], [], [socket("MASK")]);
+    add(7, "EmptyLatentImage", "Base resolution", [0, 750], [400, 115],
+        [1152, 1536, 1], [], [socket("LATENT")]);
+    add(8, "LoraLoaderModelOnly", "Global Turbo", [0, 410], [400, 115],
+        ["anima-turbo-lora-v0.2.safetensors", 0.65],
+        [socket("model", "MODEL")], [socket("MODEL")]);
+    add(9, "LoraLoaderModelOnly", "Global Skin Texture", [0, 580], [400, 115],
+        ["anima/Skin Texture Detail.safetensors", 0.4],
+        [socket("model", "MODEL")], [socket("MODEL")]);
     connect(1, 0, 8, 0);
+    connect(8, 0, 9, 0);
 
     const characters = [
         {
-            id: 10, label: "A", y: 0, x: 0, feather: [0, 0, 32, 0],
+            id: 10, label: "A", y: 0, x: 0, feather: [0, 0, 48, 0],
             lora: "anima/Bikini Cinderella - Anima.safetensors",
             positive: "The woman on the left: bikinicinderella, black bikini. She embraces the woman on the right, with naturally connected arms and hands.",
             negative: "white outfit, dress",
             color: "#243c3b", bgcolor: "#345451",
         },
         {
-            id: 30, label: "B", y: 940, x: 368, feather: [32, 0, 0, 0],
+            id: 30, label: "B", y: 940, x: 552, feather: [48, 0, 0, 0],
             lora: "anima/White Cinderella - Anima.safetensors",
             positive: "The woman on the right: whitecinderella, white outfit. She embraces the woman on the left, with naturally connected arms and hands.",
             negative: "black bikini, swimsuit",
@@ -95,7 +99,7 @@ function buildWorkflow() {
         add(id + 4, "CLIPTextEncode", `${label} / negative conditioning`, [1540, y + 575], [300, 135],
             [""], [socket("clip", "CLIP"), converted("text", "STRING")], [socket("CONDITIONING")], tint);
         add(id + 5, "SolidMask", `${label} / region size`, [1900, y], [310, 115],
-            [1.0, 400, 1024], [], [socket("MASK")], tint);
+            [1.0, 600, 1536], [], [socket("MASK")], tint);
         add(id + 6, "FeatherMask", `${label} / region feather`, [1900, y + 175], [310, 145],
             character.feather, [socket("mask", "MASK")], [socket("MASK")], tint);
         add(id + 7, "MaskComposite", `${label} / region position`, [1900, y + 380], [310, 145],
@@ -140,25 +144,14 @@ function buildWorkflow() {
         socket("hooks", "HOOKS"),
     ], pairOutputs);
     add(54, "KSampler", "Joint A/B generation", [3090, 0], [330, 290],
-        [2026092701, "fixed", 30, 4.0, "euler", "simple", 1.0], samplerInputs, [socket("LATENT")]);
+        [2026092701, "fixed", 18, 1.0, "res_multistep", "sgm_uniform", 1.0], samplerInputs, [socket("LATENT")]);
     add(55, "VAEDecode", "Base decode", [3090, 355], [330, 80], [],
         [socket("samples", "LATENT"), socket("vae", "VAE")], [socket("IMAGE")]);
     add(56, "PreviewImage", "Base image", [3090, 500], [330, 510], [], [socket("images", "IMAGE")]);
-    const upscaler = add(57, "UpscaleModelLoader", "AnimeSharp", [3490, 0], [350, 65],
-        ["4x-AnimeSharp.pth"], [], [socket("UPSCALE_MODEL")]);
-    upscaler.properties.models = [{
-        name: "4x-AnimeSharp.pth",
-        url: "https://huggingface.co/Kim2091/AnimeSharp/resolve/main/4x-AnimeSharp.pth",
-        directory: "upscale_models",
-    }];
-    add(58, "ImageUpscaleWithModel", "ESRGAN upscale", [3490, 130], [350, 85], [],
-        [socket("upscale_model", "UPSCALE_MODEL"), socket("image", "IMAGE")], [socket("IMAGE")]);
-    add(59, "ImageScale", "Final resolution", [3490, 280], [350, 145],
-        ["lanczos", 1160, 1536, "disabled"], [socket("image", "IMAGE")], [socket("IMAGE")]);
-    add(60, "VAEEncode", "Hires encode", [3490, 490], [350, 85], [],
-        [socket("pixels", "IMAGE"), socket("vae", "VAE")], [socket("LATENT")]);
+    add(57, "LatentUpscaleBy", "Latent upscale 1.5x", [3490, 0], [350, 115],
+        ["bislerp", 1.5], [socket("samples", "LATENT")], [socket("LATENT")]);
     add(61, "KSampler", "A/B regional Hires-fix", [3910, 0], [350, 290],
-        [2026092702, "fixed", 20, 4.0, "euler", "simple", 0.20], samplerInputs, [socket("LATENT")]);
+        [2026092702, "fixed", 8, 1.0, "res_multistep", "sgm_uniform", 0.55], samplerInputs, [socket("LATENT")]);
     add(62, "VAEDecode", "Final decode", [3910, 355], [350, 80], [],
         [socket("samples", "LATENT"), socket("vae", "VAE")], [socket("IMAGE")]);
     add(63, "SaveImage", "Final image", [3910, 500], [350, 540],
@@ -168,11 +161,10 @@ function buildWorkflow() {
         [2, 0, 50, 0], [4, 0, 50, 1], [2, 0, 51, 0], [5, 0, 51, 1],
         [19, 0, 52, 0], [19, 1, 52, 1], [39, 0, 52, 2], [39, 1, 52, 3],
         [52, 0, 53, 0], [52, 1, 53, 1], [50, 0, 53, 2], [51, 0, 53, 3],
-        [8, 0, 54, 0], [53, 0, 54, 1], [53, 1, 54, 2], [7, 0, 54, 3],
+        [9, 0, 54, 0], [53, 0, 54, 1], [53, 1, 54, 2], [7, 0, 54, 3],
         [54, 0, 55, 0], [3, 0, 55, 1], [55, 0, 56, 0],
-        [57, 0, 58, 0], [55, 0, 58, 1], [58, 0, 59, 0],
-        [59, 0, 60, 0], [3, 0, 60, 1],
-        [8, 0, 61, 0], [53, 0, 61, 1], [53, 1, 61, 2], [60, 0, 61, 3],
+        [54, 0, 57, 0],
+        [9, 0, 61, 0], [53, 0, 61, 1], [53, 1, 61, 2], [57, 0, 61, 3],
         [61, 0, 62, 0], [3, 0, 62, 1], [62, 0, 63, 0],
     ]) connect(source, slot, target, input);
 
@@ -188,10 +180,10 @@ function buildWorkflow() {
     }
     return {
         id: "c0e92976-f0ce-4ce5-b21f-a3e01c29e844",
-        revision: 0, last_node_id: 63, last_link_id: links.length,
+        revision: 1, last_node_id: 63, last_link_id: links.length,
         nodes, links,
         groups: [
-            { title: "Shared models and scene", bounding: [-30, -80, 1005, 1135], color: "#344b5b", font_size: 24 },
+            { title: "Shared models and scene", bounding: [-30, -80, 1005, 1180], color: "#344b5b", font_size: 24 },
             { title: "Character A", bounding: [1010, -80, 1600, 930], color: "#345451", font_size: 24 },
             { title: "Character B", bounding: [1010, 860, 1600, 930], color: "#654758", font_size: 24 },
             { title: "Joint generation", bounding: [2660, -80, 790, 1140], color: "#43505c", font_size: 24 },

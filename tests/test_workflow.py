@@ -66,7 +66,6 @@ class WorkflowTests(unittest.TestCase):
         for workflow in (
             self.hires_esrgan,
             self.inpaint,
-            self.hooks,
         ):
             with self.subTest(workflow=workflow.get("id")):
                 loader = next(
